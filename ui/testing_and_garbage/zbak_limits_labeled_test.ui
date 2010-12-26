@@ -1,0 +1,1805 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>Form</class>
+ <widget class="QWidget" name="Form">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1040</width>
+    <height>224</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>900</width>
+    <height>0</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <item row="0" column="0" colspan="2">
+    <widget class="QCheckBox" name="chkLimitAccessDuration">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Limit access duration</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="2" rowspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QWidget" name="widget_3" native="true">
+       <layout class="QGridLayout" name="gridLayout_2">
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="lbLimit_14">
+          <property name="text">
+           <string>Every day</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_43">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_44">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lbTime_3">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>Time:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="sbLimitHr_14">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QSpinBox" name="sbLimitMn_14">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget_4" native="true">
+       <layout class="QGridLayout" name="gridLayout_3">
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="lbLimit_13">
+          <property name="text">
+           <string>Monday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" rowspan="3">
+         <widget class="Line" name="vLine_14">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" colspan="2">
+         <widget class="QLabel" name="lbLimit_8">
+          <property name="text">
+           <string>Tuesday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6" rowspan="3">
+         <widget class="Line" name="vLine_18">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7" colspan="2">
+         <widget class="QLabel" name="lbLimit_7">
+          <property name="text">
+           <string>Wednesday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="9" rowspan="3">
+         <widget class="Line" name="vLine_13">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10" colspan="2">
+         <widget class="QLabel" name="lbLimit_11">
+          <property name="text">
+           <string>Thursday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12" rowspan="3">
+         <widget class="Line" name="vLine_15">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="13">
+         <widget class="QLabel" name="lbLimit_12">
+          <property name="text">
+           <string>Friday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="15" rowspan="3">
+         <widget class="Line" name="vLine_16">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="16" colspan="2">
+         <widget class="QLabel" name="lbLimit_9">
+          <property name="text">
+           <string>Saturday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="18" rowspan="3">
+         <widget class="Line" name="vLine_17">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="19">
+         <widget class="QLabel" name="lbLimit_10">
+          <property name="text">
+           <string>Sunday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_42">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_33">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QLabel" name="label_32">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="label_36">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="7">
+         <widget class="QLabel" name="label_31">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QLabel" name="label_37">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="10">
+         <widget class="QLabel" name="label_41">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="11">
+         <widget class="QLabel" name="label_34">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="13">
+         <widget class="QLabel" name="label_38">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="14">
+         <widget class="QLabel" name="label_30">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="16">
+         <widget class="QLabel" name="label_40">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="17">
+         <widget class="QLabel" name="label_35">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="19">
+         <widget class="QLabel" name="label_29">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="20">
+         <widget class="QLabel" name="label_39">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lbTime_2">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>Time:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="sbLimitHr_7">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QSpinBox" name="sbLimitMn_8">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QSpinBox" name="sbLimitHr_9">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="5">
+         <widget class="QSpinBox" name="sbLimitMn_11">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="7">
+         <widget class="QSpinBox" name="sbLimitHr_13">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="8">
+         <widget class="QSpinBox" name="sbLimitMn_10">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="10">
+         <widget class="QSpinBox" name="sbLimitHr_8">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="11">
+         <widget class="QSpinBox" name="sbLimitMn_13">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="13">
+         <widget class="QSpinBox" name="sbLimitHr_12">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="14">
+         <widget class="QSpinBox" name="sbLimitMn_9">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="16">
+         <widget class="QSpinBox" name="sbLimitHr_10">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="17">
+         <widget class="QSpinBox" name="sbLimitMn_12">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="19">
+         <widget class="QSpinBox" name="sbLimitHr_11">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="20">
+         <widget class="QSpinBox" name="sbLimitMn_7">
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <widget class="QCheckBox" name="chkLimAccessDurationDay">
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Configure per day</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <spacer name="verticalSpacer_3">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Minimum</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>17</width>
+       <height>18</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="3" column="0">
+    <spacer name="verticalSpacer_1">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>15</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="0" colspan="3">
+    <widget class="Line" name="hlLimitSeparation">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0">
+    <spacer name="verticalSpacer_2">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>17</width>
+       <height>13</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="chkLimTimeFrame">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Limit time frame</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1" rowspan="3" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QWidget" name="widget_2" native="true">
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="0" column="1" rowspan="2" colspan="2">
+         <widget class="QLabel" name="lbTimeMon_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Every day</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1" rowspan="2">
+         <widget class="QLabel" name="label_93">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2" rowspan="2">
+         <widget class="QLabel" name="label_94">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="0" rowspan="2">
+         <widget class="QLabel" name="lbFrom_5">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>From:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="1" rowspan="2">
+         <widget class="QSpinBox" name="sbFromHr_39">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="4" column="2" rowspan="2">
+         <widget class="QSpinBox" name="sbFromMn_39">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="0" rowspan="2">
+         <widget class="QLabel" name="lbTo_3">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>To:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="1" rowspan="2">
+         <widget class="QSpinBox" name="sbToHr_39">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="6" column="2" rowspan="2">
+         <widget class="QSpinBox" name="sbToMn_39">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QWidget" name="widget" native="true">
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="1" colspan="2">
+         <widget class="QLabel" name="lbTimeTue_7">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Monday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3" rowspan="4">
+         <widget class="Line" name="vLine_7">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4" colspan="2">
+         <widget class="QLabel" name="lbTimeTue">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Tuesday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6" rowspan="4">
+         <widget class="Line" name="vLine_8">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7" colspan="2">
+         <widget class="QLabel" name="lbTimeWed">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Wednesday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="9" rowspan="4">
+         <widget class="Line" name="vLine_9">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10" colspan="2">
+         <widget class="QLabel" name="lbTimeThu">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Thursday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12" rowspan="4">
+         <widget class="Line" name="vLine_10">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="13">
+         <widget class="QLabel" name="lbTimeFri">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Friday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="15" rowspan="4">
+         <widget class="Line" name="vLine_11">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="16" colspan="2">
+         <widget class="QLabel" name="lbTimeSat">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Saturday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="18" rowspan="4">
+         <widget class="Line" name="vLine_12">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="19">
+         <widget class="QLabel" name="lbTimeSun">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="text">
+           <string>Sunday</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_96">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QLabel" name="label_95">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="4">
+         <widget class="QLabel" name="label_4">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="5">
+         <widget class="QLabel" name="label_3">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="7">
+         <widget class="QLabel" name="label_5">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="8">
+         <widget class="QLabel" name="label_6">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="10">
+         <widget class="QLabel" name="label_7">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="11">
+         <widget class="QLabel" name="label_8">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="13">
+         <widget class="QLabel" name="label_10">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="14">
+         <widget class="QLabel" name="label_9">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="16">
+         <widget class="QLabel" name="label_11">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="17">
+         <widget class="QLabel" name="label_12">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="19">
+         <widget class="QLabel" name="label_14">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Hour:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="20">
+         <widget class="QLabel" name="label_13">
+          <property name="frameShape">
+           <enum>QFrame::NoFrame</enum>
+          </property>
+          <property name="text">
+           <string>Min:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="lbFrom">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>From:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QSpinBox" name="sbFromHr_40">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QSpinBox" name="sbFromMn_40">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QSpinBox" name="sbFromHr_1">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="5">
+         <widget class="QSpinBox" name="sbFromMn_1">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="7">
+         <widget class="QSpinBox" name="sbFromHr_2">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="8">
+         <widget class="QSpinBox" name="sbFromMn_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="10">
+         <widget class="QSpinBox" name="sbFromHr_3">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="11">
+         <widget class="QSpinBox" name="sbFromMn_3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="13">
+         <widget class="QSpinBox" name="sbFromHr_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="14">
+         <widget class="QSpinBox" name="sbFromMn_4">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="16">
+         <widget class="QSpinBox" name="sbFromHr_5">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="17">
+         <widget class="QSpinBox" name="sbFromMn_5">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="19">
+         <widget class="QSpinBox" name="sbFromHr_6">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="20">
+         <widget class="QSpinBox" name="sbFromMn_6">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QLabel" name="lbTo">
+          <property name="layoutDirection">
+           <enum>Qt::RightToLeft</enum>
+          </property>
+          <property name="text">
+           <string>To:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QSpinBox" name="sbToHr_40">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <widget class="QSpinBox" name="sbToMn_40">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="4">
+         <widget class="QSpinBox" name="sbToHr_1">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="5">
+         <widget class="QSpinBox" name="sbToMn_1">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="7">
+         <widget class="QSpinBox" name="sbToHr_2">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="8">
+         <widget class="QSpinBox" name="sbToMn_2">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="10">
+         <widget class="QSpinBox" name="sbToHr_3">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="11">
+         <widget class="QSpinBox" name="sbToMn_3">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="13">
+         <widget class="QSpinBox" name="sbToHr_4">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="14">
+         <widget class="QSpinBox" name="sbToMn_4">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="16">
+         <widget class="QSpinBox" name="sbToHr_5">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="17">
+         <widget class="QSpinBox" name="sbToMn_5">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="19">
+         <widget class="QSpinBox" name="sbToHr_6">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>23</number>
+          </property>
+          <property name="value">
+           <number>23</number>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="20">
+         <widget class="QSpinBox" name="sbToMn_6">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>41</width>
+            <height>10000</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>59</number>
+          </property>
+          <property name="value">
+           <number>59</number>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="7" column="0">
+    <widget class="QCheckBox" name="chkLimTimeFrameDay">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="layoutDirection">
+      <enum>Qt::LeftToRight</enum>
+     </property>
+     <property name="text">
+      <string>Configure per day</string>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Minimum</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
