@@ -92,14 +92,16 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.limits.ckLimit, SIGNAL('clicked()'), self.enable_limit)
         self.connect(self.ui.limits.ckBound, SIGNAL('clicked()'), self.enable_bound)
         
-        self.connect(self.ui.limits.ckLimitDay, SIGNAL('clicked()'), self.show_daily_limit)
-        self.connect(self.ui.limits.ckBoundDay, SIGNAL('clicked()'), self.show_daily_bound)
+        self.connect(self.ui.limits.ckLimitDay, SIGNAL('clicked()'), self.toggle_daily_limit)
+        self.connect(self.ui.limits.ckBoundDay, SIGNAL('clicked()'), self.toggle_daily_bound)
         
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         
         self.connect(self.timer, SIGNAL('timeout()'), self.get_limit_spin)
         
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
+        
+        self.set_locale()
         
         self.get_limit_spin()
         self.get_from_spin()
@@ -124,6 +126,28 @@ class TimekprKDE (KCModule):
 	self.read_settings()
    
 #Function definition
+
+    #Need to find a way to get the kde locale
+    def set_locale(self):
+	self.locale = 'it'
+	
+	if self.locale == 'us':
+	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
+	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
+	    self.ui.limits.vLine_6.hide()
+	    self.ui.limits.vLine_13.hide()
+	else:
+	    everydayLimit = self.ui.limits.lyLimitConfDay.takeAt(3)
+	    everydayBound = self.ui.limits.lyBoundConfDay.takeAt(3)
+	    self.ui.limits.lyLimitConfDay.addItem(everydayLimit)
+	    self.ui.limits.lyBoundConfDay.addItem(everydayBound)
+	    self.ui.limits.vLineLimit = self.ui.limits.vLine_6
+	    self.ui.limits.vLineBound = self.ui.limits.vLine_13
+	    self.ui.limits.vLine_0.hide()
+	    self.ui.limits.vLine_7.hide()
+	
+	self.toggle_daily_limit()
+	self.toggle_daily_bound()
 	
     def update_time_left(self):
         self.minutesLeft -= 1
@@ -142,21 +166,29 @@ class TimekprKDE (KCModule):
         else:
             self.ui.limits.wgBoundConfDay.setEnabled(False)
             
-    def show_daily_limit(self):
+    def toggle_daily_limit(self):
         if self.ui.limits.ckLimitDay.isChecked():
-            self.ui.limits.wgLimitEveryDay.hide()
+	    self.ui.limits.lbLimit_0.setText("Sunday")
             self.ui.limits.wgLimitWeek.show()
+            self.ui.limits.vLineLimit.show()
         else:
+	    self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
-            self.ui.limits.wgLimitEveryDay.show()
+            self.ui.limits.vLineLimit.hide()
             
-    def show_daily_bound(self):
+            
+    def toggle_daily_bound(self):
         if self.ui.limits.ckBoundDay.isChecked():
-            self.ui.limits.wgBoundEveryDay.hide()
+            self.ui.limits.lbBound_0.setText("Sunday")
             self.ui.limits.wgBoundWeek.show()
+            self.ui.limits.vLineBound.show()
         else:
             self.ui.limits.wgBoundWeek.hide()
-            self.ui.limits.wgBoundEveryDay.show()
+            self.ui.limits.lbBound_0.setText("Every day")
+            self.ui.limits.vLineBound.hide()
+            
+            
+           
       
     def hours_to_minutes(self):
         self.ui.limits.sbAccHrMon.getvalue()
@@ -173,7 +205,6 @@ class TimekprKDE (KCModule):
         self.limitSpin[0].append(self.ui.limits.sbLimitHr_4)
         self.limitSpin[0].append(self.ui.limits.sbLimitHr_5)
         self.limitSpin[0].append(self.ui.limits.sbLimitHr_6)
-        self.limitSpin[0].append(self.ui.limits.sbLimitHr_7)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_0)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_1)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_2)
@@ -181,7 +212,6 @@ class TimekprKDE (KCModule):
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_4)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_5)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_6)
-        self.limitSpin[1].append(self.ui.limits.sbLimitMn_7)
 	    
     def get_from_spin(self):
         self.fromSpin = [list(),list()]
@@ -192,7 +222,6 @@ class TimekprKDE (KCModule):
         self.fromSpin[0].append(self.ui.limits.sbFromHr_4)
         self.fromSpin[0].append(self.ui.limits.sbFromHr_5)
         self.fromSpin[0].append(self.ui.limits.sbFromHr_6)
-        self.fromSpin[0].append(self.ui.limits.sbFromHr_7)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_0)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_1)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_2)
@@ -200,7 +229,6 @@ class TimekprKDE (KCModule):
         self.fromSpin[1].append(self.ui.limits.sbFromMn_4)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_5)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_6)
-        self.fromSpin[1].append(self.ui.limits.sbFromMn_7)
         
     def get_to_spin(self):
         self.toSpin = [list(),list()]
@@ -211,7 +239,6 @@ class TimekprKDE (KCModule):
         self.toSpin[0].append(self.ui.limits.sbToHr_4)
         self.toSpin[0].append(self.ui.limits.sbToHr_5)
         self.toSpin[0].append(self.ui.limits.sbToHr_6)
-        self.toSpin[0].append(self.ui.limits.sbToHr_7)
         self.toSpin[1].append(self.ui.limits.sbToMn_0)
         self.toSpin[1].append(self.ui.limits.sbToMn_1)
         self.toSpin[1].append(self.ui.limits.sbToMn_2)
@@ -219,7 +246,6 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_4)
         self.toSpin[1].append(self.ui.limits.sbToMn_5)
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
-        self.toSpin[1].append(self.ui.limits.sbToMn_7)
 
     def read_settings(self):
 	self.user = self.ui.cbActiveUser.currentText()
@@ -241,9 +267,9 @@ class TimekprKDE (KCModule):
             bfrom = self.fromtolimits[0]
             bto = self.fromtolimits[1]
             
-            for i in range(1,8):
-                self.fromSpin[0][i].setValue(float(bfrom[i-1]))
-                self.toSpin[0][i].setValue(float(bto[i-1]))
+            for i in range(7):
+                self.fromSpin[0][i].setValue(float(bfrom[i]))
+                self.toSpin[0][i].setValue(float(bto[i]))
             # Use boundaries?
 '''            
             ub = True
