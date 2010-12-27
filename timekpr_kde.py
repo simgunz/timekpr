@@ -101,6 +101,7 @@ class TimekprKDE (KCModule):
         
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         
+        
         self.set_locale()
         
         self.get_limit_spin()
