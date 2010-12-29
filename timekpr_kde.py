@@ -77,6 +77,8 @@ class TimekprKDE (KCModule):
         self.ui.limits.wgLimitConfDay.setEnabled(False)
         self.ui.limits.wgBoundConfDay.setEnabled(False)
         
+        self.locale = 'it'
+        
         self.ui.limits.wgLimitWeek.hide()
         self.ui.limits.wgBoundWeek.hide()
         
@@ -89,11 +91,11 @@ class TimekprKDE (KCModule):
         self.timer.start()
         
         #Signal and slots definition
-        self.connect(self.ui.limits.ckLimit, SIGNAL('clicked()'), self.enable_limit)
-        self.connect(self.ui.limits.ckBound, SIGNAL('clicked()'), self.enable_bound)
+        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
+        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)
         
-        self.connect(self.ui.limits.ckLimitDay, SIGNAL('clicked()'), self.toggle_daily_limit)
-        self.connect(self.ui.limits.ckBoundDay, SIGNAL('clicked()'), self.toggle_daily_bound)
+        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.toggle_daily_limit)
+        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
         
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         
@@ -130,8 +132,6 @@ class TimekprKDE (KCModule):
 
     #Need to find a way to get the kde locale
     def set_locale(self):
-	self.locale = 'it'
-	
 	if self.locale == 'us':
 	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
 	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
@@ -147,28 +147,28 @@ class TimekprKDE (KCModule):
 	    self.ui.limits.vLine_0.hide()
 	    self.ui.limits.vLine_7.hide()
 	
-	self.toggle_daily_limit()
-	self.toggle_daily_bound()
+	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
+	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
 	
     def update_time_left(self):
         self.minutesLeft -= 1
         label = QString.number(self.minutesLeft) + " min"
         self.ui.status.lbTimeLeftStatus.setText(label)
-   
-    def enable_limit(self):
-        if self.ui.limits.ckLimit.isChecked():
+    
+    def enable_limit(self,checked):
+        if checked:
             self.ui.limits.wgLimitConfDay.setEnabled(True)
         else:
             self.ui.limits.wgLimitConfDay.setEnabled(False)
             
-    def enable_bound(self):
-        if self.ui.limits.ckBound.isChecked():
+    def enable_bound(self,checked):
+	if checked:
             self.ui.limits.wgBoundConfDay.setEnabled(True)
         else:
             self.ui.limits.wgBoundConfDay.setEnabled(False)
             
-    def toggle_daily_limit(self):
-        if self.ui.limits.ckLimitDay.isChecked():
+    def toggle_daily_limit(self,checked):
+        if checked:
 	    self.ui.limits.lbLimit_0.setText("Sunday")
             self.ui.limits.wgLimitWeek.show()
             self.ui.limits.vLineLimit.show()
@@ -178,8 +178,8 @@ class TimekprKDE (KCModule):
             self.ui.limits.vLineLimit.hide()
             
             
-    def toggle_daily_bound(self):
-        if self.ui.limits.ckBoundDay.isChecked():
+    def toggle_daily_bound(self,checked):
+        if checked:
             self.ui.limits.lbBound_0.setText("Sunday")
             self.ui.limits.wgBoundWeek.show()
             self.ui.limits.vLineBound.show()
@@ -253,6 +253,7 @@ class TimekprKDE (KCModule):
 	uislocked = isuserlocked(self.user)
 	self.fromtolimits = getuserlimits(self.user)
 	self.readfromtolimit()
+	#self.readdurationlimit(self)
     
     def defaults(self):
 	self.read_settings()
@@ -260,37 +261,36 @@ class TimekprKDE (KCModule):
     def save(self):
 	print "salvato"
     
+    #TODO:Move to to timekprcommon
     def readfromtolimit(self):
+	#WARNING: Sta roba fa cagare! Usare una bella cache con i limiti senza perderli ogni volta?
         #from-to time limitation (aka boundaries) - time.conf
-        #TODO:Sostituisci vittima con self.user ma prima converti in stringa
-        if isuserlimited('vittima'):
-            #Get user time limits (boundaries) as lists from-to
-            bfrom = self.fromtolimits[0]
-            bto = self.fromtolimits[1]
+        #Get user time limits (boundaries) as lists from-to
+        bfrom = self.fromtolimits[0]
+        bto = self.fromtolimits[1]
+        if isuserlimited(str(self.user)):
+	    self.ui.limits.ckBound.setChecked(True)
             
             for i in range(7):
                 self.fromSpin[0][i].setValue(float(bfrom[i]))
                 self.toSpin[0][i].setValue(float(bto[i]))
+        else:
+	    self.ui.limits.ckBound.setChecked(False)
             # Use boundaries?
-'''            
-            ub = True
-            # Single boundaries? (set per day)
-            sb = False
+    def islimitedbyday(bfrom,bto)
             #Are all boundaries the same?
             #If they're not same, activate single (per day) boundaries
             if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
-                sb = True
-            #Even if boundaries are Al0000-2400, return False
-            if not sb and bfrom[0] == '0' and bto[0] == '24':
-                ub = False
-            self.boundariesCheck.set_active(ub)
-            self.singleBoundaries.set_active(sb)
+                return True
+            return False
+'''
         else:
-            for i in range(7):
-                self.fromSpin[i].set_value(7)
-                self.toSpin[i].set_value(22)
-            self.boundariesCheck.set_active(False)
-            self.singleBoundaries.set_active(False)
+	    self.ui.limits.ckBoundDay.setChecked(False)
+            #for i in range(7):
+            #    self.fromSpin[i].set_value(7)
+            #    self.toSpin[i].set_value(22)
+            #self.boundariesCheck.set_active(False)
+            àself.singleBoundaries.set_active(False)
 '''
 
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
