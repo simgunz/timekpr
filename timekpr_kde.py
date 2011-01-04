@@ -277,22 +277,48 @@ class TimekprKDE (KCModule):
         else:
 	    self.ui.limits.ckBound.setChecked(False)
             # Use boundaries?
-    def islimitedbyday(bfrom,bto)
+    def islimitedbyday(self,bfrom,bto):
             #Are all boundaries the same?
             #If they're not same, activate single (per day) boundaries
             if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
                 return True
             return False
-'''
-        else:
-	    self.ui.limits.ckBoundDay.setChecked(False)
-            #for i in range(7):
-            #    self.fromSpin[i].set_value(7)
-            #    self.toSpin[i].set_value(22)
-            #self.boundariesCheck.set_active(False)
-            àself.singleBoundaries.set_active(False)
-'''
 
+
+    def readdurationlimita(self):
+        #time length limitation
+        #configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
+        del self.limits[:]
+        if isfile(configFile):
+            fileHandle = open(configFile)
+            self.limits = fileHandle.readline()
+            self.limits = self.limits.replace("limit=( ", "")
+            self.limits = self.limits.replace(")", "")
+            self.limits = self.limits.split(" ")
+
+            for i in range(7):
+                self.limitSpin[i].setValue(float(self.limits[i]) / 60)
+              
+'''
+            # Single limits? (set per day)
+            sl = False
+            # Use limits?
+            ul = True
+
+            for i in range(1, 7):
+                if self.limits[i] != self.limits[i-1]:
+                    sl = True
+
+            if self.limits[0] == '86400' and not sl:
+                ul = False
+            self.limitCheck.set_active(ul)
+            self.singleLimits.set_active(sl)
+        else:
+            for i in range(7):
+                self.limitSpin[i].set_value(300)
+            self.limitCheck.set_active(False)
+            self.singleLimits.set_active(False)
+'''
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
 def isnormal(username):
 #FIXME: Hide active user - bug #286529

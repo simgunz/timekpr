@@ -29,6 +29,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="btnLimitBypass">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Bypass for today</string>
      </property>
@@ -36,6 +39,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="btnAccBypass">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Bypass for today</string>
      </property>
@@ -45,6 +51,9 @@
     <layout class="QHBoxLayout" name="horizontalLayout_1">
      <item>
       <widget class="QPushButton" name="btnResetTime">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -58,6 +67,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btnAddTime">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -75,7 +87,11 @@
         <enum>QLayout::SetDefaultConstraint</enum>
        </property>
        <item>
-        <widget class="QSpinBox" name="sbAddTime"/>
+        <widget class="QSpinBox" name="sbAddTime">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLabel" name="lbAddTime">
@@ -99,6 +115,9 @@
    </item>
    <item>
     <widget class="QPushButton" name="btnLockAccount">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
      <property name="text">
       <string>Lock account</string>
      </property>
