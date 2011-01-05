@@ -17,7 +17,7 @@ from os.path import isfile, getmtime
 from os import geteuid
 from time import strftime, localtime
 #from timekprpam import *
-from timekprpamDV import *
+from timekprpam_kde import *
 
 def getversion():
     #return '0.2.0'

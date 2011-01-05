@@ -26,8 +26,8 @@ DEVACTIVE = True
 if DEVACTIVE:
     from sys import path
     path.append('.')
-from timekprpamDV import *
-from timekprcommonDV import *
+from timekprpam_kde import *
+from timekprcommon_kde import *
 
 
 #timekpr.conf variables (dictionary variable)
