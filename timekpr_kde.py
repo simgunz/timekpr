@@ -79,16 +79,14 @@ class TimekprKDE (KCModule):
         
         self.locale = 'it'
         
-        self.ui.limits.wgLimitWeek.hide()
-        self.ui.limits.wgBoundWeek.hide()
-        
-        
+        #TODO:Remove this part of code, it's just to test the timer
         ##Timer
         self.minutesLeft = 10
         
         self.timer = QTimer()
-        self.timer.setInterval(10000)
+        self.timer.setInterval(1000)
         self.timer.start()
+        ########################################
         
         #Signal and slots definition
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
@@ -99,39 +97,44 @@ class TimekprKDE (KCModule):
         
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         
-        self.connect(self.timer, SIGNAL('timeout()'), self.get_limit_spin)
-        
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         
+        #Initializing an empty list for time limits
         self.limits = []
         
+        #Set the format of the week (US or EU)
         self.set_locale()
         
+        #Copying the spinboxes to a list for easier access
         self.get_limit_spin()
         self.get_from_spin()
         self.get_to_spin()
         
-        self.setNeedsAuthorization(True)
+        #Needed for using KAuth authentication
+        #self.setNeedsAuthorization(True)
         #self.setUseRootOnlyMessage(True)
+        
+        #Initializing the user combobox
         #Using /etc/shadow spwd module
-        #getspall acquisisce la struct di 8 elementi di tutti gli utenti del sistema
-        #il primo elemento rappresenta il nome utente
+        #getspall acquire a 8 element struct from all the user in the system, the first element is the username
         for userinfo in getspall():
             if isnormal(userinfo[0]):
                 self.ui.cbActiveUser.addItem(userinfo[0])
-                self.ui.cbActiveUser.setCurrentIndex(0)  
+                
+        self.ui.cbActiveUser.setCurrentIndex(0)  
 	
-	#Ensure we have at least one available normal user
+	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
 	    self.ui.gbStatus.setEnabled(False)
 	    self.ui.gbGrant.setEnabled(False)
 	    self.ui.gbLimitBound.setEnabled(False)
 	
+	#Read settings from file in /etc/timekpr and from /etc/security/time.conf
 	self.read_settings()
    
 #Function definition
 
-    #Need to find a way to get the kde locale
+    #TODO:Need to find a way to get the kde locale
     def set_locale(self):
 	if self.locale == 'us':
 	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
@@ -177,8 +180,7 @@ class TimekprKDE (KCModule):
 	    self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.vLineLimit.hide()
-            
-            
+                 
     def toggle_daily_bound(self,checked):
         if checked:
             self.ui.limits.lbBound_0.setText("Sunday")
@@ -188,15 +190,6 @@ class TimekprKDE (KCModule):
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.lbBound_0.setText("Every day")
             self.ui.limits.vLineBound.hide()
-            
-            
-           
-      
-    def hours_to_minutes(self):
-        self.ui.limits.sbAccHrMon.getvalue()
-        
-    def minutes_to_hours(self):
-        print "ciao"
         
     def get_limit_spin(self):
         self.limitSpin = [list(),list()]
@@ -258,9 +251,10 @@ class TimekprKDE (KCModule):
     
     def defaults(self):
 	self.read_settings()
-	
+
+    #TODO:To implement and connect to Apply button
     def save(self):
-	print "salvato"
+	print "Saved"
     
     #TODO:Move to timekprcommon?
     def readfromtolimit(self):
@@ -272,7 +266,8 @@ class TimekprKDE (KCModule):
         if isuserlimited(str(self.user)):
 	    self.ui.limits.ckBound.setChecked(True)
             
-            if self.islimitedbyday(bfrom,bto):
+            
+	    if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
 		self.ui.limits.ckBoundDay.setChecked(True)
 	    else:
 		self.ui.limits.ckBoundDay.setChecked(False)
@@ -283,13 +278,6 @@ class TimekprKDE (KCModule):
         else:
 	    self.ui.limits.ckBound.setChecked(False)
             # Use boundaries?
-    def islimitedbyday(self,bfrom,bto):
-            #Are all boundaries the same?
-            #If they're not same, activate single (per day) boundaries
-            if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
-                return True
-            return False
-
 
     def readdurationlimit(self):
         #time length limitation
@@ -333,11 +321,10 @@ def isnormal(username):
     if (getenv('SUDO_USER') and username == getenv('SUDO_USER')):
 	return False
     
-    #Ritorna l'uid dell'utente e controlla che sia nel range degli uid assegnabili a utenti normali (non di sistema)
+    #Return the user uid and check if it is in the non-system users range
     userid = int(getpwnam(username)[2])
     logindefs = open('/etc/login.defs')
     uidminmax = re.compile('^UID_(?:MIN|MAX)\s+(\d+)', re.M).findall(logindefs.read())
-    #Perche maggiore invertito?
     if uidminmax[0] < uidminmax[1]:
 	uidmin = int(uidminmax[0])
 	uidmax = int(uidminmax[1])
