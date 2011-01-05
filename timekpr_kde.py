@@ -103,6 +103,7 @@ class TimekprKDE (KCModule):
         
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         
+        self.limits = []
         
         self.set_locale()
         
@@ -253,7 +254,7 @@ class TimekprKDE (KCModule):
 	uislocked = isuserlocked(self.user)
 	self.fromtolimits = getuserlimits(self.user)
 	self.readfromtolimit()
-	#self.readdurationlimit(self)
+	self.readdurationlimit()
     
     def defaults(self):
 	self.read_settings()
@@ -261,7 +262,7 @@ class TimekprKDE (KCModule):
     def save(self):
 	print "salvato"
     
-    #TODO:Move to to timekprcommon
+    #TODO:Move to timekprcommon?
     def readfromtolimit(self):
 	#WARNING: Sta roba fa cagare! Usare una bella cache con i limiti senza perderli ogni volta?
         #from-to time limitation (aka boundaries) - time.conf
@@ -271,6 +272,11 @@ class TimekprKDE (KCModule):
         if isuserlimited(str(self.user)):
 	    self.ui.limits.ckBound.setChecked(True)
             
+            if self.islimitedbyday(bfrom,bto):
+		self.ui.limits.ckBoundDay.setChecked(True)
+	    else:
+		self.ui.limits.ckBoundDay.setChecked(False)
+		
             for i in range(7):
                 self.fromSpin[0][i].setValue(float(bfrom[i]))
                 self.toSpin[0][i].setValue(float(bto[i]))
@@ -285,40 +291,40 @@ class TimekprKDE (KCModule):
             return False
 
 
-    def readdurationlimita(self):
+    def readdurationlimit(self):
         #time length limitation
-        #configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
+        configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
         del self.limits[:]
+        
         if isfile(configFile):
             fileHandle = open(configFile)
             self.limits = fileHandle.readline()
             self.limits = self.limits.replace("limit=( ", "")
-            self.limits = self.limits.replace(")", "")
+            self.limits = self.limits.replace(" )", "")
             self.limits = self.limits.split(" ")
-
+            #WARNING:The file with the limits must not have a \n at the end
+            
+            self.ui.limits.ckLimit.setChecked(True)
+	    
+            #Are all boundaries the same?
+            #If they're not same, activate single (per day) limits
+            if [self.limits[0]] * 7 != self.limits:
+                self.ui.limits.ckLimitDay.setChecked(True)
+            else:
+		self.ui.limits.ckLimitDay.setChecked(False)
+	    
+	    
             for i in range(7):
-                self.limitSpin[i].setValue(float(self.limits[i]) / 60)
+		hours = int(self.limits[i]) / 3600
+                self.limitSpin[0][i].setValue(hours)
+                minutes = (int(self.limits[i]) - hours * 3600) / 60
+                self.limitSpin[1][i].setValue(minutes)
               
-'''
-            # Single limits? (set per day)
-            sl = False
-            # Use limits?
-            ul = True
-
-            for i in range(1, 7):
-                if self.limits[i] != self.limits[i-1]:
-                    sl = True
-
-            if self.limits[0] == '86400' and not sl:
-                ul = False
-            self.limitCheck.set_active(ul)
-            self.singleLimits.set_active(sl)
         else:
-            for i in range(7):
-                self.limitSpin[i].set_value(300)
-            self.limitCheck.set_active(False)
-            self.singleLimits.set_active(False)
-'''
+	    self.ui.limits.ckLimit.setChecked(False)
+	    self.ui.limits.ckLimitDay.setChecked(False)
+
+
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
 def isnormal(username):
 #FIXME: Hide active user - bug #286529

@@ -1,5 +1,1 @@
-
-Install it with: 
-
-    cmake -DCMAKE_INSTALL_PREFIX=/usr .
-    sudo make install
+Not much to say untill now
