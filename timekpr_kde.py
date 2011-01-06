@@ -79,14 +79,20 @@ class TimekprKDE (KCModule):
         
         self.locale = 'it'
         
-        #TODO:Remove this part of code, it's just to test the timer
-        ##Timer
-        self.minutesLeft = 10
+        #Initializing the user combobox
+        #Using /etc/shadow spwd module
+        #getspall acquire a 8 element struct from all the user in the system, the first element is the username
+        for userinfo in getspall():
+            if isnormal(userinfo[0]):
+                self.ui.cbActiveUser.addItem(userinfo[0])
+                
+        self.ui.cbActiveUser.setCurrentIndex(0)  
         
+	#self.update_time_left()
+        ##Timer initializing
         self.timer = QTimer()
-        self.timer.setInterval(1000)
+        self.timer.setInterval(60000)
         self.timer.start()
-        ########################################
         
         #Signal and slots definition
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
@@ -113,15 +119,6 @@ class TimekprKDE (KCModule):
         #Needed for using KAuth authentication
         #self.setNeedsAuthorization(True)
         #self.setUseRootOnlyMessage(True)
-        
-        #Initializing the user combobox
-        #Using /etc/shadow spwd module
-        #getspall acquire a 8 element struct from all the user in the system, the first element is the username
-        for userinfo in getspall():
-            if isnormal(userinfo[0]):
-                self.ui.cbActiveUser.addItem(userinfo[0])
-                
-        self.ui.cbActiveUser.setCurrentIndex(0)  
 	
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
@@ -164,9 +161,22 @@ class TimekprKDE (KCModule):
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
 	
     def update_time_left(self):
-        self.minutesLeft -= 1
-        label = QString.number(self.minutesLeft) + " min"
-        self.ui.status.lbTimeLeftStatus.setText(label)
+        
+        dayIndex = int(strftime("%w"))
+        try:
+            limit = int(self.limits[dayIndex])
+        except IndexError:
+            limit = 86400
+
+        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+        used = 0
+        if isfile(timefile) and fromtoday(timefile):
+            t = open(timefile)
+            used = int(t.readline())
+            t.close()
+        left = limit - used
+        m, s = divmod(left, 60)       
+        self.ui.status.lbTimeLeftStatus.setText(str(m) + " min")
     
     def enable_limit(self,checked):
         if checked:
@@ -256,7 +266,8 @@ class TimekprKDE (KCModule):
 	uislocked = isuserlocked(self.user)
 	self.fromtolimits = getuserlimits(self.user)
 	self.readfromtolimit()
-	self.readdurationlimit()    
+	self.readdurationlimit()
+	self.statusicons(uislocked)
     
     def readfromtolimit(self):
 	#TODO:Move to timekprcommon?
@@ -308,9 +319,16 @@ class TimekprKDE (KCModule):
 	    
 	    
             for i in range(7):
+		#FIXME
+		#minuteLimits = int(self.limits[i])
+		#hours, minutes = divmod(minuteLimits , 60)
+		#print hours
 		hours = int(self.limits[i]) / 3600
+		#print hours
                 self.limitSpin[0][i].setValue(hours)
+                #print minutes
                 minutes = (int(self.limits[i]) - hours * 3600) / 60
+                #print minutes
                 self.limitSpin[1][i].setValue(minutes)
               
         else:
@@ -319,8 +337,30 @@ class TimekprKDE (KCModule):
 	    for i in range(7):
                 self.limitSpin[0][i].setValue(3)
                 self.limitSpin[1][i].setValue(0)
+                
+    def statusicons(self, uislocked):
 
-
+	if not isuserlimitedtoday(self.user) and not uislocked:
+	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
+	else:
+	    self.ui.status.lbAllDayLoginStatus.setText("No")
+	
+	if self.ui.limits.ckBound.isChecked():
+	    self.ui.status.lbBoundStatus.setText("Yes")
+	else:
+	    self.ui.status.lbBoundStatus.setText("No")
+	    
+	if self.ui.limits.ckLimit.isChecked():
+	    self.ui.status.lbLimitStatus.setText("Yes")
+	else:
+	    self.ui.status.lbLimitStatus.setText("No")
+	
+	if uislocked:
+	    self.ui.status.lbLockStatus.setText("Yes")
+	else:
+	    self.ui.status.lbLockStatus.setText("No")
+	
+	    
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
 def isnormal(username):
 #TODO:Move to timekprcommon?
