@@ -41,6 +41,8 @@ class TimekprKDE (KCModule):
     def __init__(self, component_data, parent):
         KCModule.__init__(self,component_data, parent)
         
+        #Interface initialization
+        
         #Loading the UI module
         self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/main.ui"))
         self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/status.ui"))
@@ -54,64 +56,36 @@ class TimekprKDE (KCModule):
         self.ui.lyGrant = QVBoxLayout(self.ui.gbGrant)
         self.ui.lyGrant.addWidget(self.ui.grant)
         self.ui.lyLimitBound = QVBoxLayout(self.ui.gbLimitBound)
-        self.ui.lyLimitBound.addWidget(self.ui.limits)        
-        
-        #Code for the tab mode, need to change the main.ui
-        #self.ui.statusLayout = QVBoxLayout(self.ui.tab)
-        #self.ui.statusLayout.addWidget(self.ui.status)
-        #statusSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        #self.ui.statusLayout.addItem(statusSpacer)
-        #self.ui.limitsLayout = QVBoxLayout(self.ui.tab_2)
-        #self.ui.limitsLayout.addWidget(self.ui.limits)
-        #limitsSpacer = QSpacerItem(20, 40, QSizePolicy.Minimum, QSizePolicy.Expanding)
-        #self.ui.limitsLayout.addItem(limitsSpacer)
-        
+        self.ui.lyLimitBound.addWidget(self.ui.limits)            
         self.lyMainLayout = QVBoxLayout(self)
         self.lyMainLayout.addWidget(self.ui)
+        
+        #Set the format of the week (US or EU)
+        self.locale = 'eu'
+        self.set_locale()
         
         #Set buttons
         #self.setButtons(KCModule.Apply)
         #self.changed.emit(True)
-        
-        #Interface initialization
-        self.ui.limits.wgLimitConfDay.setEnabled(False)
-        self.ui.limits.wgBoundConfDay.setEnabled(False)
-        
-        self.locale = 'it'
-        
+
         #Initializing the user combobox
         #Using /etc/shadow spwd module
         #getspall acquire a 8 element struct from all the user in the system, the first element is the username
         for userinfo in getspall():
             if isnormal(userinfo[0]):
-                self.ui.cbActiveUser.addItem(userinfo[0])
-                
+                self.ui.cbActiveUser.addItem(userinfo[0])               
         self.ui.cbActiveUser.setCurrentIndex(0)  
-        
-	#self.update_time_left()
-        ##Timer initializing
-        self.timer = QTimer()
-        self.timer.setInterval(60000)
-        self.timer.start()
-        
-        #Signal and slots definition
-        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
-        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)
-        
-        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.toggle_daily_limit)
-        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
-        
-        self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
-        
-        self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
-        
+
+
         #Initializing an empty list for time limits
         self.limits = []
+
+        ##Timer initializing
+        self.timer = QTimer()
+        self.timer.setInterval(10000)
+        self.timer.start()
         
-        #Set the format of the week (US or EU)
-        self.set_locale()
-        
-        #Copying the spinboxes to a list for easier access
+        #Copying the spinboxes to a list for faster access
         self.get_limit_spin()
         self.get_from_spin()
         self.get_to_spin()
@@ -125,9 +99,18 @@ class TimekprKDE (KCModule):
 	    self.ui.gbStatus.setEnabled(False)
 	    self.ui.gbGrant.setEnabled(False)
 	    self.ui.gbLimitBound.setEnabled(False)
+	else:
+	    #Read settings from file in /etc/timekpr and from /etc/security/time.conf
+	    self.read_settings()
 	
-	#Read settings from file in /etc/timekpr and from /etc/security/time.conf
-	self.read_settings()
+	
+	#Signal and slots definition 
+        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
+        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)        
+        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.toggle_daily_limit)
+        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
+        self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
+        self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
    
 #Function definition
 
@@ -135,13 +118,14 @@ class TimekprKDE (KCModule):
 	#TODO:This function should be called from reset insted of defaults
 	self.read_settings()
   
+  
     def save(self):
 	#TODO:To implement and connect to Apply button
 	print "Saved"
 	
-    def set_locale(self):
-	#TODO:Need to find a way to get the kde locale
 	
+    def set_locale(self):
+	#TODO:Need to find a way to get the kde locale	
 	if self.locale == 'us':
 	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
 	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
@@ -160,8 +144,8 @@ class TimekprKDE (KCModule):
 	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
 	
-    def update_time_left(self):
-        
+	
+    def update_time_left(self):       
         dayIndex = int(strftime("%w"))
         try:
             limit = int(self.limits[dayIndex])
@@ -178,17 +162,20 @@ class TimekprKDE (KCModule):
         m, s = divmod(left, 60)       
         self.ui.status.lbTimeLeftStatus.setText(str(m) + " min")
     
+    
     def enable_limit(self,checked):
         if checked:
             self.ui.limits.wgLimitConfDay.setEnabled(True)
         else:
             self.ui.limits.wgLimitConfDay.setEnabled(False)
             
+            
     def enable_bound(self,checked):
 	if checked:
             self.ui.limits.wgBoundConfDay.setEnabled(True)
         else:
             self.ui.limits.wgBoundConfDay.setEnabled(False)
+            
             
     def toggle_daily_limit(self,checked):
         if checked:
@@ -199,7 +186,8 @@ class TimekprKDE (KCModule):
 	    self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.vLineLimit.hide()
-                 
+                
+                
     def toggle_daily_bound(self,checked):
         if checked:
             self.ui.limits.lbBound_0.setText("Sunday")
@@ -209,6 +197,7 @@ class TimekprKDE (KCModule):
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.lbBound_0.setText("Every day")
             self.ui.limits.vLineBound.hide()
+        
         
     def get_limit_spin(self):
         self.limitSpin = [list(),list()]
@@ -227,6 +216,7 @@ class TimekprKDE (KCModule):
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_5)
         self.limitSpin[1].append(self.ui.limits.sbLimitMn_6)
 	    
+	    
     def get_from_spin(self):
         self.fromSpin = [list(),list()]
         self.fromSpin[0].append(self.ui.limits.sbFromHr_0)
@@ -243,6 +233,7 @@ class TimekprKDE (KCModule):
         self.fromSpin[1].append(self.ui.limits.sbFromMn_4)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_5)
         self.fromSpin[1].append(self.ui.limits.sbFromMn_6)
+        
         
     def get_to_spin(self):
         self.toSpin = [list(),list()]
@@ -261,6 +252,7 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_5)
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
 
+
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
 	uislocked = isuserlocked(self.user)
@@ -268,6 +260,7 @@ class TimekprKDE (KCModule):
 	self.readfromtolimit()
 	self.readdurationlimit()
 	self.statusicons(uislocked)
+    
     
     def readfromtolimit(self):
 	#TODO:Move to timekprcommon?
@@ -295,6 +288,7 @@ class TimekprKDE (KCModule):
                 self.fromSpin[0][i].setValue(7)
                 self.toSpin[0][i].setValue(22)
 
+
     def readdurationlimit(self):
         #time length limitation
         configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
@@ -319,16 +313,9 @@ class TimekprKDE (KCModule):
 	    
 	    
             for i in range(7):
-		#FIXME
-		#minuteLimits = int(self.limits[i])
-		#hours, minutes = divmod(minuteLimits , 60)
-		#print hours
-		hours = int(self.limits[i]) / 3600
-		#print hours
+		minuteLimits = int(self.limits[i]) / 60
+		hours, minutes = divmod(minuteLimits , 60)
                 self.limitSpin[0][i].setValue(hours)
-                #print minutes
-                minutes = (int(self.limits[i]) - hours * 3600) / 60
-                #print minutes
                 self.limitSpin[1][i].setValue(minutes)
               
         else:
@@ -337,9 +324,9 @@ class TimekprKDE (KCModule):
 	    for i in range(7):
                 self.limitSpin[0][i].setValue(3)
                 self.limitSpin[1][i].setValue(0)
-                
+          
+          
     def statusicons(self, uislocked):
-
 	if not isuserlimitedtoday(self.user) and not uislocked:
 	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
 	else:
