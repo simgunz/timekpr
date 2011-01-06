@@ -216,7 +216,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -232,7 +232,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -529,7 +529,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -545,7 +545,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -561,7 +561,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -577,7 +577,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -593,7 +593,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -609,7 +609,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -625,7 +625,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -641,7 +641,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -657,7 +657,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -673,7 +673,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -689,7 +689,7 @@
             <number>23</number>
            </property>
            <property name="value">
-            <number>23</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -705,7 +705,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -981,7 +981,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1000,7 +1000,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1019,7 +1019,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1038,7 +1038,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1371,7 +1371,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1390,7 +1390,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1409,7 +1409,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1428,7 +1428,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1447,7 +1447,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1466,7 +1466,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1485,7 +1485,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1504,7 +1504,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1523,7 +1523,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1542,7 +1542,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1561,7 +1561,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1580,7 +1580,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1599,7 +1599,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1618,7 +1618,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1637,7 +1637,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1656,7 +1656,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1675,7 +1675,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1694,7 +1694,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1713,7 +1713,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1732,7 +1732,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1751,7 +1751,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1770,7 +1770,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1789,7 +1789,7 @@
             <number>24</number>
            </property>
            <property name="value">
-            <number>22</number>
+            <number>0</number>
            </property>
           </widget>
          </item>
@@ -1808,7 +1808,7 @@
             <number>59</number>
            </property>
            <property name="value">
-            <number>59</number>
+            <number>0</number>
            </property>
           </widget>
          </item>

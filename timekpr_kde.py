@@ -134,8 +134,17 @@ class TimekprKDE (KCModule):
    
 #Function definition
 
-    #TODO:Need to find a way to get the kde locale
+    def defaults(self):
+	#TODO:This function should be called from reset insted of defaults
+	self.read_settings()
+  
+    def save(self):
+	#TODO:To implement and connect to Apply button
+	print "Saved"
+	
     def set_locale(self):
+	#TODO:Need to find a way to get the kde locale
+	
 	if self.locale == 'us':
 	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
 	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
@@ -243,41 +252,37 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
 
     def read_settings(self):
-	self.user = self.ui.cbActiveUser.currentText()
+	self.user = str(self.ui.cbActiveUser.currentText())
 	uislocked = isuserlocked(self.user)
 	self.fromtolimits = getuserlimits(self.user)
 	self.readfromtolimit()
-	self.readdurationlimit()
+	self.readdurationlimit()    
     
-    def defaults(self):
-	self.read_settings()
-
-    #TODO:To implement and connect to Apply button
-    def save(self):
-	print "Saved"
-    
-    #TODO:Move to timekprcommon?
     def readfromtolimit(self):
-	#WARNING: Sta roba fa cagare! Usare una bella cache con i limiti senza perderli ogni volta?
+	#TODO:Move to timekprcommon?
+	#TODO: Why not using a cache file for keeping all the limits even if the checkboxes are unchecked?
         #from-to time limitation (aka boundaries) - time.conf
         #Get user time limits (boundaries) as lists from-to
         bfrom = self.fromtolimits[0]
         bto = self.fromtolimits[1]
-        if isuserlimited(str(self.user)):
+        
+        if isuserlimited(self.user):
 	    self.ui.limits.ckBound.setChecked(True)
-            
-            
+                       
 	    if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
 		self.ui.limits.ckBoundDay.setChecked(True)
 	    else:
 		self.ui.limits.ckBoundDay.setChecked(False)
 		
             for i in range(7):
-                self.fromSpin[0][i].setValue(float(bfrom[i]))
-                self.toSpin[0][i].setValue(float(bto[i]))
+                self.fromSpin[0][i].setValue(int(bfrom[i]))
+                self.toSpin[0][i].setValue(int(bto[i]))
         else:
 	    self.ui.limits.ckBound.setChecked(False)
-            # Use boundaries?
+	    self.ui.limits.ckBoundDay.setChecked(False)
+	    for i in range(7):
+                self.fromSpin[0][i].setValue(7)
+                self.toSpin[0][i].setValue(22)
 
     def readdurationlimit(self):
         #time length limitation
@@ -311,10 +316,14 @@ class TimekprKDE (KCModule):
         else:
 	    self.ui.limits.ckLimit.setChecked(False)
 	    self.ui.limits.ckLimitDay.setChecked(False)
+	    for i in range(7):
+                self.limitSpin[0][i].setValue(3)
+                self.limitSpin[1][i].setValue(0)
 
 
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
 def isnormal(username):
+#TODO:Move to timekprcommon?
 #FIXME: Hide active user - bug #286529
 #SUDO_USER contains the username of the sudo user that launched timekpr
 #So this function return yes for all the non-system user and false for the system-user and for the user that launched timekp
