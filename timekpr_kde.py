@@ -60,6 +60,10 @@ class TimekprKDE (KCModule):
         self.lyMainLayout = QVBoxLayout(self)
         self.lyMainLayout.addWidget(self.ui)
         
+        #Disable the limits by default
+        self.ui.limits.wgLimitConfDay.setEnabled(False)
+	self.ui.limits.wgBoundConfDay.setEnabled(False)
+        
         #Set the format of the week (US or EU)
         self.locale = 'eu'
         self.set_locale()
@@ -67,7 +71,7 @@ class TimekprKDE (KCModule):
         #Set buttons
         #self.setButtons(KCModule.Apply)
         #self.changed.emit(True)
-
+	
         #Initializing the user combobox
         #Using /etc/shadow spwd module
         #getspall acquire a 8 element struct from all the user in the system, the first element is the username
@@ -94,6 +98,14 @@ class TimekprKDE (KCModule):
         #self.setNeedsAuthorization(True)
         #self.setUseRootOnlyMessage(True)
 	
+	#Signal and slots definition 
+        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
+        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)        
+        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.toggle_daily_limit)
+        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
+        self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
+        self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
+        
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
 	    self.ui.gbStatus.setEnabled(False)
@@ -102,15 +114,6 @@ class TimekprKDE (KCModule):
 	else:
 	    #Read settings from file in /etc/timekpr and from /etc/security/time.conf
 	    self.read_settings()
-	
-	
-	#Signal and slots definition 
-        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
-        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)        
-        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.toggle_daily_limit)
-        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
-        self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
-        self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
    
 #Function definition
 
