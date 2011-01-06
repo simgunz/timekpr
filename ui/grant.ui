@@ -28,6 +28,16 @@
     </spacer>
    </item>
    <item>
+    <widget class="QPushButton" name="btnLockAccount">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="text">
+      <string>Lock account</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="btnLimitBypass">
      <property name="enabled">
       <bool>false</bool>
@@ -112,16 +122,6 @@
       </layout>
      </item>
     </layout>
-   </item>
-   <item>
-    <widget class="QPushButton" name="btnLockAccount">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="text">
-      <string>Lock account</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

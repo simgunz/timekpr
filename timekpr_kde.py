@@ -159,8 +159,8 @@ class TimekprKDE (KCModule):
             used = int(t.readline())
             t.close()
         left = limit - used
-        m, s = divmod(left, 60)       
-        self.ui.status.lbTimeLeftStatus.setText(str(m) + " min")
+        hours, minutes = sec_to_hr_mn(left)
+        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")
     
     
     def enable_limit(self,checked):
@@ -310,11 +310,9 @@ class TimekprKDE (KCModule):
                 self.ui.limits.ckLimitDay.setChecked(True)
             else:
 		self.ui.limits.ckLimitDay.setChecked(False)
-	    
-	    
+	    	    
             for i in range(7):
-		minuteLimits = int(self.limits[i]) / 60
-		hours, minutes = divmod(minuteLimits , 60)
+		hours, minutes = sec_to_hr_mn(self.limits[i])
                 self.limitSpin[0][i].setValue(hours)
                 self.limitSpin[1][i].setValue(minutes)
               
@@ -347,7 +345,14 @@ class TimekprKDE (KCModule):
 	else:
 	    self.ui.status.lbLockStatus.setText("No")
 	
-	    
+	self.update_time_left()
+
+
+def sec_to_hr_mn(sec):
+    inminutes = int(sec) / 60
+    hr, mn = divmod(inminutes , 60)
+    return hr, mn
+    
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.
 def isnormal(username):
 #TODO:Move to timekprcommon?
