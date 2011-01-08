@@ -79,6 +79,11 @@ class TimekprKDE (KCModule):
     def __init__(self, component_data, parent):
         KCModule.__init__(self,component_data, parent)
         
+        #Set AboutData
+        self.aboutdata = self.MakeAboutData()
+        self.setAboutData(self.aboutdata)
+        
+        
         #Interface initialization
         
         #Loading the UI module
@@ -107,7 +112,7 @@ class TimekprKDE (KCModule):
         self.set_locale()
         
         #Set buttons
-        #self.setButtons(KCModule.Apply)
+        self.setButtons(KCModule.Apply)
         #self.changed.emit(True)
 	
         #Initializing the user combobox
@@ -157,7 +162,19 @@ class TimekprKDE (KCModule):
 	    self.read_settings()
    
 #Function definition
-
+    def MakeAboutData(self):
+	aboutdata = KAboutData("timekpr-kde", "userconfig", ki18n("timekpr-kde"), "0.4",
+	    ki18n("User and Group Configuration Tool"),
+	    KAboutData.License_GPL,
+	    ki18n("Copyright (c) 2008, 2010 Timekpr Authors"))
+	aboutdata.addAuthor(ki18n("Even Nedberg"), ki18n("Developer"), "even@nedberg.net", "")
+	aboutdata.addAuthor(ki18n("Savvas Radevic"), ki18n("Developer"), "vicedar@gmail.com", "")
+	aboutdata.addAuthor(ki18n("Nicolas Laurance"), ki18n("Developer"), "nlaurance@zindep.com", "")
+	aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")
+	aboutdata.addAuthor(ki18n("Simone Gaiarin"), ki18n("Developer"), "simgunz@gmail.com", "")
+	return aboutdata
+	
+	
     def defaults(self):
 	#TODO:This function should be called from reset insted of defaults
 	self.read_settings()
