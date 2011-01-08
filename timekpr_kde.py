@@ -11,7 +11,6 @@ from os import remove, mkdir, geteuid, getenv
 from os.path import isdir, isfile, realpath, dirname
 from pwd import getpwnam
 from spwd import getspall
-from spwd import getspnam#CANCELLAMI
 
 from PyQt4.QtGui import *
 from PyQt4 import uic, QtCore
@@ -111,7 +110,8 @@ class TimekprKDE (KCModule):
         self.set_locale()
         
         #Set buttons
-        self.setButtons(KCModule.Apply)
+        #self.setButtons(KCModule.Reset)
+        self.setButtons(KCModule.Help)
         #self.changed.emit(True)
 	
         #Initializing the user combobox
@@ -156,9 +156,6 @@ class TimekprKDE (KCModule):
 	    self.ui.gbStatus.setEnabled(False)
 	    self.ui.gbGrant.setEnabled(False)
 	    self.ui.gbLimitBound.setEnabled(False)
-	else:
-	    #Read settings from file in /etc/timekpr and from /etc/security/time.conf
-	    self.read_settings()
    
 #Function definition
     def MakeAboutData(self):
@@ -175,7 +172,11 @@ class TimekprKDE (KCModule):
 	
 	
     def defaults(self):
-	#TODO:This function should be called from reset insted of defaults
+	#TODO:This function is called from defaults button
+	print "defaults"
+	
+    def load(self):
+	#TODO:This function is called from reset button and automatically during construction
 	self.read_settings()
 	
 	
