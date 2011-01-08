@@ -107,8 +107,7 @@ class TimekprKDE (KCModule):
         self.ui.limits.wgLimitConfDay.setEnabled(False)
 	self.ui.limits.wgBoundConfDay.setEnabled(False)
         
-        #Set the format of the week (US or EU)
-        self.locale = 'eu'
+        #Set the format of the week
         self.set_locale()
         
         #Set buttons
@@ -181,8 +180,9 @@ class TimekprKDE (KCModule):
 	
 	
     def set_locale(self):
-	#TODO:Need to find a way to get the kde locale	
-	if self.locale == 'us':
+	locale = KGlobal.locale()
+        startday = locale.weekStartDay()
+	if startday == 7:
 	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
 	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
 	    self.ui.limits.vLine_6.hide()
