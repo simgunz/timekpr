@@ -37,6 +37,44 @@ version = getversion()
 
 
 
+
+
+
+def sec_to_hr_mn(sec):
+    inminutes = int(sec) / 60
+    hr, mn = divmod(inminutes , 60)
+    return hr, mn
+    
+    
+def isnormal(username):
+#Check if it is a regular user, with userid within UID_MIN and UID_MAX.    
+#TODO:Move to timekprcommon?
+#FIXME: Hide active user - bug #286529
+#SUDO_USER contains the username of the sudo user that launched timekpr
+#So this function return yes for all the non-system user and false for the system-user and for the user that launched timekp
+    if (getenv('SUDO_USER') and username == getenv('SUDO_USER')):
+	return False
+    
+    #Return the user uid and check if it is in the non-system users range
+    userid = int(getpwnam(username)[2])
+    logindefs = open('/etc/login.defs')
+    uidminmax = re.compile('^UID_(?:MIN|MAX)\s+(\d+)', re.M).findall(logindefs.read())
+    if uidminmax[0] < uidminmax[1]:
+	uidmin = int(uidminmax[0])
+	uidmax = int(uidminmax[1])
+    else:
+	uidmin = int(uidminmax[1])
+	uidmax = int(uidminmax[0])
+	
+    if uidmin <= userid <= uidmax:
+	return True
+    else:
+	return False
+
+
+
+
+
 class TimekprKDE (KCModule):
     def __init__(self, component_data, parent):
         KCModule.__init__(self,component_data, parent)
@@ -146,24 +184,6 @@ class TimekprKDE (KCModule):
 	
 	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
-	
-	
-    def update_time_left(self):       
-        dayIndex = int(strftime("%w"))
-        try:
-            limit = int(self.limits[dayIndex])
-        except IndexError:
-            limit = 86400
-
-        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
-        used = 0
-        if isfile(timefile) and fromtoday(timefile):
-            t = open(timefile)
-            used = int(t.readline())
-            t.close()
-        left = limit - used
-        hours, minutes = sec_to_hr_mn(left)
-        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")
     
     
     def enable_limit(self,checked):
@@ -254,15 +274,6 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_4)
         self.toSpin[1].append(self.ui.limits.sbToMn_5)
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
-
-
-    def read_settings(self):
-	self.user = str(self.ui.cbActiveUser.currentText())
-	uislocked = isuserlocked(self.user)
-	self.fromtolimits = getuserlimits(self.user)
-	self.readfromtolimit()
-	self.readdurationlimit()
-	self.statusicons(uislocked)
     
     
     def readfromtolimit(self):
@@ -325,6 +336,24 @@ class TimekprKDE (KCModule):
 	    for i in range(7):
                 self.limitSpin[0][i].setValue(3)
                 self.limitSpin[1][i].setValue(0)
+     	
+	
+    def update_time_left(self):       
+        dayIndex = int(strftime("%w"))
+        try:
+            limit = int(self.limits[dayIndex])
+        except IndexError:
+            limit = 86400
+
+        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+        used = 0
+        if isfile(timefile) and fromtoday(timefile):
+            t = open(timefile)
+            used = int(t.readline())
+            t.close()
+        left = limit - used
+        hours, minutes = sec_to_hr_mn(left)
+        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
           
           
     def statusicons(self, uislocked):
@@ -351,35 +380,52 @@ class TimekprKDE (KCModule):
 	self.update_time_left()
 
 
-def sec_to_hr_mn(sec):
-    inminutes = int(sec) / 60
-    hr, mn = divmod(inminutes , 60)
-    return hr, mn
-    
-#Check if it is a regular user, with userid within UID_MIN and UID_MAX.
-def isnormal(username):
-#TODO:Move to timekprcommon?
-#FIXME: Hide active user - bug #286529
-#SUDO_USER contains the username of the sudo user that launched timekpr
-#So this function return yes for all the non-system user and false for the system-user and for the user that launched timekp
-    if (getenv('SUDO_USER') and username == getenv('SUDO_USER')):
-	return False
-    
-    #Return the user uid and check if it is in the non-system users range
-    userid = int(getpwnam(username)[2])
-    logindefs = open('/etc/login.defs')
-    uidminmax = re.compile('^UID_(?:MIN|MAX)\s+(\d+)', re.M).findall(logindefs.read())
-    if uidminmax[0] < uidminmax[1]:
-	uidmin = int(uidminmax[0])
-	uidmax = int(uidminmax[1])
-    else:
-	uidmin = int(uidminmax[1])
-	uidmax = int(uidminmax[0])
+    def buttonstates(self, uislocked):
+	if uislocked:
+	    self.ui.grant.btnLockAccount.setText("Unlock account")
+	else:
+	    self.ui.grant.btnLockAccount.setText("Lock account")
 	
-    if uidmin <= userid <= uidmax:
-	return True
-    else:
-	return False
+	if self.ui.limits.ckLimit.isChecked():
+	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+            if isfile(timefile):
+		self.ui.grant.btnResetTime.setEnabled(True)
+	    else:
+		self.ui.grant.btnResetTime.setEnabled(False)
+	    #Reward button should add time even if .time is not there?
+	    self.ui.grant.btnLimitBypass.setEnabled(True)
+	    self.ui.grant.btnAddTime.setEnabled(True)
+	    self.ui.grant.sbAddTime.setEnabled(True)
+	    self.ui.grant.lbAddTime.setEnabled(True)
+	else:
+	    self.ui.grant.btnLimitBypass.setEnabled(False)
+	    self.ui.grant.btnResetTime.setEnabled(False)
+	    self.ui.grant.btnAddTime.setEnabled(False)
+	    self.ui.grant.sbAddTime.setEnabled(False)
+	    self.ui.grant.lbAddTime.setEnabled(False)
+	    
+	if self.ui.limits.ckBound.isChecked():
+	    index = int(strftime("%w"))
+            wfrom = self.fromtolimits[0]
+            wto = self.fromtolimits[1]
+            if wfrom[index] != '0' or wto[index] != '24':
+		self.ui.grant.btnBoundBypass.setEnabled(True)
+	    else:
+		self.ui.grant.btnBoundBypass.setEnabled(False)
+	else:
+	    self.ui.grant.btnBoundBypass.setEnabled(False)
+
+    def read_settings(self):
+	self.user = str(self.ui.cbActiveUser.currentText())
+	uislocked = isuserlocked(self.user)
+	self.fromtolimits = getuserlimits(self.user)
+	self.readfromtolimit()
+	self.readdurationlimit()
+	self.statusicons(uislocked)
+	self.buttonstates(uislocked)
+
+
+
 
 def CreatePlugin(widget_parent, parent, component_data):
     #Create configuration folder if not existing
