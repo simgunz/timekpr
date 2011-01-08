@@ -144,6 +144,9 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         
+        #TODO:Delete me, just for testing
+        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.save)
+        
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
 	    self.ui.gbStatus.setEnabled(False)
@@ -158,11 +161,6 @@ class TimekprKDE (KCModule):
     def defaults(self):
 	#TODO:This function should be called from reset insted of defaults
 	self.read_settings()
-  
-  
-    def save(self):
-	#TODO:To implement and connect to Apply button
-	print "Saved"
 	
 	
     def set_locale(self):
@@ -425,8 +423,27 @@ class TimekprKDE (KCModule):
 	self.buttonstates(uislocked)
 
 
+    def save(self):
+	#TODO:To implement and connect to Apply button
+	space = " "
+        limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
+        #timekprpam.py adduserlimits() uses lists with numbers as strings
+        bFrom = ['0'] * 7
+        bTo = ['24'] * 7
 
-
+        if self.ui.limits.ckLimit.isChecked():
+            if self.ui.limits.ckLimitDay.isChecked():
+                limit = "limit=("
+                for i in range(7):
+                    limit = limit + space + str(self.limitSpin[0][i].value() * 3600 + self.limitSpin[1][i].value() * 60)
+                limit = limit + space + ")"
+            else:
+                limit = "limit=("
+                for i in range(7):
+		    limit = limit + space + str(self.limitSpin[0][0].value() * 3600 + self.limitSpin[1][0].value() * 60)
+                limit = limit + space + ")"
+	    print limit
+	
 def CreatePlugin(widget_parent, parent, component_data):
     #Create configuration folder if not existing
     if not isdir(VAR['TIMEKPRDIR']):
