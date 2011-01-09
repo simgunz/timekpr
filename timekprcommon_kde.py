@@ -32,7 +32,7 @@ def getvariables(DEVACTIVE):
     fconf = '/etc/timekpr.conf'
     if DEVACTIVE:
         #fconf = './etc/timekpr.conf'
-        fconf = '/usr/share/kde4/apps/timekpr-kde/root/etc/timekpr.conf'
+        fconf = '/usr/share/kde4/apps/timekprkde/root/etc/timekpr.conf'
     if not isfile(fconf):
         exit('Error: Could not find configuration file %s' % fconf)
         

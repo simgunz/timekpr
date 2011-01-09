@@ -86,10 +86,10 @@ class TimekprKDE (KCModule):
         #Interface initialization
         
         #Loading the UI module
-        self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/main.ui"))
-        self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/status.ui"))
-        self.ui.grant = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/grant.ui"))
-        self.ui.limits = uic.loadUi(unicode("/usr/share/kde4/apps/timekpr-kde/ui/limits.ui"))
+        self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/main.ui"))
+        self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/status.ui"))
+        self.ui.grant = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/grant.ui"))
+        self.ui.limits = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/limits.ui"))
         
         #Create the layout using group box 
         #Since the UI is modular it's possible to change this layout for displaying the UI modules in tab, etc
@@ -111,8 +111,11 @@ class TimekprKDE (KCModule):
         
         #Set buttons
         #self.setButtons(KCModule.Reset)
-        self.setButtons(KCModule.Help)
+        #self.setButtons(KCModule.Help)
+        #print self.buttons()
+        #print KCModule.Help
         #self.changed.emit(True)
+	#TODO:Kconfigdialogmanager
 	
         #Initializing the user combobox
         #Using /etc/shadow spwd module
@@ -159,7 +162,7 @@ class TimekprKDE (KCModule):
    
 #Function definition
     def MakeAboutData(self):
-	aboutdata = KAboutData("timekpr-kde", "userconfig", ki18n("timekpr-kde"), "0.4",
+	aboutdata = KAboutData("timekprkde", "userconfig", ki18n("timekprkde"), "0.4",
 	    ki18n("User and Group Configuration Tool"),
 	    KAboutData.License_GPL,
 	    ki18n("Copyright (c) 2008, 2010 Timekpr Authors"))
@@ -439,7 +442,12 @@ class TimekprKDE (KCModule):
 	self.readdurationlimit()
 	self.statusicons(uislocked)
 	self.buttonstates(uislocked)
-
+    
+    
+    def changed(self, state):
+	#Is this necessary?
+        """a setting has changed, activate the Apply button"""
+        self.emit(SIGNAL("changed(bool)"), state)
 
     def save(self):
 	#TODO:To implement and connect to Apply button

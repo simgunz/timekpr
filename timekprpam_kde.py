@@ -42,7 +42,7 @@ def getconfsection(conffile):
 
 ## Read/Write access.conf
 #TODO:ELIMINAMI-def parseaccessconf(f='/etc/security/access.conf'):
-def parseaccessconf(f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/access.conf'):
+def parseaccessconf(f='/usr/share/kde4/apps/timekprkde/root/etc/security/access.conf'):
     """Parses the timekpr section in access.conf
     
     Returns a list with the (locked) usernames: ['niania','wawa']
@@ -67,7 +67,7 @@ def isuserlocked(u):
         return False
     return True
 
-def unlockuser(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/access.conf'):
+def unlockuser(u, f='/usr/share/kde4/apps/timekprkde/root/etc/security/access.conf'):
     """Removes access.conf line of user (Unblocks)
 
     Argument: username
@@ -90,7 +90,7 @@ def unlockuser(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/access.c
     fn.close()
     return True
 
-def lockuser(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/access.conf'):
+def lockuser(u, f='/usr/share/kde4/apps/timekprkde/root/etc/security/access.conf'):
     """Adds access.conf line of user
 
     timekpr uses access.conf to lock/disable user accounts from logging in.
@@ -160,7 +160,7 @@ def mktimeconfline(u, hfrom, hto):
     """
     return '*;*;' + u + ';' + converttimeline(hfrom, hto)
 
-def adduserlimits(username, bfrom, bto, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):
+def adduserlimits(username, bfrom, bto, f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):
     """Adds a line with the username and their from and to time limits in time.conf
 
     Arguments: username, bfrom (list), bto (list)
@@ -180,7 +180,7 @@ def adduserlimits(username, bfrom, bto, f='/usr/share/kde4/apps/timekpr-kde/root
     fn.write(m)
     return True
 
-def removeuserlimits(username, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):
+def removeuserlimits(username, f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):
     """Removes a line with the username in time.conf
 
     Returns True or False (if no write permission)
@@ -200,7 +200,7 @@ def removeuserlimits(username, f='/usr/share/kde4/apps/timekpr-kde/root/etc/secu
     return True
 
 #def isuserlimited(u, f='/etc/security/time.conf'):
-def isuserlimited(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):    
+def isuserlimited(u, f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):    
     """Checks if user is in time.conf (if account has limited access hours)
 
     Argument: username
@@ -219,7 +219,7 @@ def isuserlimited(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.
         return False
     return True
 
-def isuserlimitednow(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):
+def isuserlimitednow(u, f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):
     """Checks if username should be limited as defined in time.conf
 
     Argument: username
@@ -249,7 +249,7 @@ def isuserlimitednow(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/ti
             return False
     return True
 
-def isuserlimitedtoday(u, f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):
+def isuserlimitedtoday(u, f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):
     #Argument: username
     #Checks if username has limitations for this day
     #Returns: True or False (even if user is not in time.conf)
@@ -296,7 +296,7 @@ def converttconf(tfrom, tto, mode=0):
     return ffrom, fto
 
 #TODO:ELIMINAMI-def parsetimeconf(f='/etc/security/time.conf'):
-def parsetimeconf(f='/usr/share/kde4/apps/timekpr-kde/root/etc/security/time.conf'):
+def parsetimeconf(f='/usr/share/kde4/apps/timekprkde/root/etc/security/time.conf'):
     """Returns a list with usernames with from and to limits from the time.conf file
 
     Return example:
