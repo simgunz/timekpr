@@ -107,7 +107,7 @@ class TimekprKDE (KCModule):
 	self.ui.limits.wgBoundConfDay.setEnabled(False)
         
         #Set the format of the week
-        self.set_locale()
+        self.set_week_format()
         
         #Set buttons
         #self.setButtons(KCModule.Reset)
@@ -117,9 +117,17 @@ class TimekprKDE (KCModule):
         #self.changed.emit(True)
 	#TODO:Kconfigdialogmanager
 	
+        #Needed for using KAuth authentication
+        self.setNeedsAuthorization(True)
+        
         #Initializing the user combobox
         #Using /etc/shadow spwd module
         #getspall acquire a 8 element struct from all the user in the system, the first element is the username
+        passwd = open('/etc/passwd','r')
+        usrinfo = re.findall(logindefs.read(),'^UID_(?:MIN|MAX)\s+(\d+)')
+        
+    
+        print getspall()
         for userinfo in getspall():
             if isnormal(userinfo[0]):
                 self.ui.cbActiveUser.addItem(userinfo[0])               
@@ -139,9 +147,6 @@ class TimekprKDE (KCModule):
         self.get_from_spin()
         self.get_to_spin()
         
-        #Needed for using KAuth authentication
-        #self.setNeedsAuthorization(True)
-        #self.setUseRootOnlyMessage(True)
 	
 	#Signal and slots definition 
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
@@ -180,10 +185,26 @@ class TimekprKDE (KCModule):
 	
     def load(self):
 	#TODO:This function is called from reset button and automatically during construction
+
+	helperargs = {"primo":20,"secondo":2}
+	action = self.authAction()
+	print str(action.helperID())
+	action.setArguments(helperargs)
+	reply = action.execute()
+	content=reply.data()
+	kiave = QString('first')
+	print kiave
+	print content[kiave].toString()
+	
+	
+	if reply.failed():
+	    print "Failed"
+	else:
+	    print "Success"
 	self.read_settings()
 	
 	
-    def set_locale(self):
+    def set_week_format(self):
 	locale = KGlobal.locale()
         startday = locale.weekStartDay()
 	if startday == 7:
@@ -470,6 +491,18 @@ class TimekprKDE (KCModule):
                 limit = limit + space + ")"
 	    print limit
 	
+	helperargs = {"primo":20,"secondo":2}
+	action = self.authAction()
+	print str(action.helperID())
+	action.setArguments(helperargs)
+	reply = action.execute()
+	content=reply.data()
+	kiave = QString('first')
+	print kiave
+	print content[kiave].toString()
+	
+ 
+
 def CreatePlugin(widget_parent, parent, component_data):
     #Create configuration folder if not existing
     if not isdir(VAR['TIMEKPRDIR']):
