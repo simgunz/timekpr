@@ -21,6 +21,6 @@ target_link_libraries( timekprkdehelper ${KDE4_KDEUI_LIBS} ${KDE4_KPARTS_LIBS} )
 
 #install(FILES helper.py DESTINATION ${LIBEXEC_INSTALL_DIR})
 
-#kde4_install_auth_actions(org.kde.kcontrol.timekprkde kcm_timekprkde.actions)
+kde4_install_auth_actions(org.kde.kcontrol.timekprkde kcm_timekprkde.actions)
 
 #kde4_install_auth_helper_files(timekprkdehelper org.kde.kcontrol.timekprkde root)

@@ -9,8 +9,6 @@
 
 from os import remove, mkdir, geteuid, getenv
 from os.path import isdir, isfile, realpath, dirname
-from pwd import getpwnam
-from spwd import getspall
 
 from PyQt4.QtGui import *
 from PyQt4 import uic, QtCore
@@ -43,9 +41,8 @@ def sec_to_hr_mn(sec):
     inminutes = int(sec) / 60
     hr, mn = divmod(inminutes , 60)
     return hr, mn
-    
-    
-def isnormal(username):
+        
+def isnormal(username, userid):
 #Check if it is a regular user, with userid within UID_MIN and UID_MAX.    
 #TODO:Move to timekprcommon?
 #FIXME: Hide active user - bug #286529
@@ -54,8 +51,7 @@ def isnormal(username):
     if (getenv('SUDO_USER') and username == getenv('SUDO_USER')):
 	return False
     
-    #Return the user uid and check if it is in the non-system users range
-    userid = int(getpwnam(username)[2])
+    #Check if it is in the non-system users range
     logindefs = open('/etc/login.defs')
     uidminmax = re.compile('^UID_(?:MIN|MAX)\s+(\d+)', re.M).findall(logindefs.read())
     if uidminmax[0] < uidminmax[1]:
@@ -109,30 +105,8 @@ class TimekprKDE (KCModule):
         #Set the format of the week
         self.set_week_format()
         
-        #Set buttons
-        #self.setButtons(KCModule.Reset)
-        #self.setButtons(KCModule.Help)
-        #print self.buttons()
-        #print KCModule.Help
-        #self.changed.emit(True)
-	#TODO:Kconfigdialogmanager
-	
-        #Needed for using KAuth authentication
-        self.setNeedsAuthorization(True)
-        
         #Initializing the user combobox
-        #Using /etc/shadow spwd module
-        #getspall acquire a 8 element struct from all the user in the system, the first element is the username
-        passwd = open('/etc/passwd','r')
-        usrinfo = re.findall(logindefs.read(),'^UID_(?:MIN|MAX)\s+(\d+)')
-        
-    
-        print getspall()
-        for userinfo in getspall():
-            if isnormal(userinfo[0]):
-                self.ui.cbActiveUser.addItem(userinfo[0])               
-        self.ui.cbActiveUser.setCurrentIndex(0)  
-
+        self.loadUser() 
 
         #Initializing an empty list for time limits
         self.limits = []
@@ -157,13 +131,16 @@ class TimekprKDE (KCModule):
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         
         #TODO:Delete me, just for testing
-        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.save)
+        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
         
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
 	    self.ui.gbStatus.setEnabled(False)
 	    self.ui.gbGrant.setEnabled(False)
 	    self.ui.gbLimitBound.setEnabled(False)
+	    
+	#Needed for using KAuth authentication
+        self.setNeedsAuthorization(True)
    
 #Function definition
     def MakeAboutData(self):
@@ -177,31 +154,6 @@ class TimekprKDE (KCModule):
 	aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")
 	aboutdata.addAuthor(ki18n("Simone Gaiarin"), ki18n("Developer"), "simgunz@gmail.com", "")
 	return aboutdata
-	
-	
-    def defaults(self):
-	#TODO:This function is called from defaults button
-	print "defaults"
-	
-    def load(self):
-	#TODO:This function is called from reset button and automatically during construction
-
-	helperargs = {"primo":20,"secondo":2}
-	action = self.authAction()
-	print str(action.helperID())
-	action.setArguments(helperargs)
-	reply = action.execute()
-	content=reply.data()
-	kiave = QString('first')
-	print kiave
-	print content[kiave].toString()
-	
-	
-	if reply.failed():
-	    print "Failed"
-	else:
-	    print "Success"
-	self.read_settings()
 	
 	
     def set_week_format(self):
@@ -226,13 +178,23 @@ class TimekprKDE (KCModule):
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
     
     
+    def loadUser(self):
+        passwd = open('/etc/passwd','r').read()
+        userinfodb = re.compile('^.+$', re.M).findall(passwd)        
+    
+        for entry in userinfodb:
+            userinfo = re.split(':',entry)
+            if isnormal(userinfo[0],int(userinfo[2])):
+		self.ui.cbActiveUser.addItem(userinfo[0])               
+        self.ui.cbActiveUser.setCurrentIndex(0) 
+    
+    
     def enable_limit(self,checked):
         if checked:
             self.ui.limits.wgLimitConfDay.setEnabled(True)
         else:
             self.ui.limits.wgLimitConfDay.setEnabled(False)
-            
-            
+                        
     def enable_bound(self,checked):
 	if checked:
             self.ui.limits.wgBoundConfDay.setEnabled(True)
@@ -455,6 +417,7 @@ class TimekprKDE (KCModule):
 	else:
 	    self.ui.grant.btnBoundBypass.setEnabled(False)
 
+
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
 	uislocked = isuserlocked(self.user)
@@ -465,12 +428,25 @@ class TimekprKDE (KCModule):
 	self.buttonstates(uislocked)
     
     
-    def changed(self, state):
-	#Is this necessary?
-        """a setting has changed, activate the Apply button"""
-        self.emit(SIGNAL("changed(bool)"), state)
+    def changed(self):
+	#TODO:This function should be removed, it's just for testing
+        #If a setting has changed, activate the Apply button
+        self.emit(SIGNAL("changed(bool)"), True)
 
+
+    def defaults(self):
+	#TODO:This function is called from defaults button, should set defaults value
+	print "Defaults called"	
+
+
+    def load(self):
+	#This function is called from reset button and automatically during construction
+	self.read_settings()
+	#FIXME:When the module is loaded from kcmshell the Apply button is enabled, should be disabled
+	
+	
     def save(self):
+	print "Saved"
 	#TODO:To implement and connect to Apply button
 	space = " "
         limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
@@ -491,17 +467,23 @@ class TimekprKDE (KCModule):
                 limit = limit + space + ")"
 	    print limit
 	
-	helperargs = {"primo":20,"secondo":2}
+	
+	#TODO:Remove.Helper test
+	helperargs = {"primo":int(self.limitSpin[0][0].value()),"secondo":2}
 	action = self.authAction()
-	print str(action.helperID())
 	action.setArguments(helperargs)
 	reply = action.execute()
 	content=reply.data()
 	kiave = QString('first')
-	print kiave
 	print content[kiave].toString()
-	
+		
+	if reply.failed():
+	    print "Failed"
+	else:
+	    print "Success"	    
+	#TODO:Remove.End helper test
  
+
 
 def CreatePlugin(widget_parent, parent, component_data):
     #Create configuration folder if not existing
@@ -510,6 +492,5 @@ def CreatePlugin(widget_parent, parent, component_data):
     if not isdir(VAR['TIMEKPRWORK']):
         mkdir(VAR['TIMEKPRWORK'])
     #if not isdir(VAR['TIMEKPRSHARED']):  
-    #    exit('Error: Could not find the shared directory %s' % VAR['TIMEKPRSHARED']
-	
+    #    exit('Error: Could not find the shared directory %s' % VAR['TIMEKPRSHARED']	
     return TimekprKDE(component_data, widget_parent)
