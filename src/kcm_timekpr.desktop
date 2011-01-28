@@ -1,0 +1,25 @@
+[Desktop Entry]
+Exec=kcmshell4 kcm_timekpr
+Icon=timekpr
+Type=Service
+
+X-KDE-ServiceTypes=KCModule
+X-KDE-Library=kpythonpluginfactory
+X-KDE-ParentApp=kcontrol
+X-KDE-PluginKeyword=kcm_timekpr/kcm_timekpr.py
+
+X-DocPath=kcontrol/timekpr/index.html
+
+X-KDE-System-Settings-Parent-Category=computer-administration
+X-KDE-System-Settings-Parent-Category-V2=system-administration
+X-KDE-Weight=65
+
+Name=Timekpr
+Comment=Keep control of computer usage
+
+X-KDE-Keywords=timekpr, time, limits
+X-KDE-Keywords[it]=timekpr, tempo, limiti
+
+Categories=Qt;KDE;System;
+
+#X-Ubuntu-Gettext-Domain=desktop_kdeadmin

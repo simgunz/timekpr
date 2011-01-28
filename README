@@ -1,6 +1,0 @@
-Not much to say untill now
-
--- Up-to-date: /usr/lib/kde4/libexec/helper.py
--- Up-to-date: /usr/share/polkit-1/actions/org.kde.kcontrol.timekprkde.policy
--- Installing: /etc/dbus-1/system.d/org.kde.kcontrol.timekprkde.conf
--- Installing: /usr/share/dbus-1/system-services/org.kde.kcontrol.timekprkde.service

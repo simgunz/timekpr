@@ -1,9 +1,23 @@
-#DO NOT INSTALL IT, THE CMAKE FILE IS NOT READY
+Dependency:
 
-Instructions for installing:
+    python-kqt4
+    python-kde4
 
-  cd timekpr-kde
+Install timekpr:
+
+    Add ppa:timekpr-maintainers/ppa to your repository
+    sudo apt-get install timekpr
+
+Install:
+
+  cd kcm_timekpr/src
   mkdir build
   cd build
   cmake .. -DCMAKE_INSTALL_PREFIX=`kde4-config --prefix`
+  make
   sudo make install
+
+Uninstall:
+
+  cd kcm_timekpr/src/build
+  sudo make uninstall

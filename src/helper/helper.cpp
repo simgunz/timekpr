@@ -1,3 +1,9 @@
+/*
+KDE KCModule for configuring timekpr
+Copyright (c) 2008, 2010 Timekpr Authors.
+This file is licensed under the General Public License version 3 or later.
+See the COPYRIGHT file for full details. You should have received the COPYRIGHT file along with the program
+*/
 #include "helper.h"
 
 
@@ -13,12 +19,14 @@
 
 ActionReply Helper::save(const QVariantMap &args)
 { 
+    
     QString arg = args["primo"].toString();
-    //arg = arg + "9";
+    
     int a = 10 + arg.toInt();
     
     QVariantMap retdata;
     retdata["first"] = a;
+    
     
     ActionReply reply(ActionReply::SuccessReply);
     reply.setData(retdata);
@@ -26,4 +34,4 @@ ActionReply Helper::save(const QVariantMap &args)
     return reply;
 }
 
-KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.timekprkde", Helper)
+KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmtimekpr", Helper)

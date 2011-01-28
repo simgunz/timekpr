@@ -17,14 +17,14 @@ from PyKDE4.kdecore import *
 from PyKDE4.kdeui import *
 
 #If DEVACTIVE is true, it uses files from local directory
-DEVACTIVE = True
+DEVACTIVE = False
 
 #IMPORT
 if DEVACTIVE:
     from sys import path
     path.append('.')
-from timekprpam_kde import *
-from timekprcommon_kde import *
+from timekprpam import *
+from timekprcommon import *
 
 
 #timekpr.conf variables (dictionary variable)
@@ -82,10 +82,10 @@ class TimekprKDE (KCModule):
         #Interface initialization
         
         #Loading the UI module
-        self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/main.ui"))
-        self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/status.ui"))
-        self.ui.grant = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/grant.ui"))
-        self.ui.limits = uic.loadUi(unicode("/usr/share/kde4/apps/timekprkde/ui/limits.ui"))
+        self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/main.ui"))
+        self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/status.ui"))
+        self.ui.grant = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/grant.ui"))
+        self.ui.limits = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/limits.ui"))
         
         #Create the layout using group box 
         #Since the UI is modular it's possible to change this layout for displaying the UI modules in tab, etc
@@ -144,15 +144,16 @@ class TimekprKDE (KCModule):
    
 #Function definition
     def MakeAboutData(self):
-	aboutdata = KAboutData("timekprkde", "userconfig", ki18n("timekprkde"), "0.4",
+	aboutdata = KAboutData("kcmtimekpr", "userconfig", ki18n("Timekpr control module"), "0.4",
 	    ki18n("User and Group Configuration Tool"),
 	    KAboutData.License_GPL,
 	    ki18n("Copyright (c) 2008, 2010 Timekpr Authors"))
+	aboutdata.addAuthor(ki18n("Simone Gaiarin"), ki18n("Developer"), "simgunz@gmail.com", "")
 	aboutdata.addAuthor(ki18n("Even Nedberg"), ki18n("Developer"), "even@nedberg.net", "")
 	aboutdata.addAuthor(ki18n("Savvas Radevic"), ki18n("Developer"), "vicedar@gmail.com", "")
 	aboutdata.addAuthor(ki18n("Nicolas Laurance"), ki18n("Developer"), "nlaurance@zindep.com", "")
 	aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")
-	aboutdata.addAuthor(ki18n("Simone Gaiarin"), ki18n("Developer"), "simgunz@gmail.com", "")
+	
 	return aboutdata
 	
 	

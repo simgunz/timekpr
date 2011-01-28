@@ -1,9 +1,0 @@
-[Domain]
-Name=Timekprkde Control Module
-Icon=timekpr
-
-[org.kde.kcontrol.timekprkde.save]
-Name=Save the timekprkde settings
-Description=Administrator authorization is required to change the timekprkde settings
-Policy=auth_admin
-Persistence=session
