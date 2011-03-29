@@ -1,0 +1,17 @@
+[Desktop Entry]
+Comment=Provide the current user status
+Icon=Charm
+Name=Timekpr DataEngine
+Type=Service
+X-KDE-Library=plasma_engine_timekpr
+X-KDE-PluginInfo-Author=Simone Gaiarin
+X-KDE-PluginInfo-Category=Examples
+X-KDE-PluginInfo-Depends=
+X-KDE-PluginInfo-Email=simgunz@gmail.com
+X-KDE-PluginInfo-EnabledByDefault=
+X-KDE-PluginInfo-License=GPL
+X-KDE-PluginInfo-Name=timekpr
+X-KDE-PluginInfo-Version=0.1
+X-KDE-PluginInfo-Website=http://plasma.kde.org/
+X-KDE-ServiceTypes=Plasma/DataEngine
+X-Plasma-EngineName=timekpr

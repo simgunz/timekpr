@@ -1,0 +1,12 @@
+[Buildset]
+BuildItems=@Variant(\x00\x00\x00\t\x00\x00\x00\x00\x01\x00\x00\x00\x0b\x00\x00\x00\x00\x01\x00\x00\x00"\x00p\x00l\x00a\x00s\x00m\x00a\x00-\x00d\x00a\x00t\x00a\x00e\x00n\x00g\x00i\x00n\x00e)
+
+[CMake]
+BuildDirs=/home/simone/Projects/timekpr/src/plasma-dataengine/build
+CMakeDir=/usr/share/cmake-2.8/Modules
+Current CMake Binary=file:///usr/bin/cmake
+CurrentBuildDir=file:///home/simone/Projects/timekpr/src/plasma-dataengine/build
+CurrentBuildType=Debug
+CurrentInstallDir=file:///usr
+Extra Arguments=
+ProjectRootRelative=./
