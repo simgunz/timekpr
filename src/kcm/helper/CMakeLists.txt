@@ -1,7 +1,3 @@
-#project(kcm_timekpr)
-find_package(KDE4 REQUIRED)
-include(KDE4Defaults)
-
 include_directories( ${KDE4_INCLUDES} )
  
 kde4_add_executable( kcmtimekprhelper helper.cpp )

@@ -1,10 +1,3 @@
-project(timekpr_backend)
-find_package( KDE4 REQUIRED )
-include(KDE4Defaults)
-include(FindPythonLibrary)
-include(FindPyQt4)
-include(FindPyKDE4)
-
 install(DIRECTORY python-support/ DESTINATION ${DATA_INSTALL_DIR}/python-support/timekpr)
 install(DIRECTORY etc/ DESTINATION ${CONFIG_INSTALL_DIR})
 install(PROGRAMS bin/timekpr bin/timekpr.postinst bin/timekpr.postrm DESTINATION ${BIN_INSTALL_DIR})
