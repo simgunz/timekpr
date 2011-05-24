@@ -469,10 +469,10 @@ class TimekprKDE (KCModule):
     
     def lockunlock(self):
 	args = {'subaction':0}
-	if self.status['lock']==lock:
-	    args['operation']=unlock
+	if self.status['lock'] == lock:
+	    args['operation'] = unlock
 	else:
-	    args['operation']=lock
+	    args['operation'] = lock
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
 	    self.status['lock'] = not self.status['lock']
@@ -481,13 +481,13 @@ class TimekprKDE (KCModule):
 	
     def bypassTimeFrame(self):
 	args = {'subaction':1}
-	if self.status['bound']==nobound or self.status['bound']==noboundtoday:
-	    args['operation']=bound
+	if self.status['bound'] == nobound or self.status['bound'] == noboundtoday:
+	    args['operation'] = bound
 	else:
-	    args['operation']=noboundtoday
+	    args['operation'] = noboundtoday
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    if (args['operation']==noboundtoday):
+	    if (args['operation'] == noboundtoday):
 		self.status['bound'] = noboundtoday
 	    else:
 		self.status['bound'] = bound
@@ -496,13 +496,13 @@ class TimekprKDE (KCModule):
 
     def bypassAccessDuration(self):
 	args = {'subaction':2}
-	if self.status['limit']==nolimit or self.status['limit']==nolimittoday:
-	    args['operation']=limit
+	if self.status['limit'] == nolimit or self.status['limit'] == nolimittoday:
+	    args['operation'] = limit
 	else:
-	    args['operation']=nolimittoday
+	    args['operation'] = nolimittoday
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    if (args['operation']==nolimittoday):
+	    if (args['operation'] == nolimittoday):
 		self.status['limit'] = nolimittoday
 	    else:
 		self.status['limit'] = limit
@@ -513,14 +513,21 @@ class TimekprKDE (KCModule):
 	args = {'subaction':3}
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    self.status['reset']=reset
+	    self.status['reset'] = reset
 	    self.buttonstates()
 	    self.statusicons()
 
     def addTime(self):
 	args = {'subaction':4}
-	args = {'time':100}
-	self.executePermissionsAction(args)
+	time = self.ui.grant.sbAddTime.value()
+	if time:
+	    args['time'] = time
+	    reply = self.executePermissionsAction(args)
+	    if not reply.failed():
+		self.ui.grant.sbAddTime.setValue(0)
+		self.status['reset'] = noreset
+		self.buttonstates()
+		self.statusicons()
 	
     def changed(self):
 	#TODO:This function should be removed, it's just for testing
