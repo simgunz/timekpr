@@ -43,7 +43,7 @@ TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     setBackgroundHints(StandardBackground);
     setAspectRatioMode(Plasma::ConstrainedSquare );
     setHasConfigurationInterface(true);  
-    setPopupIcon("timekpr_kde");
+    setPopupIcon(m_icon);
     //resize(200, 200);
     //resize(graphicsWidget()->minimumSize());
 
@@ -76,7 +76,7 @@ void TimekprApplet::init()
 
     Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr_kde"));
     Plasma::ToolTipManager::self()->setContent(this, tooltip);
-
+    
 }
 
 void TimekprApplet::toolTipAboutToShow()
