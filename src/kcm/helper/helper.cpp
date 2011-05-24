@@ -61,7 +61,6 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     }
 
     return ActionReply::SuccessReply;
-    
     //return createReply(code);
 }
 

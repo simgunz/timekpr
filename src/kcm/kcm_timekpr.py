@@ -133,9 +133,10 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.toggle_daily_bound)
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
+        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
         
         #TODO:Delete me, just for testing
-        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
+        #self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
         
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
@@ -432,6 +433,16 @@ class TimekprKDE (KCModule):
 	self.statusicons(uislocked)
 	self.buttonstates(uislocked)
     
+    def executePermissionsAction(self,args):
+	action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
+	action.setHelperID("org.kde.kcontrol.kcmtimekpr")
+	action.setArguments(args)
+	reply = action.execute()
+    
+    def lockunlock(self):
+	args = {'subaction':0}
+	args['operation']=0
+	self.executePermissionsAction(args)
     
     def changed(self):
 	#TODO:This function should be removed, it's just for testing
