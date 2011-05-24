@@ -43,7 +43,7 @@
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Bypass for today</string>
+      <string>Bypass time frame for today</string>
      </property>
     </widget>
    </item>
@@ -53,7 +53,7 @@
       <bool>true</bool>
      </property>
      <property name="text">
-      <string>Bypass for today</string>
+      <string>Bypass access duration for today</string>
      </property>
     </widget>
    </item>
