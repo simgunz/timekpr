@@ -288,15 +288,107 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
     
     
+    def update_time_left(self):       
+        dayIndex = int(strftime("%w"))
+        try:
+            limit = int(self.limits[dayIndex])
+        except IndexError:
+            limit = 86400
+
+        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+        used = 0
+        if isfile(timefile) and fromtoday(timefile):
+            t = open(timefile)
+            used = int(t.readline())
+            t.close()
+        left = limit - used
+        hours, minutes = sec_to_hr_mn(left)
+        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
+          
+          
+    def statusicons(self):
+	if not isuserlimitedtoday(self.user) and not self.status['lock']:
+	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
+	else:
+	    self.ui.status.lbAllDayLoginStatus.setText("No")
+	
+	if self.status['bound']:
+	    self.ui.status.lbBoundStatus.setText("Yes")
+	else:
+	    self.ui.status.lbBoundStatus.setText("No")
+	    
+	if self.status['limit']:
+	    self.ui.status.lbLimitStatus.setText("Yes")
+	else:
+	    self.ui.status.lbLimitStatus.setText("No")
+	
+	if self.status['lock']:
+	    self.ui.status.lbLockStatus.setText("Yes")
+	else:
+	    self.ui.status.lbLockStatus.setText("No")
+	
+	self.update_time_left()
+
+
+    def buttonstates(self):
+	if self.status['lock']:
+	    self.ui.grant.btnLockAccount.setText("Unlock account")
+	else:
+	    self.ui.grant.btnLockAccount.setText("Lock account")
+	    
+	if self.status['bound']:
+	    index = int(strftime("%w"))
+            wfrom = self.fromtolimits[0]
+            wto = self.fromtolimits[1]
+            if wfrom[index] != '0' or wto[index] != '24':
+		self.ui.grant.btnBoundBypass.setEnabled(True)
+	    else:
+		self.ui.grant.btnBoundBypass.setEnabled(False)
+	else:
+	    self.ui.grant.btnBoundBypass.setEnabled(False)
+	 
+	 
+	if self.status['limit']:
+	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+            if isfile(timefile):
+		self.ui.grant.btnResetTime.setEnabled(True)
+	    else:
+		self.ui.grant.btnResetTime.setEnabled(False)
+	    #Reward button should add time even if .time is not there?
+	    self.ui.grant.btnLimitBypass.setEnabled(True)
+	    self.ui.grant.btnAddTime.setEnabled(True)
+	    self.ui.grant.sbAddTime.setEnabled(True)
+	    self.ui.grant.lbAddTime.setEnabled(True)
+	else:
+	    self.ui.grant.btnLimitBypass.setEnabled(False)
+	    self.ui.grant.btnResetTime.setEnabled(False)
+	    self.ui.grant.btnAddTime.setEnabled(False)
+	    self.ui.grant.sbAddTime.setEnabled(False)
+	    self.ui.grant.lbAddTime.setEnabled(False)
+
+
+    def read_settings(self):
+	self.user = str(self.ui.cbActiveUser.currentText())
+	uislocked = isuserlocked(self.user)
+	self.status = {'lock':uislocked}
+	self.readfromtolimit()
+	self.readdurationlimit()
+	self.statusicons()
+	self.buttonstates()
+
+
     def readfromtolimit(self):
 	#TODO:Move to timekprcommon?
 	#TODO: Why not using a cache file for keeping all the limits even if the checkboxes are unchecked?
         #from-to time limitation (aka boundaries) - time.conf
         #Get user time limits (boundaries) as lists from-to
+        self.fromtolimits = getuserlimits(self.user)
         bfrom = self.fromtolimits[0]
         bto = self.fromtolimits[1]
         
-        if isuserlimited(self.user):
+        self.status['bound'] = isuserlimited(self.user)
+        
+        if self.status['bound']:
 	    self.ui.limits.ckBound.setChecked(True)
                        
 	    if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
@@ -320,7 +412,8 @@ class TimekprKDE (KCModule):
         configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
         del self.limits[:]
         
-        if isfile(configFile):
+        self.status['limit'] = isfile(configFile)
+        if self.status['limit']:
             fileHandle = open(configFile)
             self.limits = fileHandle.readline()
             self.limits = self.limits.replace("limit=( ", "")
@@ -350,93 +443,6 @@ class TimekprKDE (KCModule):
                 self.limitSpin[1][i].setValue(0)
      	
 	
-    def update_time_left(self):       
-        dayIndex = int(strftime("%w"))
-        try:
-            limit = int(self.limits[dayIndex])
-        except IndexError:
-            limit = 86400
-
-        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
-        used = 0
-        if isfile(timefile) and fromtoday(timefile):
-            t = open(timefile)
-            used = int(t.readline())
-            t.close()
-        left = limit - used
-        hours, minutes = sec_to_hr_mn(left)
-        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
-          
-          
-    def statusicons(self, uislocked):
-	if not isuserlimitedtoday(self.user) and not uislocked:
-	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
-	else:
-	    self.ui.status.lbAllDayLoginStatus.setText("No")
-	
-	if self.ui.limits.ckBound.isChecked():
-	    self.ui.status.lbBoundStatus.setText("Yes")
-	else:
-	    self.ui.status.lbBoundStatus.setText("No")
-	    
-	if self.ui.limits.ckLimit.isChecked():
-	    self.ui.status.lbLimitStatus.setText("Yes")
-	else:
-	    self.ui.status.lbLimitStatus.setText("No")
-	
-	if uislocked:
-	    self.ui.status.lbLockStatus.setText("Yes")
-	else:
-	    self.ui.status.lbLockStatus.setText("No")
-	
-	self.update_time_left()
-
-
-    def buttonstates(self, uislocked):
-	if uislocked:
-	    self.ui.grant.btnLockAccount.setText("Unlock account")
-	else:
-	    self.ui.grant.btnLockAccount.setText("Lock account")
-	
-	if self.ui.limits.ckLimit.isChecked():
-	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
-            if isfile(timefile):
-		self.ui.grant.btnResetTime.setEnabled(True)
-	    else:
-		self.ui.grant.btnResetTime.setEnabled(False)
-	    #Reward button should add time even if .time is not there?
-	    self.ui.grant.btnLimitBypass.setEnabled(True)
-	    self.ui.grant.btnAddTime.setEnabled(True)
-	    self.ui.grant.sbAddTime.setEnabled(True)
-	    self.ui.grant.lbAddTime.setEnabled(True)
-	else:
-	    self.ui.grant.btnLimitBypass.setEnabled(False)
-	    self.ui.grant.btnResetTime.setEnabled(False)
-	    self.ui.grant.btnAddTime.setEnabled(False)
-	    self.ui.grant.sbAddTime.setEnabled(False)
-	    self.ui.grant.lbAddTime.setEnabled(False)
-	    
-	if self.ui.limits.ckBound.isChecked():
-	    index = int(strftime("%w"))
-            wfrom = self.fromtolimits[0]
-            wto = self.fromtolimits[1]
-            if wfrom[index] != '0' or wto[index] != '24':
-		self.ui.grant.btnBoundBypass.setEnabled(True)
-	    else:
-		self.ui.grant.btnBoundBypass.setEnabled(False)
-	else:
-	    self.ui.grant.btnBoundBypass.setEnabled(False)
-
-
-    def read_settings(self):
-	self.user = str(self.ui.cbActiveUser.currentText())
-	uislocked = isuserlocked(self.user)
-	self.fromtolimits = getuserlimits(self.user)
-	self.readfromtolimit()
-	self.readdurationlimit()
-	self.statusicons(uislocked)
-	self.buttonstates(uislocked)
-    
     def executePermissionsAction(self,args):
 	action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
 	action.setHelperID("org.kde.kcontrol.kcmtimekpr")
