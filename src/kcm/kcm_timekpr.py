@@ -142,7 +142,17 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
         self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clearallrestriction)
+        self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.changed)
+        self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.changed)        
+        self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.changed)
+        self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.changed)
         
+        for i in range(2):
+	    for j in range(7):
+		self.connect(self.limitSpin[i][j],SIGNAL('valueChanged(int)'),self.changed)
+		self.connect(self.fromSpin[i][j],SIGNAL('valueChanged(int)'),self.changed)
+		self.connect(self.toSpin[i][j],SIGNAL('valueChanged(int)'),self.changed)		
+		
         #TODO:Delete me, just for testing
         #self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
         
@@ -399,6 +409,7 @@ class TimekprKDE (KCModule):
 	self.readdurationlimit()
 	self.statusicons()
 	self.buttonstates()
+	self.emit(SIGNAL("changed(bool)"), False)
 
 
     def readfromtolimit(self):
@@ -570,8 +581,6 @@ class TimekprKDE (KCModule):
 	
 	
     def save(self):
-	print "Saved"
-	#TODO:To implement and connect to Apply button
 	space = " "
         limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
         #timekprpam.py adduserlimits() uses lists with numbers as strings
@@ -589,8 +598,21 @@ class TimekprKDE (KCModule):
                 for i in range(7):
 		    limit = limit + space + str(self.limitSpin[0][0].value() * 3600 + self.limitSpin[1][0].value() * 60)
                 limit = limit + space + ")"
-	    print limit
-	
+                
+        bFrom = [[],[]]
+        bTo = [[],[]]        
+        
+        if self.ui.limits.ckBound.isChecked():
+	    if self.ui.limits.ckBoundDay.isChecked():
+                for i in range(2):
+		    for j in range(7):
+			bFrom.append(str(self.fromSpin[i][j].value()))
+			bToHr.append(str(self.toSpin[i][j].value()))
+            else:
+		for i in range(2):
+		    for j in range(7):
+			bFrom.append(str(self.fromSpin[i][0].value()))
+			bToHr.append(str(self.toSpin[i][0].value()))
 	
 	#TODO:Remove.Helper test
 	helperargs = {"primo":int(self.limitSpin[0][0].value()),"secondo":2}
