@@ -34,4 +34,35 @@ ActionReply Helper::save(const QVariantMap &args)
     return reply;
 }
 
+ActionReply Helper::managepermissions(const QVariantMap &args)
+{
+    int subaction = args.value("subaction").toInt();
+
+    int code = 0;
+
+    switch (subaction) {
+    case Lock:
+        code = (0);
+        break;
+    case BypassTimeFrame:
+        code = (0);
+        break;
+    case BypassAccessDuration:
+        code = (0);
+        break;
+    case ResetTime:
+        code = (0);
+        break;
+    case AddTime:
+        code = (0);
+        break;
+    default:
+        return ActionReply::HelperError;
+    }
+
+    return ActionReply::SuccessReply;
+    
+    //return createReply(code);
+}
+
 KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmtimekpr", Helper)

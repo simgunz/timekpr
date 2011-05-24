@@ -14,10 +14,13 @@ using namespace KAuth;
 
 class Helper : public QObject {
     Q_OBJECT
-
+    
+public:
+    enum { Lock, BypassTimeFrame, BypassAccessDuration, ResetTime, AddTime };
+    
 public slots:
     ActionReply save(const QVariantMap &map);
-
+    ActionReply managepermissions(const QVariantMap &map);
 };
 
 #endif
