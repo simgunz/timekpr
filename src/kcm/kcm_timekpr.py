@@ -8,7 +8,8 @@
 # See the COPYRIGHT file for full details. You should have received the COPYRIGHT file along with the program
 
 from os import remove, mkdir, geteuid, getenv
-from os.path import isdir, isfile, realpath, dirname
+from os.path import isdir, isfile, realpath, dirname, dirname
+import sys
 
 from PyQt4.QtGui import *
 from PyQt4 import uic, QtCore
@@ -80,12 +81,15 @@ class TimekprKDE (KCModule):
         
         
         #Interface initialization
+	
+	#print basename(sys.argv[0])
+        #Loading the UI module        print get_path()
+        self.ui = uic.loadUi(unicode(dirname(__file__) + "/ui/main.ui"))
+        self.ui.status = uic.loadUi(unicode(dirname(__file__) + "/ui/status.ui"))
+        self.ui.grant = uic.loadUi(unicode(dirname(__file__) + "/ui/grant.ui"))
+        self.ui.limits = uic.loadUi(unicode(dirname(__file__) + "/ui/limits.ui"))
         
-        #Loading the UI module
-        self.ui = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/main.ui"))
-        self.ui.status = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/status.ui"))
-        self.ui.grant = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/grant.ui"))
-        self.ui.limits = uic.loadUi(unicode("/usr/share/kde4/apps/kcm_timekpr/ui/limits.ui"))
+        
         
         #Create the layout using group box 
         #Since the UI is modular it's possible to change this layout for displaying the UI modules in tab, etc
@@ -485,7 +489,7 @@ class TimekprKDE (KCModule):
 	#TODO:Remove.End helper test
  
 
-
+    
 def CreatePlugin(widget_parent, parent, component_data):
     #Create configuration folder if not existing
     if not isdir(VAR['TIMEKPRDIR']):

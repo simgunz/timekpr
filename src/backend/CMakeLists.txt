@@ -1,4 +1,10 @@
-install(DIRECTORY python-support/ DESTINATION /usr/share/python-support/timekpr)
-install(DIRECTORY etc/ DESTINATION ${CONFIG_INSTALL_DIR})
-install(PROGRAMS bin/timekpr bin/timekpr.postinst bin/timekpr.postrm DESTINATION ${BIN_INSTALL_DIR})
-install(PROGRAMS bin/timekprd DESTINATION /etc/rc.d/)
+set(SRCFILES timekprpam.py timekprcommon.py)
+
+PYKDE4_INSTALL_PYTHON_FILES(${SRCFILES})
+
+install(DIRECTORY etc/ DESTINATION ${SYSCONF_INSTALL_DIR})
+install(FILES timekpr.py DESTINATION ${DATA_INSTALL_DIR}/timekpr-kde)
+install(PROGRAMS bin/timekpr.postinst bin/timekpr.postrm DESTINATION ${BIN_INSTALL_DIR})
+install(PROGRAMS bin/timekprd DESTINATION ${SYSCONF_INSTALL_DIR}/rc.d/)
+
+PYKDE4_ADD_EXECUTABLE(timekpr.py timekpr)

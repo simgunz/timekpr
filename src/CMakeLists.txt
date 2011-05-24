@@ -1,5 +1,6 @@
 project(timekpr-kde)
-find_package( KDE4 REQUIRED )
+
+find_package(KDE4 REQUIRED)
 include(KDE4Defaults)
 include(FindPythonLibrary)
 include(FindPyQt4)

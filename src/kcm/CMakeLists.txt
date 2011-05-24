@@ -1,5 +1,4 @@
 add_subdirectory (helper)
-
-install(FILES kcm_timekpr.py DESTINATION ${DATA_INSTALL_DIR}/kcm_timekpr)
-install(FILES ui/main.ui ui/status.ui ui/grant.ui ui/limits.ui DESTINATION ${DATA_INSTALL_DIR}/kcm_timekpr/ui)
+PYKDE4_INSTALL_PYTHON_FILES(kcm_timekpr.py)
+install(DIRECTORY ui/ DESTINATION ${DATA_INSTALL_DIR}/timekpr-kde/ui)
 install(FILES kcm_timekpr.desktop DESTINATION ${SERVICES_INSTALL_DIR})

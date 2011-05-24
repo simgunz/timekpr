@@ -6,7 +6,7 @@ Type=Service
 X-KDE-ServiceTypes=KCModule
 X-KDE-Library=kpythonpluginfactory
 X-KDE-ParentApp=kcontrol
-X-KDE-PluginKeyword=kcm_timekpr/kcm_timekpr.py
+X-KDE-PluginKeyword=timekpr-kde/kcm_timekpr.py
 
 X-DocPath=kcontrol/timekpr/index.html
 

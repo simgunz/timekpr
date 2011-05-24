@@ -1,6 +1,6 @@
 [Domain]
 Name=Timekpr Control Module
-Icon=timekpr
+Icon=timekpr_kde
 
 [org.kde.kcontrol.kcmtimekpr.save]
 Name=Save the timekpr settings
