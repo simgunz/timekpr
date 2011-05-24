@@ -134,6 +134,10 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
+        self.connect(self.ui.grant.btnBoundBypass,SIGNAL('clicked()'),self.bypassTimeFrame)
+        self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
+        self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
+        self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
         
         #TODO:Delete me, just for testing
         #self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
@@ -443,7 +447,26 @@ class TimekprKDE (KCModule):
 	args = {'subaction':0}
 	args['operation']=0
 	self.executePermissionsAction(args)
-    
+	
+    def bypassTimeFrame(self):
+	args = {'subaction':1}
+	args = {'subaction':0}
+	self.executePermissionsAction(args)
+
+    def bypassAccessDuration(self):
+	args = {'subaction':2}
+	args = {'subaction':0}
+	self.executePermissionsAction(args)
+	
+    def resetTime(self):
+	args = {'subaction':3}
+	self.executePermissionsAction(args)
+
+    def addTime(self):
+	args = {'subaction':4}
+	args = {'time':100}
+	self.executePermissionsAction(args)
+	
     def changed(self):
 	#TODO:This function should be removed, it's just for testing
         #If a setting has changed, activate the Apply button
