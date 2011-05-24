@@ -34,8 +34,10 @@ VAR = getvariables(DEVACTIVE)
 version = getversion()
 
 
-
-
+#Enum
+unlock, lock = range(2)
+nobound, bound, noboundtoday = range(3)
+nolimit, limit, nolimittoday = range(3)
 
 
 def sec_to_hr_mn(sec):
@@ -312,20 +314,24 @@ class TimekprKDE (KCModule):
 	else:
 	    self.ui.status.lbAllDayLoginStatus.setText("No")
 	
-	if self.status['bound']:
-	    self.ui.status.lbBoundStatus.setText("Yes")
-	else:
-	    self.ui.status.lbBoundStatus.setText("No")
-	    
-	if self.status['limit']:
-	    self.ui.status.lbLimitStatus.setText("Yes")
-	else:
-	    self.ui.status.lbLimitStatus.setText("No")
-	
 	if self.status['lock']:
 	    self.ui.status.lbLockStatus.setText("Yes")
 	else:
 	    self.ui.status.lbLockStatus.setText("No")
+	    
+	if self.status['bound'] == bound:
+	    self.ui.status.lbBoundStatus.setText("Yes")
+	elif self.status['bound'] == nobound:
+	    self.ui.status.lbBoundStatus.setText("No")
+	else:
+	    self.ui.status.lbBoundStatus.setText("No (just for today)")
+	    
+	if self.status['limit'] == limit:
+	    self.ui.status.lbLimitStatus.setText("Yes")
+	elif self.status['limit'] == nolimit:
+	    self.ui.status.lbLimitStatus.setText("No")
+	else:
+	    self.ui.status.lbLimitStatus.setText("No (just for today)")
 	
 	self.update_time_left()
 
@@ -336,19 +342,24 @@ class TimekprKDE (KCModule):
 	else:
 	    self.ui.grant.btnLockAccount.setText("Lock account")
 	    
+	self.ui.grant.btnBoundBypass.setText("Bypass time frame for today")
 	if self.status['bound']:
-	    index = int(strftime("%w"))
-            wfrom = self.fromtolimits[0]
-            wto = self.fromtolimits[1]
-            if wfrom[index] != '0' or wto[index] != '24':
-		self.ui.grant.btnBoundBypass.setEnabled(True)
+	    if self.status['bound']==1:
+		index = int(strftime("%w"))
+		wfrom = self.fromtolimits[0]
+		wto = self.fromtolimits[1]
+		if wfrom[index] != '0' or wto[index] != '24':
+		    self.ui.grant.btnBoundBypass.setEnabled(True)
+		else:
+		    self.ui.grant.btnBoundBypass.setEnabled(False)
 	    else:
-		self.ui.grant.btnBoundBypass.setEnabled(False)
+		self.ui.grant.btnBoundBypass.setText("Clear bypass time frame for today")
+		self.ui.grant.btnBoundBypass.setEnabled(True)
 	else:
 	    self.ui.grant.btnBoundBypass.setEnabled(False)
 	 
-	 
-	if self.status['limit']:
+	self.ui.grant.btnLimitBypass.setText("Bypass access duration for today") 
+	if self.status['limit'] == limit:
 	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
             if isfile(timefile):
 		self.ui.grant.btnResetTime.setEnabled(True)
@@ -360,11 +371,15 @@ class TimekprKDE (KCModule):
 	    self.ui.grant.sbAddTime.setEnabled(True)
 	    self.ui.grant.lbAddTime.setEnabled(True)
 	else:
-	    self.ui.grant.btnLimitBypass.setEnabled(False)
 	    self.ui.grant.btnResetTime.setEnabled(False)
 	    self.ui.grant.btnAddTime.setEnabled(False)
 	    self.ui.grant.sbAddTime.setEnabled(False)
 	    self.ui.grant.lbAddTime.setEnabled(False)
+	    if self.status['limit'] == nolimit:
+		self.ui.grant.btnLimitBypass.setEnabled(False)
+	    else:
+		self.ui.grant.btnLimitBypass.setText("Clear bypass access duration for today")
+		self.ui.grant.btnLimitBypass.setEnabled(True)
 
 
     def read_settings(self):
@@ -448,21 +463,49 @@ class TimekprKDE (KCModule):
 	action.setHelperID("org.kde.kcontrol.kcmtimekpr")
 	action.setArguments(args)
 	reply = action.execute()
+	return reply
     
     def lockunlock(self):
 	args = {'subaction':0}
-	args['operation']=0
-	self.executePermissionsAction(args)
+	if self.status['lock']==lock:
+	    args['operation']=unlock
+	else:
+	    args['operation']=lock
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    self.status['lock'] = not self.status['lock']
+	    self.buttonstates()
+	    self.statusicons()
 	
     def bypassTimeFrame(self):
 	args = {'subaction':1}
-	args = {'subaction':0}
-	self.executePermissionsAction(args)
+	if self.status['bound']==nobound or self.status['bound']==noboundtoday:
+	    args['operation']=bound
+	else:
+	    args['operation']=noboundtoday
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    if (args['operation']==noboundtoday):
+		self.status['bound'] = noboundtoday
+	    else:
+		self.status['bound'] = bound
+	    self.buttonstates()
+	    self.statusicons()
 
     def bypassAccessDuration(self):
 	args = {'subaction':2}
-	args = {'subaction':0}
-	self.executePermissionsAction(args)
+	if self.status['limit']==nolimit or self.status['limit']==nolimittoday:
+	    args['operation']=limit
+	else:
+	    args['operation']=nolimittoday
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    if (args['operation']==nolimittoday):
+		self.status['limit'] = nolimittoday
+	    else:
+		self.status['limit'] = limit
+	    self.buttonstates()
+	    self.statusicons()
 	
     def resetTime(self):
 	args = {'subaction':3}
