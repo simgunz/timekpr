@@ -141,6 +141,7 @@ class TimekprKDE (KCModule):
         self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
+        self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clearallrestriction)
         
         #TODO:Delete me, just for testing
         #self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
@@ -382,6 +383,12 @@ class TimekprKDE (KCModule):
 	    else:
 		self.ui.grant.btnLimitBypass.setText("Clear bypass access duration for today")
 		self.ui.grant.btnLimitBypass.setEnabled(True)
+	
+	if ((self.status['lock'] == lock) or (self.status['bound'] == bound) or (self.status['limit'] == limit)):
+	    self.ui.grant.btnClearAllRestriction.setEnabled(True)
+	else:
+	    self.ui.grant.btnClearAllRestriction.setEnabled(False)
+	
 
 
     def read_settings(self):
@@ -467,8 +474,19 @@ class TimekprKDE (KCModule):
 	reply = action.execute()
 	return reply
     
-    def lockunlock(self):
+    
+    def clearallrestriction(self):
 	args = {'subaction':0}
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    self.status['lock'] = unlock
+	    self.status['bound'] = nobound
+	    self.status['limit'] = nolimit
+	    self.buttonstates()
+	    self.statusicons()
+	    
+    def lockunlock(self):
+	args = {'subaction':1}
 	if self.status['lock'] == lock:
 	    args['operation'] = unlock
 	else:
@@ -479,8 +497,9 @@ class TimekprKDE (KCModule):
 	    self.buttonstates()
 	    self.statusicons()
 	
+	
     def bypassTimeFrame(self):
-	args = {'subaction':1}
+	args = {'subaction':2}
 	if self.status['bound'] == nobound or self.status['bound'] == noboundtoday:
 	    args['operation'] = bound
 	else:
@@ -494,8 +513,9 @@ class TimekprKDE (KCModule):
 	    self.buttonstates()
 	    self.statusicons()
 
+
     def bypassAccessDuration(self):
-	args = {'subaction':2}
+	args = {'subaction':3}
 	if self.status['limit'] == nolimit or self.status['limit'] == nolimittoday:
 	    args['operation'] = limit
 	else:
@@ -509,16 +529,18 @@ class TimekprKDE (KCModule):
 	    self.buttonstates()
 	    self.statusicons()
 	
+	
     def resetTime(self):
-	args = {'subaction':3}
+	args = {'subaction':4}
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
 	    self.status['reset'] = reset
 	    self.buttonstates()
 	    self.statusicons()
 
+
     def addTime(self):
-	args = {'subaction':4}
+	args = {'subaction':5}
 	time = self.ui.grant.sbAddTime.value()
 	if time:
 	    args['time'] = time
@@ -528,6 +550,7 @@ class TimekprKDE (KCModule):
 		self.status['reset'] = noreset
 		self.buttonstates()
 		self.statusicons()
+	
 	
     def changed(self):
 	#TODO:This function should be removed, it's just for testing

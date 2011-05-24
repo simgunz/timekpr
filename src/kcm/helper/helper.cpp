@@ -41,23 +41,26 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     int code = 0;
 
     switch (subaction) {
-    case Lock:
-        code = (0);
-        break;
-    case BypassTimeFrame:
-        code = (0);
-        break;
-    case BypassAccessDuration:
-        code = (0);
-        break;
-    case ResetTime:
-        code = (0);
-        break;
-    case AddTime:
-        code = (0);
-        break;
-    default:
-        return ActionReply::HelperError;
+	case ClearAllRestriction:
+	    code = (0);
+	    break;
+	case Lock:
+	    code = (0);
+	    break;
+	case BypassTimeFrame:
+	    code = (0);
+	    break;
+	case BypassAccessDuration:
+	    code = (0);
+	    break;
+	case ResetTime:
+	    code = (0);
+	    break;
+	case AddTime:
+	    code = (0);
+	    break;
+	default:
+	    return ActionReply::HelperError;
     }
 
     return ActionReply::SuccessReply;
