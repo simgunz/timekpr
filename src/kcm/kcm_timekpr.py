@@ -587,47 +587,50 @@ class TimekprKDE (KCModule):
         bFrom = ['0'] * 7
         bTo = ['24'] * 7
 
+	limit = "limit=("
+        
         if self.ui.limits.ckLimit.isChecked():
             if self.ui.limits.ckLimitDay.isChecked():
-                limit = "limit=("
                 for i in range(7):
                     limit = limit + space + str(self.limitSpin[0][i].value() * 3600 + self.limitSpin[1][i].value() * 60)
-                limit = limit + space + ")"
             else:
-                limit = "limit=("
                 for i in range(7):
-		    limit = limit + space + str(self.limitSpin[0][0].value() * 3600 + self.limitSpin[1][0].value() * 60)
-                limit = limit + space + ")"
+		    limit = limit + space + str(self.limitSpin[0][0].value() * 3600 + self.limitSpin[1][0].value() * 60)                
+        
+        limit = limit + space + ")"
                 
-        bFrom = [[],[]]
-        bTo = [[],[]]        
+        bFrom = [['0'] * 7,['0'] * 7]
+        bTo = [['24'] * 7,['0'] * 7]
         
         if self.ui.limits.ckBound.isChecked():
+	    bFrom = [[],[]]
+            bTo = [[],[]]
 	    if self.ui.limits.ckBoundDay.isChecked():
                 for i in range(2):
 		    for j in range(7):
-			bFrom.append(str(self.fromSpin[i][j].value()))
-			bToHr.append(str(self.toSpin[i][j].value()))
+			bFrom[i].append(str(self.fromSpin[i][j].value()))
+			bTo[i].append(str(self.toSpin[i][j].value()))
             else:
 		for i in range(2):
 		    for j in range(7):
-			bFrom.append(str(self.fromSpin[i][0].value()))
-			bToHr.append(str(self.toSpin[i][0].value()))
+			bFrom[i].append(str(self.fromSpin[i][0].value()))
+			bTo[i].append(str(self.toSpin[i][0].value()))
 	
-	#TODO:Remove.Helper test
-	helperargs = {"primo":int(self.limitSpin[0][0].value()),"secondo":2}
+	bound = mktimeconfline(self.user, bFrom[0], bTo[0]) + "\n"
+	helperargs = {"user":self.user,"bound":bound,"limit":limit}
 	action = self.authAction()
 	action.setArguments(helperargs)
+	#getconfsection(f)
 	reply = action.execute()
-	content=reply.data()
-	kiave = QString('first')
-	print content[kiave].toString()
-		
+	#content = reply.data()
+	#print content
+	#print content["first"]
+	#print "\n"
+	#print content["second"]
 	if reply.failed():
 	    print "Failed"
 	else:
-	    print "Success"	    
-	#TODO:Remove.End helper test
+	    print "Success"	
  
 
     

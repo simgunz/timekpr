@@ -8,6 +8,7 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 
 
 #include <QFile>
+#include <QTextStream>
 #include <QDir>
 #include <KConfig>
 #include <KConfigGroup>
@@ -16,20 +17,51 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 #include <iostream>
 #include <string>
 
+#include <QDebug>
 
 ActionReply Helper::save(const QVariantMap &args)
 { 
     
-    QString arg = args["primo"].toString();
+    QString limit = args["limit"].toString();
+    QString fileName("/etc/timekpr/");
+    fileName += args["user"].toString();
+    QFile limitFile(fileName);
     
-    int a = 10 + arg.toInt();
+    //QVariantMap retdata;
     
-    QVariantMap retdata;
-    retdata["first"] = a;
+    if (limit == "limit=( )")
+    {
+	if(limitFile.exists())
+	{
+	    limitFile.remove();
+	    //retdata["first"] = "exist";
+	    qDebug() << "Limits removed";
+	}
+	qDebug() << "Limits not present, so not removed";
+	//retdata["first"] = "not exist";
+    }
+    else
+    {
+	//if (!limitFile.open(QIODevice::WriteOnly|QFile::Truncate))
+	if (!limitFile.open(QIODevice::WriteOnly))
+	{
+	    qDebug() << "Can't open file in write mode";
+	    return false;
+	}
+	QTextStream out(&limitFile);
+	qDebug() << limit;
+	out << limit << endl;
+	limitFile.close();
+	qDebug() << "Limits successfully written to file";
+    }
+
+
+    
+    
     
     
     ActionReply reply(ActionReply::SuccessReply);
-    reply.setData(retdata);
+    //reply.setData(retdata);
     
     return reply;
 }
