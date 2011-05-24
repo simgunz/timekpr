@@ -38,6 +38,7 @@ version = getversion()
 unlock, lock = range(2)
 nobound, bound, noboundtoday = range(3)
 nolimit, limit, nolimittoday = range(3)
+noreset, reset = range(2)
 
 
 def sec_to_hr_mn(sec):
@@ -361,7 +362,8 @@ class TimekprKDE (KCModule):
 	self.ui.grant.btnLimitBypass.setText("Bypass access duration for today") 
 	if self.status['limit'] == limit:
 	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
-            if isfile(timefile):
+            #if isfile(timefile):
+            if self.status['reset']==noreset:
 		self.ui.grant.btnResetTime.setEnabled(True)
 	    else:
 		self.ui.grant.btnResetTime.setEnabled(False)
@@ -385,7 +387,7 @@ class TimekprKDE (KCModule):
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
 	uislocked = isuserlocked(self.user)
-	self.status = {'lock':uislocked}
+	self.status = {'lock':uislocked,'reset':noreset}
 	self.readfromtolimit()
 	self.readdurationlimit()
 	self.statusicons()
@@ -509,7 +511,11 @@ class TimekprKDE (KCModule):
 	
     def resetTime(self):
 	args = {'subaction':3}
-	self.executePermissionsAction(args)
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    self.status['reset']=reset
+	    self.buttonstates()
+	    self.statusicons()
 
     def addTime(self):
 	args = {'subaction':4}
