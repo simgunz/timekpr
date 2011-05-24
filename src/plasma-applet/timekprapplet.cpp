@@ -74,15 +74,15 @@ void TimekprApplet::init()
     eItem->setTitle("InfoProvider");
     initExtenderItem(eItem);
 
-    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr-kde"));
+    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr-kde").pixmap(QSize(32,32)));
     Plasma::ToolTipManager::self()->setContent(this, tooltip);
 
 }
 
 void TimekprApplet::toolTipAboutToShow()
 {
-    //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr").pixmap(QSize(32,32)));
-    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr").pixmap(QSize(32,32)));
+    //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr-kde").pixmap(QSize(32,32)));
+    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr-kde").pixmap(QSize(32,32)));
 }
 
 
