@@ -37,13 +37,13 @@
 TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
     m_theme(this),
-    m_icon("timekpr-kde")
+    m_icon("timekpr_kde")
 {
     // this will get us the standard applet background, for free!
     setBackgroundHints(StandardBackground);
     setAspectRatioMode(Plasma::ConstrainedSquare );
     setHasConfigurationInterface(true);  
-    setPopupIcon("timekpr-kde");
+    setPopupIcon("timekpr_kde");
     //resize(200, 200);
     //resize(graphicsWidget()->minimumSize());
 
@@ -74,15 +74,15 @@ void TimekprApplet::init()
     eItem->setTitle("InfoProvider");
     initExtenderItem(eItem);
 
-    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr-kde").pixmap(QSize(32,32)));
+    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr_kde"));
     Plasma::ToolTipManager::self()->setContent(this, tooltip);
 
 }
 
 void TimekprApplet::toolTipAboutToShow()
 {
-    //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr-kde").pixmap(QSize(32,32)));
-    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr-kde").pixmap(QSize(32,32)));
+    //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
+    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
 }
 
 

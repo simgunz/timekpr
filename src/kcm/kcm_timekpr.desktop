@@ -1,6 +1,6 @@
 [Desktop Entry]
 Exec=kcmshell4 kcm_timekpr
-Icon=timekpr-kde
+Icon=timekpr_kde
 Type=Service
 
 X-KDE-ServiceTypes=KCModule
