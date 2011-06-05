@@ -452,7 +452,7 @@ class TimekprKDE (KCModule):
             fileHandle = open(configFile)
             self.limits = fileHandle.readline()
             self.limits = self.limits.replace("limit=( ", "")
-            self.limits = self.limits.replace(" )", "")
+            self.limits = self.limits.replace(")", "")
             self.limits = self.limits.split(" ")
             #WARNING:The file with the limits must not have a \n at the end
             
@@ -460,7 +460,14 @@ class TimekprKDE (KCModule):
 	    
             #Are all boundaries the same?
             #If they're not same, activate single (per day) limits
-            if [self.limits[0]] * 7 != self.limits:
+            
+            sl = False
+            for i in range(1, 7):
+                if self.limits[i] != self.limits[i-1]:
+                    sl = True
+                    qDebug(self.limits[i] + " " + self.limits[i-1])
+                    
+            if sl:
                 self.ui.limits.ckLimitDay.setChecked(True)
             else:
 		self.ui.limits.ckLimitDay.setChecked(False)
@@ -630,7 +637,10 @@ class TimekprKDE (KCModule):
 	if reply.failed():
 	    print "Failed"
 	else:
-	    print "Success"	
+	    print "Success"
+	
+	self.read_settings()
+	self.update_time_left()
  
 
     
