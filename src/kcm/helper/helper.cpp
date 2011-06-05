@@ -10,12 +10,12 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 #include <QFile>
 #include <QTextStream>
 #include <QDir>
+#include <QRegExp>
 #include <KConfig>
 #include <KConfigGroup>
 #include <KStandardDirs>
 
 #include <iostream>
-#include <string>
 
 #include <QDebug>
 
@@ -42,7 +42,6 @@ ActionReply Helper::save(const QVariantMap &args)
     }
     else
     {
-	//if (!limitFile.open(QIODevice::WriteOnly|QFile::Truncate))
 	if (!limitFile.open(QIODevice::WriteOnly))
 	{
 	    qDebug() << "Can't open file in write mode";
@@ -56,6 +55,9 @@ ActionReply Helper::save(const QVariantMap &args)
     }
 
 
+    //Better to check if actually they have been changed
+    removeuserlimits(args["user"].toString());
+    adduserlimits(args["user"].toString(),args["bound"].toString());
     
     
     
@@ -99,4 +101,64 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     //return createReply(code);
 }
 
+bool Helper::removeuserlimits(QString user)
+{
+    QFile filer("/home/simone/time.conf");
+    if (!filer.open(QIODevice::ReadOnly))
+	return false;
+    QTextStream timeconfr(&filer);
+    QString conf = timeconfr.readAll();
+    filer.close();
+    
+    QString regex = "## TIMEKPR START\\n.*(\\*;\\*;";
+    regex += user += ";[^\\n]*\\n)";
+    QRegExp re(regex);
+    
+    if(re.indexIn(conf) > -1)
+	conf.replace(re.cap(1),"");
+    else
+	return false;
+    
+    //TODO:Better to make a backup copy of the file before truncating it
+    QFile filew("/home/simone/time.conf");
+    if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
+	return false;
+    QTextStream timeconfw(&filew);
+    timeconfw << conf;
+    filew.close();
+    
+    return true;
+}
+
+bool Helper::adduserlimits(QString user, QString line)
+{
+    QFile filer("/home/simone/time.conf");
+    if (!filer.open(QIODevice::ReadOnly))
+	return false;
+    QTextStream timeconfr(&filer);
+    QString conf = timeconfr.readAll();
+    filer.close();
+    
+    QString regex = "(## TIMEKPR END)";
+    QRegExp re(regex);
+    
+    if(re.indexIn(conf) > -1)
+    {
+	QString newline = line += re.cap(0);
+	conf.replace(re.cap(0),newline);
+    }
+    else
+	return false;
+    
+    //TODO:Better to make a backup copy of the file before truncating it
+    QFile filew("/home/simone/time.conf");
+    if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
+	return false;
+    QTextStream timeconfw(&filew);
+    timeconfw << conf;
+    filew.close();
+    
+    return true;
+}
+    
 KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmtimekpr", Helper)

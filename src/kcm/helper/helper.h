@@ -9,6 +9,7 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 #define KDM_HELPER_H
 
 #include <kauth.h>
+#include <QString> //needed?
 
 using namespace KAuth;
 
@@ -21,6 +22,10 @@ public:
 public slots:
     ActionReply save(const QVariantMap &map);
     ActionReply managepermissions(const QVariantMap &map);
+    
+private:
+    bool removeuserlimits(QString user);
+    bool adduserlimits(QString user, QString line);
 };
 
 #endif
