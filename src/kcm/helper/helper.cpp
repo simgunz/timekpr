@@ -103,7 +103,7 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
 
 bool Helper::removeuserlimits(QString user)
 {
-    QFile filer("/home/simone/time.conf");
+    QFile filer("/etc/security/time.conf");
     if (!filer.open(QIODevice::ReadOnly))
 	return false;
     QTextStream timeconfr(&filer);
@@ -120,7 +120,7 @@ bool Helper::removeuserlimits(QString user)
 	return false;
     
     //TODO:Better to make a backup copy of the file before truncating it
-    QFile filew("/home/simone/time.conf");
+    QFile filew("/etc/security/time.conf");
     if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
 	return false;
     QTextStream timeconfw(&filew);
@@ -132,7 +132,7 @@ bool Helper::removeuserlimits(QString user)
 
 bool Helper::adduserlimits(QString user, QString line)
 {
-    QFile filer("/home/simone/time.conf");
+    QFile filer("/etc/security/time.conf");
     if (!filer.open(QIODevice::ReadOnly))
 	return false;
     QTextStream timeconfr(&filer);
@@ -151,7 +151,7 @@ bool Helper::adduserlimits(QString user, QString line)
 	return false;
     
     //TODO:Better to make a backup copy of the file before truncating it
-    QFile filew("/home/simone/time.conf");
+    QFile filew("/etc/security/time.conf");
     if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
 	return false;
     QTextStream timeconfw(&filew);
