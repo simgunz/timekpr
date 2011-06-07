@@ -1,23 +1,24 @@
 Dependency:
 
-    python-kqt4
+    python-qt4
     python-kde4
-
-Install timekpr:
-
-    Add ppa:timekpr-maintainers/ppa to your repository
-    sudo apt-get install timekpr
 
 Install:
 
-  cd kcm_timekpr/src
+  cd timekpr
   mkdir build
   cd build
-  cmake .. -DCMAKE_INSTALL_PREFIX=`kde4-config --prefix`
+  cmake -DCMAKE_INSTALL_PREFIX=`kde4-config --prefix` ../src
   make
   sudo make install
 
+  Reboot or:
+
+    kbuildsycoca4
+    kquitapp plasma-desktop
+    plasma-desktop
+
 Uninstall:
 
-  cd kcm_timekpr/src/build
+  cd timekpr/build
   sudo make uninstall
