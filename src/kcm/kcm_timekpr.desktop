@@ -1,12 +1,12 @@
 [Desktop Entry]
 Exec=kcmshell4 kcm_timekpr
-Icon=timekpr_kde
+Icon=timekpr
 Type=Service
 
 X-KDE-ServiceTypes=KCModule
 X-KDE-Library=kpythonpluginfactory
 X-KDE-ParentApp=kcontrol
-X-KDE-PluginKeyword=timekpr-kde/kcm_timekpr.py
+X-KDE-PluginKeyword=timekpr/kcm_timekpr.py
 
 X-DocPath=kcontrol/timekpr/index.html
 

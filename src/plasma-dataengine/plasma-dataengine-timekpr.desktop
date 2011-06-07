@@ -1,6 +1,6 @@
 [Desktop Entry]
 Comment=Provide the current user status
-Icon=Charm
+Icon=timekpr
 Name=Timekpr DataEngine
 Type=Service
 X-KDE-Library=plasma_engine_timekpr

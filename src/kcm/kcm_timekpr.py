@@ -74,7 +74,7 @@ def isnormal(username, userid):
 
 
 
-class TimekprKDE (KCModule):
+class Timekpr (KCModule):
     def __init__(self, component_data, parent):
         KCModule.__init__(self,component_data, parent)
         
@@ -663,4 +663,4 @@ def CreatePlugin(widget_parent, parent, component_data):
         mkdir(VAR['TIMEKPRWORK'])
     #if not isdir(VAR['TIMEKPRSHARED']):  
     #    exit('Error: Could not find the shared directory %s' % VAR['TIMEKPRSHARED']	
-    return TimekprKDE(component_data, widget_parent)
+    return Timekpr(component_data, widget_parent)
