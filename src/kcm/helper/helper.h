@@ -13,12 +13,13 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 
 using namespace KAuth;
 
+const QString extension[] = {".time",".logout",".late",".allow"};
+
 class Helper : public QObject {
     Q_OBJECT
     
 public:
     enum { ClearAllRestriction, Lock, BypassTimeFrame, BypassAccessDuration, ResetTime, AddTime };
-    
 public slots:
     ActionReply save(const QVariantMap &map);
     ActionReply managepermissions(const QVariantMap &map);
@@ -26,6 +27,7 @@ public slots:
 private:
     bool removeuserlimits(QString user);
     bool adduserlimits(QString user, QString line);
+    int clearAllRestriction(QMap<QString,QVariant> &var, QString &user, int &subaction);
 };
 
 #endif

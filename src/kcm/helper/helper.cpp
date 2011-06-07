@@ -23,8 +23,7 @@ ActionReply Helper::save(const QVariantMap &args)
 { 
     
     QString limit = args["limit"].toString();
-    QString fileName("/etc/timekpr/");
-    fileName += args["user"].toString();
+    QString fileName = "/etc/timekpr/" + args["user"].toString();
     QFile limitFile(fileName);
     
     //QVariantMap retdata;
@@ -71,12 +70,14 @@ ActionReply Helper::save(const QVariantMap &args)
 ActionReply Helper::managepermissions(const QVariantMap &args)
 {
     int subaction = args.value("subaction").toInt();
+    QString user = args.value("user").toString();
+    QMap<QString,QVariant> var = args.value("var").toMap();
 
     int code = 0;
 
     switch (subaction) {
 	case ClearAllRestriction:
-	    code = (0);
+	    code = clearAllRestriction(var,user,subaction);
 	    break;
 	case Lock:
 	    code = (0);
@@ -101,6 +102,32 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     //return createReply(code);
 }
 
+int Helper::clearAllRestriction(QMap<QString,QVariant> &var, QString &user, int &subaction)
+{
+    QString root, filename;
+    root = var["TIMEKPRWORK"].toString() + "/" + user;
+    for (int i = 0; i < 4; i++ )
+    {
+	filename =  root + extension[i];
+	QFile file(filename);
+	if(file.exists())
+	    file.remove();
+	qDebug() << filename;
+    }
+    
+    filename = var["TIMEKPRDIR"].toString() + "/" + user;
+    QFile file(filename);
+    if(file.exists())
+	file.remove();
+    //Should implement this paradigm in a function?
+	
+    removeuserlimits(user);
+    
+    //unlockuser(user);
+    
+    return 0;
+}
+
 bool Helper::removeuserlimits(QString user)
 {
     QFile filer("/etc/security/time.conf");
@@ -110,8 +137,7 @@ bool Helper::removeuserlimits(QString user)
     QString conf = timeconfr.readAll();
     filer.close();
     
-    QString regex = "## TIMEKPR START\\n.*(\\*;\\*;";
-    regex += user += ";[^\\n]*\\n)";
+    QString regex = "## TIMEKPR START\\n.*(\\*;\\*;" + user + ";[^\\n]*\\n)";
     QRegExp re(regex);
     
     if(re.indexIn(conf) > -1)
@@ -144,7 +170,7 @@ bool Helper::adduserlimits(QString user, QString line)
     
     if(re.indexIn(conf) > -1)
     {
-	QString newline = line += re.cap(0);
+	QString newline = line + re.cap(0);
 	conf.replace(re.cap(0),newline);
     }
     else

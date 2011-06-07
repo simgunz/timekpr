@@ -210,7 +210,8 @@ class TimekprKDE (KCModule):
             userinfo = re.split(':',entry)
             if isnormal(userinfo[0],int(userinfo[2])):
 		self.ui.cbActiveUser.addItem(userinfo[0])               
-        self.ui.cbActiveUser.setCurrentIndex(0) 
+        self.ui.cbActiveUser.setCurrentIndex(2)
+        #TODO:Set index to 0 (just for testing)
     
     
     def enable_limit(self,checked):
@@ -302,6 +303,7 @@ class TimekprKDE (KCModule):
         self.toSpin[1].append(self.ui.limits.sbToMn_6)
     
     
+    #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
         dayIndex = int(strftime("%w"))
         try:
@@ -488,12 +490,17 @@ class TimekprKDE (KCModule):
     def executePermissionsAction(self,args):
 	action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
 	action.setHelperID("org.kde.kcontrol.kcmtimekpr")
+	args['var'] = VAR
+	args['user'] = self.user
 	action.setArguments(args)
 	reply = action.execute()
 	return reply
     
     
     def clearallrestriction(self):
+	answer = KMessageBox.warningContinueCancel(self,i18n("All restriction for user " + self.user + " will be cleared"),i18n("Timekpr"))
+	if not answer == KMessageBox.Continue:
+	    return
 	args = {'subaction':0}
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
@@ -502,6 +509,7 @@ class TimekprKDE (KCModule):
 	    self.status['limit'] = nolimit
 	    self.buttonstates()
 	    self.statusicons()
+	    self.read_settings()
 	    
     def lockunlock(self):
 	args = {'subaction':1}
