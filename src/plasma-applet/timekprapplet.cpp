@@ -18,11 +18,13 @@
  ***************************************************************************/
 
 #include "timekprapplet.h"
+
+//QT
 #include <QPainter>
 #include <QFontMetrics>
 #include <QSizeF>
-#include <KLocale>
 
+//Plasma
 #include <plasma/svg.h>
 #include <plasma/theme.h>
 #include <Plasma/DataEngine>
@@ -32,7 +34,15 @@
 #include <Plasma/Label>
 #include <Plasma/ToolTipContent>
 #include <Plasma/ToolTipManager>
+
+//KDE
+#include <KLocale>
+#include <KGlobal>
+#include <KStandardDirs>
 #include <KNotification>
+#include <KCModuleInfo>
+#include <KConfigDialog>
+#include <KCModuleProxy>
 
 TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
@@ -69,14 +79,28 @@ void TimekprApplet::init()
         setFailedToLaunch(true, i18n("No world to say hello"));
     }
 
-    Plasma::ExtenderItem *eItem = new Plasma::ExtenderItem(extender());
-    eItem->setName("InfoProvider");
-    eItem->setTitle("InfoProvider");
-    initExtenderItem(eItem);
+    if (!extender()->hasItem("InfoProvider"))
+    {
+	Plasma::ExtenderItem *eItem = new Plasma::ExtenderItem(extender());
+	eItem->setName("InfoProvider");
+	eItem->setTitle("InfoProvider");
+	initExtenderItem(eItem);
+    }
 
     Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr_kde"));
     Plasma::ToolTipManager::self()->setContent(this, tooltip);
     
+}
+
+void TimekprApplet::createConfigurationInterface(KConfigDialog *parent)
+{
+    m_timekprSettingsWidget = new KCModuleProxy("kcm_timekpr");
+
+    parent->addPage(m_timekprSettingsWidget, m_timekprSettingsWidget->moduleInfo().moduleName(),
+                    m_timekprSettingsWidget->moduleInfo().icon());
+
+    //parent->setButtons( KDialog::Ok | KDialog::Cancel);
+    //connect(parent, SIGNAL(okClicked()), this, SLOT(configAccepted()));
 }
 
 void TimekprApplet::toolTipAboutToShow()

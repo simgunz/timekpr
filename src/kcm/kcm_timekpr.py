@@ -401,8 +401,11 @@ class TimekprKDE (KCModule):
 	else:
 	    self.ui.grant.btnClearAllRestriction.setEnabled(False)
 	
-
-
+	
+    #def indexchanged(self):
+    #KMessageBox.questionYesNo(this,i18n("<qt>You changed the default component of your choice, do want to save that change now ?</qt>"),QString(),KStandardGuiItem::save(),KStandardGuiItem::discard())==KMessageBox::Yes)
+    
+    
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
 	uislocked = isuserlocked(self.user)

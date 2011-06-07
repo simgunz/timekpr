@@ -27,6 +27,8 @@
 #include <Plasma/PopupApplet>
 #include <Plasma/DataEngine>
 #include <Plasma/Svg>
+#include <KCModuleProxy>
+
 
 class QSizeF;
 
@@ -48,9 +50,11 @@ public:
     void toolTipAboutToShow();
 protected:
     void initExtenderItem(Plasma::ExtenderItem *item);
+    void createConfigurationInterface(KConfigDialog *parent);
 private:
     KIcon m_icon;
     Plasma::Svg m_theme;
+    KCModuleProxy *m_timekprSettingsWidget;
 };
 
 #endif
