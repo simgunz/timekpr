@@ -1,15 +1,17 @@
 #!/bin/sh
 afile='/etc/security/access.conf'
 tfile='/etc/security/time.conf'
-timekprwork=/var/lib/timekpr
-timekprdir=/etc/timekpr
+timekprwork='/var/lib/timekpr'
+timekprdir='/etc/timekpr'
 
 if [ "$1" = "purge" ] ; then
   #This will clear default directories
   if [ -d $timekprwork ] ; then
+    echo "Removing timekpr work directory"
     rm -rf $timekprwork
   fi
   if [ -d $timekprdir ] ; then
+    echo "Removing timekpr conf directory"
     rm -rf $timekprdir
   fi
   #This will uncomment the commented areas and remove the lines

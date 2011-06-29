@@ -1,24 +1,31 @@
 Dependency:
 
-    python-qt4
-    python-kde4
+    gcc
+    make
+    cmake
+    automoc4
 
 Install:
 
-  cd timekpr
-  mkdir build
-  cd build
-  cmake -DCMAKE_INSTALL_PREFIX=`kde4-config --prefix` ../src
-  make
-  sudo make install
+  sudo ./install.sh
 
-  Reboot or:
+Postinstall (needed just because some icon are not loaded by plasma after installing the software):
 
-    kbuildsycoca4
+    Reboot or give:
+
     kquitapp plasma-desktop
     plasma-desktop
 
 Uninstall:
+  
+  Disable configuration lines in time.conf access.conf:
 
-  cd timekpr/build
-  sudo make uninstall
+    sudo ./uninstall.sh
+
+  Purge configuration lines in time.conf access.conf
+
+    sudo ./uninstall.sh purge
+
+Note:
+  
+  If you remove the build directory you will not be able to uninstall the software. In this case reinstall it and then remove it with the scripts.

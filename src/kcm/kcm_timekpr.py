@@ -656,11 +656,4 @@ class Timekpr (KCModule):
 
     
 def CreatePlugin(widget_parent, parent, component_data):
-    #Create configuration folder if not existing
-    if not isdir(VAR['TIMEKPRDIR']):
-        mkdir(VAR['TIMEKPRDIR'])
-    if not isdir(VAR['TIMEKPRWORK']):
-        mkdir(VAR['TIMEKPRWORK'])
-    #if not isdir(VAR['TIMEKPRSHARED']):  
-    #    exit('Error: Could not find the shared directory %s' % VAR['TIMEKPRSHARED']	
     return Timekpr(component_data, widget_parent)

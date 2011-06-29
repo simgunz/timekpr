@@ -2,7 +2,20 @@
 #Prepare gdm and login in /etc/pam.d/
 gfile='/etc/pam.d/gdm'
 kfile='/etc/pam.d/kdm'
+kkfile='/etc/pam.d/kde'
 lfile='/etc/pam.d/login'
+
+timekprwork='/var/lib/timekpr'
+timekprdir='/etc/timekpr'
+
+if [ ! -d $timekprwork ] ; then
+  echo "Creating timekpr work directory"
+  mkdir $timekprwork
+fi
+if [ ! -d $timekprdir ] ; then
+  echo "Creating timekpr conf directory"
+  mkdir $timekprdir
+fi
 
 if [ -e $gfile ] ; then
   #pam_time
@@ -42,6 +55,26 @@ if [ -e $kfile ] ; then
   fi
 else
   echo "Couldn't find $kfile (oops?)"
+fi
+
+if [ -e $kkfile ] ; then
+  #pam_time
+  echo "Checking for pam_time.so in $kkfile"
+  x=$(grep -c '^account\s*required\s*pam_time.so' $kkfile)
+  if [ $x = 0 ] ; then
+    #Didn't find pam_time.so - add it
+    echo "Adding pam_time in $kkfile"
+    sed -i -e '$s/$/\naccount required pam_time.so\n/' $kkfile
+  fi
+  #pam_access
+  echo "Checking for pam_access.so in $kkfile"
+  x=$(grep -c '^account\s*required\s*pam_access.so' $kkfile)
+  if [ $x = 0 ] ; then
+    #Didn't find pam_access.so - add it
+    sed -i -e '$s/$/\naccount required pam_access.so\n/' $kkfile
+  fi
+else
+  echo "Couldn't find $kkfile (oops?)"
 fi
 
 if [ -e $lfile ] ; then
