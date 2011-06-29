@@ -87,7 +87,7 @@ void TimekprApplet::init()
 	initExtenderItem(eItem);
     }
 
-    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr_kde"));
+    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr"));
     Plasma::ToolTipManager::self()->setContent(this, tooltip);
     
 }
