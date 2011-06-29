@@ -210,7 +210,7 @@ class Timekpr (KCModule):
             userinfo = re.split(':',entry)
             if isnormal(userinfo[0],int(userinfo[2])):
 		self.ui.cbActiveUser.addItem(userinfo[0])               
-        self.ui.cbActiveUser.setCurrentIndex(2)
+        self.ui.cbActiveUser.setCurrentIndex(0)
         #TODO:Set index to 0 (just for testing)
     
     
