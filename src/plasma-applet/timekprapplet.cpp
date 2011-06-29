@@ -47,7 +47,7 @@
 TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
     m_theme(this),
-    m_icon("timekpr_kde")
+    m_icon("timekpr")
 {
     // this will get us the standard applet background, for free!
     setBackgroundHints(StandardBackground);
