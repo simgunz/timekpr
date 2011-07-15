@@ -19,6 +19,33 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 
 #include <QDebug>
 
+bool secureCopy(const QString &from, const QString &to)
+{
+    QFile srcFile(from);
+    if (!srcFile.open(QIODevice::ReadOnly))
+        return false;
+
+    // Security check: we don't want to expose contents of files like /etc/shadow
+    //if (!(srcFile.permissions() & QFile::ReadOther))
+    //    return false;
+
+
+    QFile dstFile(to);
+    if (!dstFile.open(QIODevice::WriteOnly))
+        return false;
+
+    const quint64 maxBlockSize = 102400;
+    while (!srcFile.atEnd())
+        if (dstFile.write(srcFile.read(maxBlockSize)) == -1)
+            return false;
+
+    if (!dstFile.setPermissions(
+                QFile::WriteUser | QFile::ReadUser | QFile::ReadGroup | QFile::ReadOther))
+        return false;
+
+    return true;
+}
+
 ActionReply Helper::save(const QVariantMap &args)
 { 
     
@@ -36,7 +63,10 @@ ActionReply Helper::save(const QVariantMap &args)
 	    //retdata["first"] = "exist";
 	    qDebug() << "Limits removed";
 	}
-	qDebug() << "Limits not present, so not removed";
+	else
+	{
+	    qDebug() << "Limits not present, so not removed";
+	}
 	//retdata["first"] = "not exist";
     }
     else
@@ -47,8 +77,6 @@ ActionReply Helper::save(const QVariantMap &args)
 	    return false;
 	}
 	QTextStream out(&limitFile);
-	qDebug() << limit;
-	out << limit << endl;
 	limitFile.close();
 	qDebug() << "Limits successfully written to file";
     }
@@ -58,7 +86,9 @@ ActionReply Helper::save(const QVariantMap &args)
     removeuserlimits(args["user"].toString());
     adduserlimits(args["user"].toString(),args["bound"].toString());
     
+    QString tempConfigName = args.value("temprcfile").toString();
     
+    secureCopy(tempConfigName,"/home/simone/timekprrc");
     
     
     ActionReply reply(ActionReply::SuccessReply);
@@ -112,7 +142,6 @@ int Helper::clearAllRestriction(QMap<QString,QVariant> &var, QString &user, int 
 	QFile file(filename);
 	if(file.exists())
 	    file.remove();
-	qDebug() << filename;
     }
     
     filename = var["TIMEKPRDIR"].toString() + "/" + user;
@@ -186,5 +215,6 @@ bool Helper::adduserlimits(QString user, QString line)
     
     return true;
 }
+
     
 KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmtimekpr", Helper)

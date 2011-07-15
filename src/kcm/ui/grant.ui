@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>488</width>
-    <height>184</height>
+    <width>449</width>
+    <height>180</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -45,22 +45,22 @@
     </widget>
    </item>
    <item row="3" column="0">
-    <widget class="QPushButton" name="btnBoundBypass">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="text">
-      <string>Bypass time frame for today</string>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="0">
     <widget class="QPushButton" name="btnLimitBypass">
      <property name="enabled">
       <bool>true</bool>
      </property>
      <property name="text">
       <string>Bypass access duration for today</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="btnBoundBypass">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Bypass time frame for today</string>
      </property>
     </widget>
    </item>

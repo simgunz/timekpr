@@ -15,14 +15,14 @@ from os import geteuid
 from time import strftime, localtime
 from timekprpam import *
 
-def getversion():
-    return '0.3.0'
+def get_version():
+    return '0.4.0'
 
-def checkifadmin():
+def check_if_admin():
     if geteuid() != 0:
         exit('Error: You need to have administrative privileges to run timekpr')
 
-def getvariables(DEVACTIVE):
+def get_variables(DEVACTIVE):
     #Read timekpr.conf
     fconf = '/etc/timekpr.conf'
     if DEVACTIVE:
@@ -93,20 +93,20 @@ def getvariables(DEVACTIVE):
 
     return var
 
-def getcmdoutput(cmd):
+def get_cmd_output(cmd):
     #TODO: timekpr-gui.py: Use it for "/etc/init.d/timekpr status" and a button enable/disable
     from os import popen
     #Execute a command, returns its output
     out = popen(cmd)
     return out.read()
 
-def fromtoday(fname):
+def from_today(fname):
     # Returns True if a file was last modified today
     fdate = strftime("%Y%m%d", localtime(getmtime(fname)))
     today = strftime("%Y%m%d")
     return fdate == today
 
-def islate(bto, allowfile):
+def is_late(bto, allowfile):
     # Get current day index and hour of day
     index = int(strftime("%w"))
     hour = int(strftime("%H"))
@@ -121,14 +121,14 @@ def islate(bto, allowfile):
     else:
         return False
 
-def ispasttime(limits, time):
+def is_past_time(limits, time):
     index = int(strftime("%w"))
     if (time > limits[index]):
         return True
     else:
         return False
 
-def isearly(bfrom, allowfile):
+def is_early(bfrom, allowfile):
     # Get current day index and hour of day
     index = int(strftime("%w"))
     hour = int(strftime("%H"))
@@ -143,27 +143,36 @@ def isearly(bfrom, allowfile):
     else:
         return False
 
-def isrestricteduser(username, limit):
+def is_restricted_user(username, limit):
     if not isuserlimited(username) and limit == 86400:
         return False
     else:
         return True
 
-def readusersettings(user, conffile):
-    #Returns limits and from/to allowed hours
-    if isfile(conffile):
-        fhandle = open(conffile)
-        limits = fhandle.readline() #Read 1st line
-        limits = re.compile('(\d+)').findall(limits)
-        lims = list(map(int, limits))
-    else:
-        lims = [ 86400, 86400, 86400, 86400, 86400, 86400, 86400 ]
-    bfromandto = getuserlimits(user)
-    bfromtemp = bfromandto[0]
-    #Using map instead of for i in ...
-    bfrom = list(map(int, bfromtemp))
+def read_user_settings(user = None, confFile = None):   
 
-    btotemp = bfromandto[1]
-    bto = list(map(int, btotemp))
+    limits = [list(),list()]
+    time_from = [list(),list()]
+    time_to = [list(),list()]
+    limits[0] = [3, 3, 3, 3, 3, 3, 3]
+    limits[1] = [0, 0, 0, 0, 0, 0, 0]
+    time_from[0] = [0, 0, 0, 0, 0, 0, 0]
+    time_from[1] = [0, 0, 0, 0, 0, 0, 0]
+    time_to[0] = [24, 24, 24, 24, 24, 24, 24]
+    time_to[1] = [0, 0, 0, 0, 0, 0, 0]
+    
+    
+    if confFile:
+	config = ConfigParser()
+	config.read("/home/simone/timekprrc")
+    
+	if config.has_section(user):
+	    for i in range(7):
+		time_from[0][i] = config.getint(user,"fromHr_" + str(i))
+		time_from[1][i] = config.getint(user,"fromMn_" + str(i))
+		time_to[0][i] = config.getint(user,"toHr_" + str(i))
+		time_to[1][i] = config.getint(user,"toMn_" + str(i))
+		limits[0][i] = config.getint(user,"limitHr_" + str(i))
+		limits[1][i] = config.getint(user,"limitMn_" + str(i))
 
-    return lims, bfrom, bto
+    return limits, time_from, time_to

@@ -30,8 +30,8 @@ from timekprcommon import *
 
 #timekpr.conf variables (dictionary variable)
 global VAR
-VAR = getvariables(DEVACTIVE)    
-version = getversion()
+VAR = get_variables(DEVACTIVE)    
+version = get_version()
 
 
 #Enum
@@ -109,14 +109,15 @@ class Timekpr (KCModule):
         self.ui.limits.wgLimitConfDay.setEnabled(False)
 	self.ui.limits.wgBoundConfDay.setEnabled(False)
         
-        #Set the format of the week
-        self.set_week_format()
-        
         #Initializing the user combobox
         self.loadUser() 
 
         #Initializing an empty list for time limits
         self.limits = []
+        self.status = dict()
+        
+        #Set the format of the week
+        self.set_week_format()
 
         ##Timer initializing
         self.timer = QTimer()
@@ -127,7 +128,9 @@ class Timekpr (KCModule):
         self.get_limit_spin()
         self.get_from_spin()
         self.get_to_spin()
-        
+	
+	#KConfig
+	self.config = self.createTempConfig()
 	
 	#Signal and slots definition 
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
@@ -141,7 +144,7 @@ class Timekpr (KCModule):
         self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
-        self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clearallrestriction)
+        self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clear_all_restrictions)
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.changed)
         self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.changed)        
         self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.changed)
@@ -153,8 +156,6 @@ class Timekpr (KCModule):
 		self.connect(self.fromSpin[i][j],SIGNAL('valueChanged(int)'),self.changed)
 		self.connect(self.toSpin[i][j],SIGNAL('valueChanged(int)'),self.changed)		
 		
-        #TODO:Delete me, just for testing
-        #self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.changed)
         
 	#Ensure we have at least one available normal user otherwise we disable all the modules
 	if self.ui.cbActiveUser.count() == 0:
@@ -219,13 +220,14 @@ class Timekpr (KCModule):
             self.ui.limits.wgLimitConfDay.setEnabled(True)
         else:
             self.ui.limits.wgLimitConfDay.setEnabled(False)
+        self.status["limited"] = checked
                         
     def enable_bound(self,checked):
 	if checked:
             self.ui.limits.wgBoundConfDay.setEnabled(True)
         else:
             self.ui.limits.wgBoundConfDay.setEnabled(False)
-            
+        self.status["bounded"] = checked    
             
     def toggle_daily_limit(self,checked):
         if checked:
@@ -236,7 +238,8 @@ class Timekpr (KCModule):
 	    self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.vLineLimit.hide()
-                
+        self.status["limitedByDay"] = checked
+
                 
     def toggle_daily_bound(self,checked):
         if checked:
@@ -247,6 +250,7 @@ class Timekpr (KCModule):
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.lbBound_0.setText("Every day")
             self.ui.limits.vLineBound.hide()
+        self.status["boundedByDay"] = checked
         
         
     def get_limit_spin(self):
@@ -323,26 +327,26 @@ class Timekpr (KCModule):
           
           
     def statusicons(self):
-	if not isuserlimitedtoday(self.user) and not self.status['lock']:
+	if not isuserlimitedtoday(self.user) and not self.status['locked']:
 	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
 	else:
 	    self.ui.status.lbAllDayLoginStatus.setText("No")
 	
-	if self.status['lock']:
+	if self.status['locked']:
 	    self.ui.status.lbLockStatus.setText("Yes")
 	else:
 	    self.ui.status.lbLockStatus.setText("No")
 	    
-	if self.status['bound'] == bound:
+	if self.status['bounded'] == bound:
 	    self.ui.status.lbBoundStatus.setText("Yes")
-	elif self.status['bound'] == nobound:
+	elif self.status['bounded'] == nobound:
 	    self.ui.status.lbBoundStatus.setText("No")
 	else:
 	    self.ui.status.lbBoundStatus.setText("No (just for today)")
 	    
-	if self.status['limit'] == limit:
+	if self.status['limited'] == limit:
 	    self.ui.status.lbLimitStatus.setText("Yes")
-	elif self.status['limit'] == nolimit:
+	elif self.status['limited'] == nolimit:
 	    self.ui.status.lbLimitStatus.setText("No")
 	else:
 	    self.ui.status.lbLimitStatus.setText("No (just for today)")
@@ -351,17 +355,17 @@ class Timekpr (KCModule):
 
 
     def buttonstates(self):
-	if self.status['lock']:
+	if self.status['locked']:
 	    self.ui.grant.btnLockAccount.setText("Unlock account")
 	else:
 	    self.ui.grant.btnLockAccount.setText("Lock account")
 	    
 	self.ui.grant.btnBoundBypass.setText("Bypass time frame for today")
-	if self.status['bound']:
-	    if self.status['bound']==1:
+	if self.status['bounded']:
+	    if self.status['bounded']==1:
 		index = int(strftime("%w"))
-		wfrom = self.fromtolimits[0]
-		wto = self.fromtolimits[1]
+		wfrom = self.time_from[0]
+		wto = self.time_to[0]
 		if wfrom[index] != '0' or wto[index] != '24':
 		    self.ui.grant.btnBoundBypass.setEnabled(True)
 		else:
@@ -373,7 +377,7 @@ class Timekpr (KCModule):
 	    self.ui.grant.btnBoundBypass.setEnabled(False)
 	 
 	self.ui.grant.btnLimitBypass.setText("Bypass access duration for today") 
-	if self.status['limit'] == limit:
+	if self.status['limited'] == limit:
 	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
             #if isfile(timefile):
             if self.status['reset']==noreset:
@@ -390,13 +394,13 @@ class Timekpr (KCModule):
 	    self.ui.grant.btnAddTime.setEnabled(False)
 	    self.ui.grant.sbAddTime.setEnabled(False)
 	    self.ui.grant.lbAddTime.setEnabled(False)
-	    if self.status['limit'] == nolimit:
+	    if self.status['limited'] == nolimit:
 		self.ui.grant.btnLimitBypass.setEnabled(False)
 	    else:
 		self.ui.grant.btnLimitBypass.setText("Clear bypass access duration for today")
 		self.ui.grant.btnLimitBypass.setEnabled(True)
 	
-	if ((self.status['lock'] == lock) or (self.status['bound'] == bound) or (self.status['limit'] == limit)):
+	if ((self.status['locked'] == lock) or (self.status['bounded']) or (self.status['limited'])):
 	    self.ui.grant.btnClearAllRestriction.setEnabled(True)
 	else:
 	    self.ui.grant.btnClearAllRestriction.setEnabled(False)
@@ -408,87 +412,33 @@ class Timekpr (KCModule):
     
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
+	
 	uislocked = isuserlocked(self.user)
-	self.status = {'lock':uislocked,'reset':noreset}
-	self.readfromtolimit()
-	self.readdurationlimit()
+	self.status = {'locked':uislocked,'reset':noreset}
+	
+	self.read_limit_status()
+	
+	self.limits, self.time_from, self.time_to = read_user_settings(self.user)	
+	
+	self.load_module_values()
 	self.statusicons()
 	self.buttonstates()
 	self.emit(SIGNAL("changed(bool)"), False)
 
-
-    def readfromtolimit(self):
-	#TODO:Move to timekprcommon?
-	#TODO: Why not using a cache file for keeping all the limits even if the checkboxes are unchecked?
-        #from-to time limitation (aka boundaries) - time.conf
-        #Get user time limits (boundaries) as lists from-to
-        self.fromtolimits = getuserlimits(self.user)
-        bfrom = self.fromtolimits[0]
-        bto = self.fromtolimits[1]
-        
-        self.status['bound'] = isuserlimited(self.user)
-        
-        if self.status['bound']:
-	    self.ui.limits.ckBound.setChecked(True)
-                       
-	    if [bfrom[0]] * 7 != bfrom or [bto[0]] * 7 != bto:
-		self.ui.limits.ckBoundDay.setChecked(True)
-	    else:
-		self.ui.limits.ckBoundDay.setChecked(False)
-		
-            for i in range(7):
-                self.fromSpin[0][i].setValue(int(bfrom[i]))
-                self.toSpin[0][i].setValue(int(bto[i]))
-        else:
-	    self.ui.limits.ckBound.setChecked(False)
-	    self.ui.limits.ckBoundDay.setChecked(False)
-	    for i in range(7):
-                self.fromSpin[0][i].setValue(7)
-                self.toSpin[0][i].setValue(22)
-
-
-    def readdurationlimit(self):
-        #time length limitation
-        configFile = VAR['TIMEKPRDIR'] + '/' + str(self.user)
-        del self.limits[:]
-        
-        self.status['limit'] = isfile(configFile)
-        if self.status['limit']:
-            fileHandle = open(configFile)
-            self.limits = fileHandle.readline()
-            self.limits = self.limits.replace("limit=( ", "")
-            self.limits = self.limits.replace(")", "")
-            self.limits = self.limits.split(" ")
-            #WARNING:The file with the limits must not have a \n at the end
-            
-            self.ui.limits.ckLimit.setChecked(True)
-	    
-            #Are all boundaries the same?
-            #If they're not same, activate single (per day) limits
-            
-            sl = False
-            for i in range(1, 7):
-                if self.limits[i] != self.limits[i-1]:
-                    sl = True
-                    qDebug(self.limits[i] + " " + self.limits[i-1])
-                    
-            if sl:
-                self.ui.limits.ckLimitDay.setChecked(True)
-            else:
-		self.ui.limits.ckLimitDay.setChecked(False)
-	    	    
-            for i in range(7):
-		hours, minutes = sec_to_hr_mn(self.limits[i])
-                self.limitSpin[0][i].setValue(hours)
-                self.limitSpin[1][i].setValue(minutes)
-              
-        else:
-	    self.ui.limits.ckLimit.setChecked(False)
-	    self.ui.limits.ckLimitDay.setChecked(False)
-	    for i in range(7):
-                self.limitSpin[0][i].setValue(3)
-                self.limitSpin[1][i].setValue(0)
-     	
+    def read_limit_status(self,default = False):
+	config = ConfigParser()
+	config.read("/home/simone/timekprrc")
+	
+	if config.has_section(self.user) and not default:
+	    self.status['limited'] = config.getboolean(self.user,"limited")
+	    self.status['bounded'] = config.getboolean(self.user,"bounded")
+	    self.status['limitedByDay'] = config.getboolean(self.user,"limitedByDay")
+	    self.status['boundedByDay'] = config.getboolean(self.user,"boundedByDay")
+	else:
+	    self.status['limited'] = False
+	    self.status['bounded'] = False
+	    self.status['limitedByDay'] = False
+	    self.status['boundedByDay'] = False	
 	
     def executePermissionsAction(self,args):
 	action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
@@ -500,61 +450,62 @@ class Timekpr (KCModule):
 	return reply
     
     
-    def clearallrestriction(self):
+    def clear_all_restrictions(self):
 	answer = KMessageBox.warningContinueCancel(self,i18n("All restriction for user " + self.user + " will be cleared"),i18n("Timekpr"))
 	if not answer == KMessageBox.Continue:
 	    return
 	args = {'subaction':0}
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    self.status['lock'] = unlock
-	    self.status['bound'] = nobound
-	    self.status['limit'] = nolimit
+	    self.status['locked'] = unlock
+	    self.status['bounded'] = nobound
+	    self.status['limited'] = nolimit
+	    self.save()
 	    self.buttonstates()
 	    self.statusicons()
 	    self.read_settings()
 	    
     def lockunlock(self):
 	args = {'subaction':1}
-	if self.status['lock'] == lock:
+	if self.status['locked'] == lock:
 	    args['operation'] = unlock
 	else:
 	    args['operation'] = lock
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    self.status['lock'] = not self.status['lock']
+	    self.status['locked'] = not self.status['locked']
 	    self.buttonstates()
 	    self.statusicons()
 	
 	
     def bypassTimeFrame(self):
 	args = {'subaction':2}
-	if self.status['bound'] == nobound or self.status['bound'] == noboundtoday:
+	if self.status['bounded'] == nobound or self.status['bounded'] == noboundtoday:
 	    args['operation'] = bound
 	else:
 	    args['operation'] = noboundtoday
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
 	    if (args['operation'] == noboundtoday):
-		self.status['bound'] = noboundtoday
+		self.status['bounded'] = noboundtoday
 	    else:
-		self.status['bound'] = bound
+		self.status['bounded'] = bound
 	    self.buttonstates()
 	    self.statusicons()
 
 
     def bypassAccessDuration(self):
 	args = {'subaction':3}
-	if self.status['limit'] == nolimit or self.status['limit'] == nolimittoday:
+	if self.status['limited'] == nolimit or self.status['limited'] == nolimittoday:
 	    args['operation'] = limit
 	else:
 	    args['operation'] = nolimittoday
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
 	    if (args['operation'] == nolimittoday):
-		self.status['limit'] = nolimittoday
+		self.status['limited'] = nolimittoday
 	    else:
-		self.status['limit'] = limit
+		self.status['limited'] = limit
 	    self.buttonstates()
 	    self.statusicons()
 	
@@ -588,17 +539,22 @@ class Timekpr (KCModule):
 
 
     def defaults(self):
-	#TODO:This function is called from defaults button, should set defaults value
-	print "Defaults called"	
-
+	self.read_limit_status(True)
+	self.limits, self.time_from, self.time_to = read_user_settings(self.user)
+	self.load_module_values()
+	
 
     def load(self):
 	#This function is called from reset button and automatically during construction
 	self.read_settings()
 	#FIXME:When the module is loaded from kcmshell the Apply button is enabled, should be disabled
-	
+    
+    #def make
 	
     def save(self):
+	
+	self.configSave()
+	
 	space = " "
         limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
         #timekprpam.py adduserlimits() uses lists with numbers as strings
@@ -635,7 +591,8 @@ class Timekpr (KCModule):
 			bTo[i].append(str(self.toSpin[i][0].value()))
 	
 	bound = mktimeconfline(self.user, bFrom[0], bTo[0]) + "\n"
-	helperargs = {"user":self.user,"bound":bound,"limit":limit}
+	temprcfile = self.config.name()
+	helperargs = {"user":self.user,"bound":bound,"limit":limit,"temprcfile":temprcfile}
 	action = self.authAction()
 	action.setArguments(helperargs)
 	#getconfsection(f)
@@ -645,15 +602,51 @@ class Timekpr (KCModule):
 	#print content["first"]
 	#print "\n"
 	#print content["second"]
-	if reply.failed():
-	    print "Failed"
-	else:
-	    print "Success"
 	
 	self.read_settings()
 	self.update_time_left()
  
-
+ 
+    def createTempConfig(self):
+	tempConfigFile = KTemporaryFile()
+	tempConfigFile.open()
+	tempConfigName = tempConfigFile.fileName()
+	systemConfig = KConfig("/home/simone/timekprrc", KConfig.SimpleConfig)
+	tempConfig = systemConfig.copyTo(tempConfigName)
+	QFile.setPermissions(tempConfigName, tempConfigFile.permissions() | QFile.ReadOther);
+	return tempConfig
+	
+	
+    def configSave(self):
+	userGroup = self.config.group(self.user)
+	userGroup.writeEntry("limited",self.status['limited'])
+	userGroup.writeEntry("limitedByday",self.status['limitedByDay'])
+	userGroup.writeEntry("bounded",self.status['bounded'])
+	userGroup.writeEntry("boundedByDay",self.status['boundedByDay'])
+	for i in range(7):
+	    userGroup.writeEntry("limitHr_" + str(i),self.limitSpin[0][i].value())
+	    userGroup.writeEntry("limitMn_" + str(i),self.limitSpin[1][i].value())
+	    userGroup.writeEntry("fromHr_" + str(i),self.fromSpin[0][i].value())
+	    userGroup.writeEntry("fromMn_" + str(i),self.fromSpin[1][i].value())
+	    userGroup.writeEntry("toHr_" + str(i),self.toSpin[0][i].value())
+	    userGroup.writeEntry("toMn_" + str(i),self.toSpin[1][i].value())
+	self.config.sync()
+    
+    
+    def load_module_values(self):
+	self.ui.limits.ckLimit.setChecked(self.status['limited'])
+	self.ui.limits.ckLimitDay.setChecked(self.status['limitedByDay'])
+	self.ui.limits.ckBound.setChecked(self.status['bounded'])
+	self.ui.limits.ckBoundDay.setChecked(self.status['boundedByDay'])
+	
+	for i in range(7):
+	    self.limitSpin[0][i].setValue(self.limits[0][i])
+	    self.limitSpin[1][i].setValue(self.limits[1][i])
+	    self.fromSpin[0][i].setValue(self.time_from[0][i])
+	    self.fromSpin[1][i].setValue(self.time_from[1][i])
+	    self.toSpin[0][i].setValue(self.time_to[0][i])
+	    self.toSpin[1][i].setValue(self.time_to[1][i])
+    
     
 def CreatePlugin(widget_parent, parent, component_data):
     return Timekpr(component_data, widget_parent)
