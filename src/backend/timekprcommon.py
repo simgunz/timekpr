@@ -149,12 +149,16 @@ def is_restricted_user(username, limit):
     else:
         return True
 
+def convert_limits(limits,index):
+	lims = limits[0][index] * 3600 + limits[1][index] * 60
+	return lims
+	
 def read_user_settings(user = None, confFile = None):   
 
     limits = [list(),list()]
     time_from = [list(),list()]
     time_to = [list(),list()]
-    limits[0] = [3, 3, 3, 3, 3, 3, 3]
+    limits[0] = [24, 24, 24, 24, 24, 24, 24]
     limits[1] = [0, 0, 0, 0, 0, 0, 0]
     time_from[0] = [0, 0, 0, 0, 0, 0, 0]
     time_from[1] = [0, 0, 0, 0, 0, 0, 0]

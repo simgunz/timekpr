@@ -10,6 +10,7 @@
 from os import remove, mkdir, geteuid, getenv
 from os.path import isdir, isfile, realpath, dirname, dirname
 import sys
+import json
 
 from PyQt4.QtGui import *
 from PyQt4 import uic, QtCore
@@ -220,14 +221,14 @@ class Timekpr (KCModule):
             self.ui.limits.wgLimitConfDay.setEnabled(True)
         else:
             self.ui.limits.wgLimitConfDay.setEnabled(False)
-        self.status["limited"] = checked
+            
                         
     def enable_bound(self,checked):
 	if checked:
             self.ui.limits.wgBoundConfDay.setEnabled(True)
         else:
-            self.ui.limits.wgBoundConfDay.setEnabled(False)
-        self.status["bounded"] = checked    
+            self.ui.limits.wgBoundConfDay.setEnabled(False)  
+            
             
     def toggle_daily_limit(self,checked):
         if checked:
@@ -238,7 +239,6 @@ class Timekpr (KCModule):
 	    self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.vLineLimit.hide()
-        self.status["limitedByDay"] = checked
 
                 
     def toggle_daily_bound(self,checked):
@@ -250,7 +250,6 @@ class Timekpr (KCModule):
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.lbBound_0.setText("Every day")
             self.ui.limits.vLineBound.hide()
-        self.status["boundedByDay"] = checked
         
         
     def get_limit_spin(self):
@@ -549,12 +548,7 @@ class Timekpr (KCModule):
 	self.read_settings()
 	#FIXME:When the module is loaded from kcmshell the Apply button is enabled, should be disabled
     
-    #def make
-	
-    def save(self):
-	
-	self.configSave()
-	
+    def CANCELLAMI(self):
 	space = " "
         limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
         #timekprpam.py adduserlimits() uses lists with numbers as strings
@@ -563,13 +557,13 @@ class Timekpr (KCModule):
 
 	limit = "limit=("
         
-        if self.ui.limits.ckLimit.isChecked():
-            if self.ui.limits.ckLimitDay.isChecked():
+        if self.status['limited']:
+            if self.status['limitedByday']:
                 for i in range(7):
-                    limit = limit + space + str(self.limitSpin[0][i].value() * 3600 + self.limitSpin[1][i].value() * 60)
+                    limit = convert_limits(self.limits,i)
             else:
                 for i in range(7):
-		    limit = limit + space + str(self.limitSpin[0][0].value() * 3600 + self.limitSpin[1][0].value() * 60)                
+		    convert_limits(self.limits,i)
         
         limit = limit + space + ")"
                 
@@ -591,6 +585,13 @@ class Timekpr (KCModule):
 			bTo[i].append(str(self.toSpin[i][0].value()))
 	
 	bound = mktimeconfline(self.user, bFrom[0], bTo[0]) + "\n"
+	
+    def save(self):
+	
+	self.configSave()
+	self.read_user_settings(self.user,config.name())
+	
+	
 	temprcfile = self.config.name()
 	helperargs = {"user":self.user,"bound":bound,"limit":limit,"temprcfile":temprcfile}
 	action = self.authAction()
@@ -619,11 +620,14 @@ class Timekpr (KCModule):
 	
     def configSave(self):
 	userGroup = self.config.group(self.user)
-	userGroup.writeEntry("limited",self.status['limited'])
-	userGroup.writeEntry("limitedByday",self.status['limitedByDay'])
-	userGroup.writeEntry("bounded",self.status['bounded'])
-	userGroup.writeEntry("boundedByDay",self.status['boundedByDay'])
+	userGroup.writeEntry("limited",self.ui.limits.ckLimit.isChecked())
+	userGroup.writeEntry("limitedByday",self.ui.limits.ckLimitDay.isChecked())
+	userGroup.writeEntry("bounded",self.ui.limits.ckBound.isChecked())
+	userGroup.writeEntry("boundedByDay",self.ui.limits.ckBoundDay.isChecked())
+	
 	for i in range(7):
+	    self.limits[0][i] = self.limitSpin[0][i].value()
+	    self.limits[1][i] = self.limitSpin[1][i].value()
 	    userGroup.writeEntry("limitHr_" + str(i),self.limitSpin[0][i].value())
 	    userGroup.writeEntry("limitMn_" + str(i),self.limitSpin[1][i].value())
 	    userGroup.writeEntry("fromHr_" + str(i),self.fromSpin[0][i].value())
