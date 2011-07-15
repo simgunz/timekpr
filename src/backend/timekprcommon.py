@@ -15,6 +15,17 @@ from os import geteuid
 from time import strftime, localtime
 from timekprpam import *
 
+import json
+
+#Enum
+UNLOCK, LOCK = range(2)
+NOBOUND, BOUND, NOBOUNDTODAY = range(3)
+NOLIMIT, LIMIT, NOLIMITTODAY = range(3)
+NORESET, RESET = range(2)
+HR, MN = range(2)
+LABELS = ["limits_hr","limits_mn","time_from_hr","time_from_mn","time_to_hr","time_to_mn"]
+
+
 def get_version():
     return '0.4.0'
 
@@ -112,7 +123,7 @@ def is_late(bto, allowfile):
     hour = int(strftime("%H"))
     if (hour > bto[index]):
         if isfile(allowfile):
-            if not fromtoday(allowfile):
+            if not from_today(allowfile):
                 return True
             else:
                 return False
@@ -134,7 +145,7 @@ def is_early(bfrom, allowfile):
     hour = int(strftime("%H"))
     if (hour < bfrom[index]):
         if isfile(allowfile):
-            if not fromtoday(allowfile):
+            if not from_today(allowfile):
                 return True
             else:
                 return False
@@ -149,34 +160,34 @@ def is_restricted_user(username, limit):
     else:
         return True
 
+
 def convert_limits(limits,index):
 	lims = limits[0][index] * 3600 + limits[1][index] * 60
 	return lims
 	
-def read_user_settings(user = None, confFile = None):   
-
+	
+def read_user_settings(user, conffile, default = False):   
     limits = [list(),list()]
     time_from = [list(),list()]
     time_to = [list(),list()]
-    limits[0] = [24, 24, 24, 24, 24, 24, 24]
-    limits[1] = [0, 0, 0, 0, 0, 0, 0]
-    time_from[0] = [0, 0, 0, 0, 0, 0, 0]
-    time_from[1] = [0, 0, 0, 0, 0, 0, 0]
-    time_to[0] = [24, 24, 24, 24, 24, 24, 24]
-    time_to[1] = [0, 0, 0, 0, 0, 0, 0]
+    limits[HR] = [24, 24, 24, 24, 24, 24, 24]
+    limits[MN] = [0, 0, 0, 0, 0, 0, 0]
+    time_from[HR] = [0, 0, 0, 0, 0, 0, 0]
+    time_from[MN] = [0, 0, 0, 0, 0, 0, 0]
+    time_to[HR] = [24, 24, 24, 24, 24, 24, 24]
+    time_to[MN] = [0, 0, 0, 0, 0, 0, 0]
     
     
-    if confFile:
-	config = ConfigParser()
-	config.read("/home/simone/timekprrc")
-    
+    if not default:
+	config = configparser.ConfigParser()
+	config.read(conffile)
+	
 	if config.has_section(user):
-	    for i in range(7):
-		time_from[0][i] = config.getint(user,"fromHr_" + str(i))
-		time_from[1][i] = config.getint(user,"fromMn_" + str(i))
-		time_to[0][i] = config.getint(user,"toHr_" + str(i))
-		time_to[1][i] = config.getint(user,"toMn_" + str(i))
-		limits[0][i] = config.getint(user,"limitHr_" + str(i))
-		limits[1][i] = config.getint(user,"limitMn_" + str(i))
+	    limits[HR] = json.loads(config.get(user,LABELS[0]))
+	    limits[MN] = json.loads(config.get(user,LABELS[1]))
+	    time_from[HR] = json.loads(config.get(user,LABELS[2]))
+	    time_from[MN] = json.loads(config.get(user,LABELS[3]))
+	    time_to[HR] = json.loads(config.get(user,LABELS[4]))
+	    time_to[MN] = json.loads(config.get(user,LABELS[5]))	    
 
     return limits, time_from, time_to

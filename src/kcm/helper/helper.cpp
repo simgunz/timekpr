@@ -49,7 +49,7 @@ bool secureCopy(const QString &from, const QString &to)
 ActionReply Helper::save(const QVariantMap &args)
 { 
     
-    QString limit = args["limit"].toString();
+    /*QString limit = args["limit"].toString();
     QString fileName = "/etc/timekpr/" + args["user"].toString();
     QFile limitFile(fileName);
     
@@ -80,7 +80,7 @@ ActionReply Helper::save(const QVariantMap &args)
 	limitFile.close();
 	qDebug() << "Limits successfully written to file";
     }
-
+    */
 
     //Better to check if actually they have been changed
     removeuserlimits(args["user"].toString());
