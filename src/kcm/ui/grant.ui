@@ -108,6 +108,12 @@
          <property name="enabled">
           <bool>true</bool>
          </property>
+         <property name="minimum">
+          <number>-1440</number>
+         </property>
+         <property name="maximum">
+          <number>1440</number>
+         </property>
         </widget>
        </item>
        <item>
