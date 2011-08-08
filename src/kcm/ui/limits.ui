@@ -988,7 +988,7 @@
          <item row="2" column="2">
           <widget class="QSpinBox" name="sbFromMn_0">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1026,7 +1026,7 @@
          <item row="3" column="2">
           <widget class="QSpinBox" name="sbToMn_0">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1378,7 +1378,7 @@
          <item row="2" column="1">
           <widget class="QSpinBox" name="sbFromMn_1">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1416,7 +1416,7 @@
          <item row="2" column="4">
           <widget class="QSpinBox" name="sbFromMn_2">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1454,7 +1454,7 @@
          <item row="2" column="7">
           <widget class="QSpinBox" name="sbFromMn_3">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1492,7 +1492,7 @@
          <item row="2" column="10">
           <widget class="QSpinBox" name="sbFromMn_4">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1530,7 +1530,7 @@
          <item row="2" column="13">
           <widget class="QSpinBox" name="sbFromMn_5">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1568,7 +1568,7 @@
          <item row="2" column="16">
           <widget class="QSpinBox" name="sbFromMn_6">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1606,7 +1606,7 @@
          <item row="3" column="1">
           <widget class="QSpinBox" name="sbToMn_1">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1644,7 +1644,7 @@
          <item row="3" column="4">
           <widget class="QSpinBox" name="sbToMn_2">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1682,7 +1682,7 @@
          <item row="3" column="7">
           <widget class="QSpinBox" name="sbToMn_3">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1720,7 +1720,7 @@
          <item row="3" column="10">
           <widget class="QSpinBox" name="sbToMn_4">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1758,7 +1758,7 @@
          <item row="3" column="13">
           <widget class="QSpinBox" name="sbToMn_5">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>
@@ -1796,7 +1796,7 @@
          <item row="3" column="16">
           <widget class="QSpinBox" name="sbToMn_6">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="maximumSize">
             <size>

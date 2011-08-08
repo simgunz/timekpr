@@ -132,7 +132,7 @@ class Timekpr (KCModule):
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
-        self.connect(self.ui.grant.btnBoundBypass,SIGNAL('clicked()'),self.bypassTimeFrame)
+        self.connect(self.ui.grant.btnBoundBypass,SIGNAL('clicked()'),self.bypass_time_frame)
         self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
@@ -201,7 +201,7 @@ class Timekpr (KCModule):
             userinfo = re.split(':',entry)
             if isnormal(userinfo[0],int(userinfo[2])):
 		self.ui.cbActiveUser.addItem(userinfo[0])               
-        self.ui.cbActiveUser.setCurrentIndex(0)
+        self.ui.cbActiveUser.setCurrentIndex(1)
         #TODO:Set index to 0 (just for testing)
     
     
@@ -293,21 +293,28 @@ class Timekpr (KCModule):
     #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
         dayIndex = int(strftime("%w"))
-        try:
-            limit = int(self.limits[dayIndex])
-        except IndexError:
-            limit = 86400
-
-        timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
+        if self.status['limited']:
+	    if self.status['limitedByDay']:
+		limit = convert_limits(self.limits,dayIndex)
+	    else:
+		limit = convert_limits(self.limits,0)
+	else:
+	    limit = 86400
+	    
+        used = self.get_used_time()
+        left = limit - used
+        hours, minutes = sec_to_hr_mn(left)
+        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
+        self.reset_button_state()
+    
+    def get_used_time(self):
+	timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
         used = 0
         if isfile(timefile) and from_today(timefile):
             t = open(timefile)
             used = int(t.readline())
             t.close()
-        left = limit - used
-        hours, minutes = sec_to_hr_mn(left)
-        self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
-          
+        return used
           
     def statusicons(self):
 	if not isuserlimitedtoday(self.user) and not self.status['locked']:
@@ -335,8 +342,15 @@ class Timekpr (KCModule):
 	    self.ui.status.lbLimitStatus.setText("No (just for today)")
 	
 	self.update_time_left()
-
-
+	    
+	    
+    def reset_button_state(self):
+	if self.get_used_time():
+	    self.ui.grant.btnResetTime.setEnabled(True)
+	else:
+	    self.ui.grant.btnResetTime.setEnabled(False)
+	    
+	    
     def buttonstates(self):
 	if self.status['locked']:
 	    self.ui.grant.btnLockAccount.setText("Unlock account")
@@ -363,10 +377,7 @@ class Timekpr (KCModule):
 	if self.status['limited'] == LIMIT:
 	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
             #if isfile(timefile):
-            if self.status['reset']==NORESET:
-		self.ui.grant.btnResetTime.setEnabled(True)
-	    else:
-		self.ui.grant.btnResetTime.setEnabled(False)
+	    self.reset_button_state()
 	    #Reward button should add time even if .time is not there?
 	    self.ui.grant.btnLimitBypass.setEnabled(True)
 	    self.ui.grant.btnAddTime.setEnabled(True)
@@ -396,32 +407,16 @@ class Timekpr (KCModule):
     def read_settings(self):
 	self.user = str(self.ui.cbActiveUser.currentText())
 	
-	uislocked = isuserlocked(self.user)
-	self.status = {'locked':uislocked,'reset':NORESET}
+	#uislocked = isuserlocked(self.user)
+	#self.status = {'locked':uislocked,'reset':NORESET}
 	
-	self.read_limit_status()
-	
-	self.limits, self.time_from, self.time_to = read_user_settings(self.user,"/home/simone/timekprrc")	
+	self.limits, self.time_from, self.time_to ,self.status = read_user_settings(self.user,"/home/simone/timekprrc")
 	
 	self.load_module_values()
 	self.statusicons()
 	self.buttonstates()
 	self.emit(SIGNAL("changed(bool)"), False)
 
-    def read_limit_status(self,default = False):
-	config = ConfigParser()
-	config.read("/home/simone/timekprrc")
-	
-	if config.has_section(self.user) and not default:
-	    self.status['limited'] = config.getboolean(self.user,"limited")
-	    self.status['bounded'] = config.getboolean(self.user,"bounded")
-	    self.status['limitedByDay'] = config.getboolean(self.user,"limitedByDay")
-	    self.status['boundedByDay'] = config.getboolean(self.user,"boundedByDay")
-	else:
-	    self.status['limited'] = False
-	    self.status['bounded'] = False
-	    self.status['limitedByDay'] = False
-	    self.status['boundedByDay'] = False	
 	
     def executePermissionsAction(self,args):
 	action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
@@ -461,7 +456,7 @@ class Timekpr (KCModule):
 	    self.statusicons()
 	
 	
-    def bypassTimeFrame(self):
+    def bypass_time_frame(self):
 	args = {'subaction':2}
 	if self.status['bounded'] == NOBOUND or self.status['bounded'] == NOBOUNDTODAY:
 	    args['operation'] = BOUND
@@ -497,7 +492,6 @@ class Timekpr (KCModule):
 	args = {'subaction':4}
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
-	    self.status['reset'] = RESET
 	    self.buttonstates()
 	    self.statusicons()
 
@@ -510,7 +504,6 @@ class Timekpr (KCModule):
 	    reply = self.executePermissionsAction(args)
 	    if not reply.failed():
 		self.ui.grant.sbAddTime.setValue(0)
-		self.status['reset'] = NORESET
 		self.buttonstates()
 		self.statusicons()
 	
@@ -522,9 +515,9 @@ class Timekpr (KCModule):
 
 
     def defaults(self):
-	self.read_limit_status(True)
-	self.limits, self.time_from, self.time_to = read_user_settings(self.user,"/home/simone/timekprrc",True)
-	self.load_module_values()
+	#self.read_limit_status(True)
+	self.limits, self.time_from, self.time_to,self.status = read_user_settings()
+	#self.load_module_values()
 	
 
     def load(self):
@@ -532,60 +525,18 @@ class Timekpr (KCModule):
 	self.read_settings()
 	#FIXME:When the module is loaded from kcmshell the Apply button is enabled, should be disabled
     
-    def CANCELLAMI(self):
-	space = " "
-        limit = "limit=( 86400 86400 86400 86400 86400 86400 86400 )"
-        #timekprpam.py adduserlimits() uses lists with numbers as strings
-        bFrom = ['0'] * 7
-        bTo = ['24'] * 7
-
-	limit = "limit=("
-        
-        if self.status['limited']:
-            if self.status['limitedByDay']:
-                for i in range(7):
-                    limit = convert_limits(self.limits,i)
-            else:
-                for i in range(7):
-		    convert_limits(self.limits,i)
-        
-        limit = limit + space + ")"
-                
-        bFrom = [['0'] * 7,['0'] * 7]
-        bTo = [['24'] * 7,['0'] * 7]
-        
-        if self.ui.limits.ckBound.isChecked():
-	    bFrom = [[],[]]
-            bTo = [[],[]]
-	    if self.ui.limits.ckBoundDay.isChecked():
-                for i in range(2):
-		    for j in range(7):
-			bFrom[i].append(str(self.fromSpin[i][j].value()))
-			bTo[i].append(str(self.toSpin[i][j].value()))
-            else:
-		for i in range(2):
-		    for j in range(7):
-			bFrom[i].append(str(self.fromSpin[i][0].value()))
-			bTo[i].append(str(self.toSpin[i][0].value()))
-	
-	bound = mktimeconfline(self.user, bFrom[0], bTo[0]) + "\n"
-	
-	return limit , bound
-	
+   	
     def save(self):
 	
 	self.temp_config_save()
-	lims, bFrom, bTo = read_user_settings(self.user,self.config.name())
-	
-	bound = mktimeconfline(self.user, map(str,bFrom[0]), map(str,bTo[0]) ) + "\n"
-	#limit , bound = self.CANCELLAMI()
-	
+	settings = read_user_settings(self.user,self.config.name()) 
+	lims, bFrom, bTo = parse_settings(settings)
+	bound = mktimeconfline(self.user, map(str,bFrom[HR]), map(str,bTo[HR]) ) + "\n"
 	temprcfile = self.config.name()
-	helperargs = {"user":self.user,"bound":bound,"limit":lims,"temprcfile":temprcfile}
+	helperargs = {"user":self.user,"bound":bound,"temprcfile":temprcfile}
 	action = self.authAction()
 	action.setArguments(helperargs)	
 	reply = action.execute()
-	
 	
 	self.read_settings()
 	self.update_time_left()
@@ -603,7 +554,8 @@ class Timekpr (KCModule):
     
     def temp_config_save(self):
 	userGroup = self.config.group(self.user)
-
+	
+	userGroup.writeEntry("locked",self.status['locked'])
 	userGroup.writeEntry("limited",self.ui.limits.ckLimit.isChecked())
 	userGroup.writeEntry("limitedByday",self.ui.limits.ckLimitDay.isChecked())
 	userGroup.writeEntry("bounded",self.ui.limits.ckBound.isChecked())

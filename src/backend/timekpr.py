@@ -208,7 +208,8 @@ while (True):
         if not is_notified(username):
             logkpr('configuration file for %s exists' % username)
             # Read lists: from, to and limit
-            limits, bfrom, bto = read_user_settings(username, conffile)
+            settings = read_user_settings(username, '/home/simone/timekprrc')
+            limits, bfrom, bto = parse_settings(settings)
 	    
             timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
             allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
@@ -223,14 +224,12 @@ while (True):
             # Get current day index and hour of day
             index = int(strftime("%w"))
             hour = int(strftime("%H"))
-            minunte = int(strftime("%M"))
+            minute = int(strftime("%M"))
 
             logkpr('User: %s Day-Index: %s Seconds-passed: %s' % (username, index, time))
-
 	    
             # Compare: is current hour less than the one in bfrom list?
-            if ( (hour < bfrom[0][index]) or ( (hour == bfrom[0][index]) and (minute < bfrom[1][index]) ) ) ):
-            #if ((hour < bfrom[index]):
+            if ( (hour < bfrom[HR][index]) or ( (hour == bfrom[HR][index]) and (minute < bfrom[MN][index]) ) ):
                 logkpr('Current hour less than the defined hour in conffile for user %s' % username)
                 if isfile(allowfile):
                     if not from_today(allowfile):
@@ -243,8 +242,7 @@ while (True):
                     ####thread_it(0.5, logOut, username)
 
             # Compare: is current hour greater/equal to $to array?
-            if ( (hour > bto[0][index]) or ( (hour == bto[0][index]) and (minute > bto[1][index]) ) ) ):
-            #if (hour >= bto[index]):
+            if ( (hour > bto[HR][index]) or ( (hour == bto[HR][index]) and (minute > bto[MN][index]) ) ):
                 logkpr('Current hour greater than the defined hour in conffile for user %s' % username)
                 # Has the user been given extended login hours?
                 if isfile(allowfile):
@@ -312,7 +310,7 @@ while (True):
                     lock_account(username)
 
     # Done checking all users, sleeping
-    VAR['POLLTIME'] = 5
+    VAR['POLLTIME'] = 25
     logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])
     sleep(VAR['POLLTIME'])
 

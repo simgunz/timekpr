@@ -11,6 +11,8 @@ See the COPYRIGHT file for full details. You should have received the COPYRIGHT 
 #include <kauth.h>
 #include <QString> //needed?
 
+enum Operation {ADD, REMOVE};
+
 using namespace KAuth;
 
 const QString extension[] = {".time",".logout",".late",".allow"};
@@ -25,9 +27,11 @@ public slots:
     ActionReply managepermissions(const QVariantMap &map);
     
 private:
-    bool removeuserlimits(QString user);
-    bool adduserlimits(QString user, QString line);
-    int clearAllRestriction(QMap<QString,QVariant> &var, QString &user, int &subaction);
+    //bool removeuserlimits(QString user);
+    //bool adduserlimits(QString user, QString line);
+    bool addAndRemoveUserLimits(QString user, Operation op, QString line = "");
+    int clearAllRestriction(QMap<QString,QVariant> &var, QString &user);
+    int resetTime(QMap<QString,QVariant> &var,QString &user);
 };
 
 #endif

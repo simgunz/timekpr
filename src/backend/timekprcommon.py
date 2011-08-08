@@ -23,7 +23,7 @@ NOBOUND, BOUND, NOBOUNDTODAY = range(3)
 NOLIMIT, LIMIT, NOLIMITTODAY = range(3)
 NORESET, RESET = range(2)
 HR, MN = range(2)
-LABELS = ["limits_hr","limits_mn","time_from_hr","time_from_mn","time_to_hr","time_to_mn"]
+LABELS = ['limits_hr','limits_mn','time_from_hr','time_from_mn','time_to_hr','time_to_mn']
 
 
 def get_version():
@@ -154,6 +154,7 @@ def is_early(bfrom, allowfile):
     else:
         return False
 
+
 def is_restricted_user(username, limit):
     if not isuserlimited(username) and limit == 86400:
         return False
@@ -162,32 +163,61 @@ def is_restricted_user(username, limit):
 
 
 def convert_limits(limits,index):
-	lims = limits[0][index] * 3600 + limits[1][index] * 60
+	lims = limits[HR][index] * 3600 + limits[MN][index] * 60
 	return lims
 	
 	
-def read_user_settings(user, conffile, default = False):   
-    limits = [list(),list()]
-    time_from = [list(),list()]
-    time_to = [list(),list()]
-    limits[HR] = [24, 24, 24, 24, 24, 24, 24]
-    limits[MN] = [0, 0, 0, 0, 0, 0, 0]
-    time_from[HR] = [0, 0, 0, 0, 0, 0, 0]
-    time_from[MN] = [0, 0, 0, 0, 0, 0, 0]
-    time_to[HR] = [24, 24, 24, 24, 24, 24, 24]
-    time_to[MN] = [0, 0, 0, 0, 0, 0, 0]
+def read_user_settings(user = None, conffile = None):  
+    limits = [[]]*2
+    time_from = [[]]*2
+    time_to = [[]]*2
+    status = dict()
+    default = True
     
-    
-    if not default:
+    if conffile:
 	config = configparser.ConfigParser()
-	config.read(conffile)
-	
+	config.read(str(conffile))
 	if config.has_section(user):
-	    limits[HR] = json.loads(config.get(user,LABELS[0]))
-	    limits[MN] = json.loads(config.get(user,LABELS[1]))
-	    time_from[HR] = json.loads(config.get(user,LABELS[2]))
-	    time_from[MN] = json.loads(config.get(user,LABELS[3]))
-	    time_to[HR] = json.loads(config.get(user,LABELS[4]))
-	    time_to[MN] = json.loads(config.get(user,LABELS[5]))	    
+	    default = False
+	
+    if default:
+	config = configparser.ConfigParser()
+	config.read(str('/home/simone/timekprdefault'))
+	user = 'default'
 
+    limits[HR] = json.loads(config.get(user,LABELS[0]))
+    limits[MN] = json.loads(config.get(user,LABELS[1]))
+    time_from[HR] = json.loads(config.get(user,LABELS[2]))
+    time_from[MN] = json.loads(config.get(user,LABELS[3]))
+    time_to[HR] = json.loads(config.get(user,LABELS[4]))
+    time_to[MN] = json.loads(config.get(user,LABELS[5]))    
+    status['locked'] = config.getboolean(user,'locked')
+    status['limited'] = config.getboolean(user,'limited')
+    status['limitedByDay'] = config.getboolean(user,'limitedByDay')
+    status['bounded'] = config.getboolean(user,'bounded')
+    status['boundedByDay'] = config.getboolean(user,'boundedByDay')
+	    
+    return limits, time_from, time_to, status
+    
+    
+def parse_settings(settings):
+    if settings[3]['limited']:
+	if settings[3]['limitedByDay']:
+	    limits = settings[0]
+	else:
+	    limits = [ [settings[0][HR][0]]*7 , [settings[0][MN][0]]*7 ]
+    else:
+	limits = [ [24]*7 , [0]*7 ]
+	
+    if settings[3]['bounded']:
+	if settings[3]['boundedByDay']:
+	    time_from = settings[1]
+	    time_to = settings[2]
+	else:
+	    time_from = [ [settings[1][HR][0]]*7 , [settings[1][MN][0]]*7 ]
+	    time_to = [ [settings[2][HR][0]]*7 , [settings[2][MN][0]]*7 ]
+    else:
+	time_from = [ [0]*7 , [0]*7 ]
+	time_to = [ [24]*7 , [0]*7 ]
+	
     return limits, time_from, time_to

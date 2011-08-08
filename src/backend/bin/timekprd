@@ -17,7 +17,7 @@ case "$1" in
     ;;
   stop)
     stat_busy "Stopping timekpr"
-    [ ! -z "$PID" ] && killall --user root timekpr &> /dev/null
+    [ ! -z "$PID" ] && kill $(ps aux | grep '[p]ython /usr/bin/timekpr' | awk '{print $2}') &> /dev/null
     if [ $? -gt 0 ]; then
       stat_fail
     else
