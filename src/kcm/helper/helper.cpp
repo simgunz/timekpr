@@ -102,12 +102,13 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     int subaction = args.value("subaction").toInt();
     QString user = args.value("user").toString();
     QMap<QString,QVariant> var = args.value("var").toMap();
+    QString root(var["TIMEKPRWORK"].toString() + "/" + user);
 
     int code = 0;
 
     switch (subaction) {
 	case ClearAllRestriction:
-	    code = clearAllRestriction(var,user);
+	    code = clearAllRestriction(root,user);
 	    break;
 	case Lock:
 	    code = (0);
@@ -119,10 +120,10 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
 	    code = (0);
 	    break;
 	case ResetTime:
-	    code = resetTime(var,user);
+	    code = resetTime(root);
 	    break;
 	case AddTime:
-	    code = (0);
+	    code = addTime(root,args.value("time").toInt());
 	    break;
 	default:
 	    return ActionReply::HelperError;
@@ -132,10 +133,10 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
     //return createReply(code);
 }
 
-int Helper::clearAllRestriction(QMap<QString,QVariant> &var, QString &user)
+int Helper::clearAllRestriction(QString root,QString user)
 {
-    QString root, filename;
-    root = var["TIMEKPRWORK"].toString() + "/" + user;
+    QString filename;
+    //root = var["TIMEKPRWORK"].toString() + "/" + user;
     for (int i = 0; i < 4; i++ )
     {
 	filename =  root + extension[i];
@@ -144,10 +145,10 @@ int Helper::clearAllRestriction(QMap<QString,QVariant> &var, QString &user)
 	    file.remove();
     }
     
-    filename = var["TIMEKPRDIR"].toString() + "/" + user;
-    QFile file(filename);
-    if(file.exists())
-	file.remove();
+//     filename = var["TIMEKPRDIR"].toString() + "/" + user;
+//     QFile file(filename);
+//     if(file.exists())
+// 	file.remove();
     //Should implement this paradigm in a function?
 	
     addAndRemoveUserLimits(user,REMOVE);
@@ -157,15 +158,42 @@ int Helper::clearAllRestriction(QMap<QString,QVariant> &var, QString &user)
     return 0;
 }
 
-int Helper::resetTime(QMap<QString,QVariant> &var,QString &user)
+int Helper::resetTime(QString root)
 {
     QString fileName;
-    fileName = var["TIMEKPRWORK"].toString() + "/" + user + ".time";
+    fileName = root + ".time";
     QFile timeFile(fileName);
     if(timeFile.exists())
 	timeFile.remove();
     return 0;
 }
+
+int Helper::addTime(QString root,int rewardTime)
+{
+    QString fileName;
+    fileName = root + ".time";
+    int time = 0;
+    QFile timeFile(fileName);
+    
+    if (timeFile.open(QIODevice::ReadOnly))
+    {
+	QTextStream read(&timeFile);
+	read >> time;	
+	timeFile.close();
+    }
+    
+    time = time - rewardTime * 60;
+    
+    if (!timeFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
+	return false;
+    
+    QTextStream write(&timeFile);
+    write << time;
+    timeFile.close();
+    return 0;
+}
+
+
 // bool Helper::removeuserlimits(QString user)
 // {
 //     QFile filer("/etc/security/time.conf");

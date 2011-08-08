@@ -30,8 +30,9 @@ private:
     //bool removeuserlimits(QString user);
     //bool adduserlimits(QString user, QString line);
     bool addAndRemoveUserLimits(QString user, Operation op, QString line = "");
-    int clearAllRestriction(QMap<QString,QVariant> &var, QString &user);
-    int resetTime(QMap<QString,QVariant> &var,QString &user);
+    int clearAllRestriction(QString root,QString user);
+    int resetTime(QString root);
+    int addTime(QString root,int rewardTime);
 };
 
 #endif
