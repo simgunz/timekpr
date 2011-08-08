@@ -137,7 +137,7 @@ int Helper::clearAllRestriction(QString root,QString user)
 {
     QString filename;
     //root = var["TIMEKPRWORK"].toString() + "/" + user;
-    for (int i = 0; i < 4; i++ )
+    for (int i = 0; i < 3; i++ )
     {
 	filename =  root + extension[i];
 	QFile file(filename);
@@ -168,21 +168,21 @@ int Helper::resetTime(QString root)
     return 0;
 }
 
-int Helper::addTime(QString root,int rewardTime)
+int Helper::addTime(QString root,int time)
 {
     QString fileName;
     fileName = root + ".time";
-    int time = 0;
+    //int time = 0;
     QFile timeFile(fileName);
     
-    if (timeFile.open(QIODevice::ReadOnly))
-    {
-	QTextStream read(&timeFile);
-	read >> time;	
-	timeFile.close();
-    }
+//     if (timeFile.open(QIODevice::ReadOnly))
+//     {
+// 	QTextStream read(&timeFile);
+// 	read >> time;	
+// 	timeFile.close();
+//     }
     
-    time = time - rewardTime * 60;
+    //time = time + time * 60;
     
     if (!timeFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
 	return false;

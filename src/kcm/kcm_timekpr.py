@@ -292,21 +292,29 @@ class Timekpr (KCModule):
     
     #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
-        dayIndex = int(strftime("%w"))
-        if self.status['limited']:
-	    if self.status['limitedByDay']:
-		limit = convert_limits(self.limits,dayIndex)
-	    else:
-		limit = convert_limits(self.limits,0)
-	else:
-	    limit = 86400
-	    
-        used = self.get_used_time()
-        left = limit - used
+	left = self.get_time_left()
         hours, minutes = sec_to_hr_mn(left)
         self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
         self.reset_button_state()
     
+    
+    def get_time_left(self):
+	limit = self.get_limit()    
+        used = self.get_used_time()
+        return limit - used
+        
+        
+    def get_limit(self):
+	limit = 86400
+        if self.status['limited']:
+	    if self.status['limitedByDay']:
+		dayIndex = int(strftime("%w"))
+		limit = convert_limits(self.limits,dayIndex)
+	    else:
+		limit = convert_limits(self.limits,0)
+	return limit
+	    
+	    
     def get_used_time(self):
 	timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
         used = 0
@@ -498,14 +506,21 @@ class Timekpr (KCModule):
 
     def addTime(self):
 	args = {'subaction':5}
-	time = self.ui.grant.sbAddTime.value()
-	if time:
-	    args['time'] = time
-	    reply = self.executePermissionsAction(args)
-	    if not reply.failed():
-		self.ui.grant.sbAddTime.setValue(0)
-		self.buttonstates()
-		self.statusicons()
+	rewardtime = self.ui.grant.sbAddTime.value() * 60
+	if not rewardtime:
+	    return
+	limit = self.get_limit()
+	used = self.get_used_time()
+	time = used - rewardtime
+	time = max(time,limit - 86400)
+	time = min(time,limit)
+	
+	args['time'] = time
+	reply = self.executePermissionsAction(args)
+	if not reply.failed():
+	    self.ui.grant.sbAddTime.setValue(0)
+	    self.buttonstates()
+	    self.statusicons()
 	
 	
     def changed(self):
