@@ -201,17 +201,19 @@ while (True):
         THISDAY = strftime("%Y%m%d")
     
     # Get the usernames and PIDs of sessions
+    print get_users()
     for username in get_users():
         conffile = VAR['TIMEKPRDIR'] + '/' + username
         # Check if user configfile exists and if user was not already notified
-        
+        print 'inin'
         if not is_notified(username):
             logkpr('configuration file for %s exists' % username)
             # Read lists: from, to and limit
-            settings = read_user_settings(username, '/home/simone/timekprrc')
+            settings = read_user_settings(username, VAR['TIMEKPRDIR'] + '/timekprrc')
             limits, bfrom, bto = parse_settings(settings)
 	    
             timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
+            print timefile
             allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
             latefile = VAR['TIMEKPRWORK'] + '/' + username + '.late'
             logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
@@ -234,12 +236,12 @@ while (True):
                 if isfile(allowfile):
                     if not from_today(allowfile):
                         logkpr('Extended login hours detected from %s.allow, but not from today' % username)
-                        ####thread_it(0.5, logOut, username)
+                        thread_it(0.5, logOut, username)
                         remove(allowfile)
                 else:
                     # User has not been given extended login hours
                     logkpr('Extended hours not detected, %s not in allowed period from-to' %username)
-                    ####thread_it(0.5, logOut, username)
+                    thread_it(0.5, logOut, username)
 
             # Compare: is current hour greater/equal to $to array?
             if ( (hour > bto[HR][index]) or ( (hour == bto[HR][index]) and (minute > bto[MN][index]) ) ):
@@ -252,16 +254,16 @@ while (True):
                         if isfile(latefile):
                             if from_today(latefile):
                                 logkpr('User %s has been late-kicked today' % username)
-                                ####thread_it(0.5, logOut, username)
+                                thread_it(0.5, logOut, username)
                                 remove(allowfile)
                                 #Lock account
                                 lock_account(username)
                             else:
                                 logkpr('User %s has NOT been late-kicked today' % username)
-                                ####thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
-                                ####thread_it(float(VAR['GRACEPERIOD']), remove, allowfile)
+                                thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
+                                thread_it(float(VAR['GRACEPERIOD']), remove, allowfile)
                                 add_notified(username)
-                                ####thread_it(VAR['GRACEPERIOD'], remove_notified, username)
+                                thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                                 lock_account(username)
                     else:
                         logkpr('Extended login hours detected - %s.allow is from today' % username)
@@ -270,14 +272,14 @@ while (True):
                     logkpr('Extended hours and %s.allow file not detected, %s not in allowed period from-to' % (username, username))
                     if isfile(latefile) and from_today(latefile):
                         logkpr('User %s has been late-kicked today' % username)
-                        ####thread_it(0.5, logOut, username)
+                        thread_it(0.5, logOut, username)
                         #Lock account
                         lock_account(username)
                     else:
                         logkpr('User %s has NOT been late-kicked today' % username)
-                        ####thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
+                        thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
                         add_notified(username)
-                        ####thread_it(VAR['GRACEPERIOD'], remove_notified, username)
+                        thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                         lock_account(username)
 
             # Is the limit exeeded
@@ -291,26 +293,25 @@ while (True):
                     # Was he kicked out today?
                     if from_today(logoutfile):
                         logkpr('%s has been kicked out today' % username)
-                        ####thread_it(0.5, logOut, username)
+                        thread_it(0.5, logOut, username)
                         #Lock account
                         lock_account(username)
                     else:
                         # The user has not been kicked out today
                         logkpr('%s has been kicked out, but not today' % username)
-                        ####thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
+                        thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
                         add_notified(username)
-                        ####thread_it(VAR['GRACEPERIOD'], remove_notified, username)
+                        thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                         lock_account(username)
                 else:
                     # The user has not been kicked out before
                     logkpr('Not found: %s.logout' % username)
-                    ####thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
+                    thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
                     add_notified(username)
-                    ####thread_it(VAR['GRACEPERIOD'], remove_notified, username)
+                    thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                     lock_account(username)
 
     # Done checking all users, sleeping
-    VAR['POLLTIME'] = 25
     logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])
     sleep(VAR['POLLTIME'])
 

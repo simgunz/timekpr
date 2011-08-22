@@ -15,7 +15,7 @@ enum Operation {ADD, REMOVE};
 
 using namespace KAuth;
 
-const QString extension[] = {".time",".logout",".late",".allow"};
+const QString extension[] = {".logout",".late",".allow"};
 
 class Helper : public QObject {
     Q_OBJECT
@@ -30,6 +30,7 @@ private:
     //bool removeuserlimits(QString user);
     //bool adduserlimits(QString user, QString line);
     bool addAndRemoveUserLimits(QString user, Operation op, QString line = "");
+    int lockUnlock(QString user, int op);
     int clearAllRestriction(QString root,QString user);
     int resetTime(QString root);
     int addTime(QString root,int rewardTime);

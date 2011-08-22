@@ -33,7 +33,7 @@ def check_if_admin():
     if geteuid() != 0:
         exit('Error: You need to have administrative privileges to run timekpr')
 
-def get_variables(DEVACTIVE):
+def get_variables(DEVACTIVE = False):
     #Read timekpr.conf
     fconf = '/etc/timekpr.conf'
     if DEVACTIVE:
@@ -165,8 +165,40 @@ def is_restricted_user(username, limit):
 def convert_limits(limits,index):
 	lims = limits[HR][index] * 3600 + limits[MN][index] * 60
 	return lims
-	
-	
+
+
+def getuserlimits(u):
+    """Gets user from-to time limitations defined in time.conf
+    
+    Argument: username
+    Return example:
+        [0] = from ['0', '0', '0', '0', '0', '0', '0']
+        [1] = to ['24', '24', '24', '24', '24', '24', '24']
+
+    """
+    hrFrom = ['0', '0', '0', '0', '0', '0', '0']
+    hrTo =  ['24', '24', '24', '24', '24', '24', '24']
+    mnFrom = ['0', '0', '0', '0', '0', '0', '0']
+    mnTo = ['0', '0', '0', '0', '0', '0', '0']
+    
+    config = ConfigParser()
+    var = get_variables()
+    config.read(var['TIMEKPRDIR'] + '/timekprrc')
+    
+    if config.has_section(u):
+	for i in range(7):
+	    hrFrom[i] = config.getint(u,"fromHr_" + str(i))
+	    mnFrom[i] = config.getint(u,"fromMn_" + str(i))
+	    hrTo[i] = config.getint(u,"toHr_" + str(i))
+	    mnTo[i] = config.getint(u,"toMn_" + str(i))
+
+    #ls = parseutlist(parsetimeconf())
+    #for user, [bfrom, bto] in ls:
+    #    if u == user:
+    #        return [bfrom, bto]
+    return [hrFrom, hrTo, mnFrom, mnTo]
+    
+    
 def read_user_settings(user = None, conffile = None):  
     limits = [[]]*2
     time_from = [[]]*2
@@ -182,7 +214,8 @@ def read_user_settings(user = None, conffile = None):
 	
     if default:
 	config = configparser.ConfigParser()
-	config.read(str('/home/simone/timekprdefault'))
+	var = get_variables()
+	config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
 	user = 'default'
 
     limits[HR] = json.loads(config.get(user,LABELS[0]))
@@ -191,7 +224,8 @@ def read_user_settings(user = None, conffile = None):
     time_from[MN] = json.loads(config.get(user,LABELS[3]))
     time_to[HR] = json.loads(config.get(user,LABELS[4]))
     time_to[MN] = json.loads(config.get(user,LABELS[5]))    
-    status['locked'] = config.getboolean(user,'locked')
+    #status['locked'] = config.getboolean(user,'locked')
+    status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
     status['limitedByDay'] = config.getboolean(user,'limitedByDay')
     status['bounded'] = config.getboolean(user,'bounded')

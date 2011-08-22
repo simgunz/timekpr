@@ -47,7 +47,7 @@
    <item row="3" column="0">
     <widget class="QPushButton" name="btnLimitBypass">
      <property name="enabled">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="text">
       <string>Bypass access duration for today</string>
@@ -57,7 +57,7 @@
    <item row="4" column="0">
     <widget class="QPushButton" name="btnBoundBypass">
      <property name="enabled">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <property name="text">
       <string>Bypass time frame for today</string>

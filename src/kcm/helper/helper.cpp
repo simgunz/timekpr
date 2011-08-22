@@ -47,48 +47,17 @@ bool secureCopy(const QString &from, const QString &to)
 }
 
 ActionReply Helper::save(const QVariantMap &args)
-{ 
-    
-    /*QString limit = args["limit"].toString();
-    QString fileName = "/etc/timekpr/" + args["user"].toString();
-    QFile limitFile(fileName);
-    
-    //QVariantMap retdata;
-    
-    if (limit == "limit=( )")
-    {
-	if(limitFile.exists())
-	{
-	    limitFile.remove();
-	    //retdata["first"] = "exist";
-	    qDebug() << "Limits removed";
-	}
-	else
-	{
-	    qDebug() << "Limits not present, so not removed";
-	}
-	//retdata["first"] = "not exist";
-    }
-    else
-    {
-	if (!limitFile.open(QIODevice::WriteOnly))
-	{
-	    qDebug() << "Can't open file in write mode";
-	    return false;
-	}
-	QTextStream out(&limitFile);
-	limitFile.close();
-	qDebug() << "Limits successfully written to file";
-    }
-    */
-
+{
     //Better to check if actually they have been changed
+    QMap<QString,QVariant> var = args.value("var").toMap();
+    QString timekprdir(var["TIMEKPRDIR"].toString());
+    
     addAndRemoveUserLimits(args["user"].toString(),REMOVE);
     addAndRemoveUserLimits(args["user"].toString(),ADD,args["bound"].toString());
     
     QString tempConfigName = args.value("temprcfile").toString();
     
-    secureCopy(tempConfigName,"/home/simone/timekprrc");
+    secureCopy(tempConfigName,timekprdir + "/timekprrc");
     
     
     ActionReply reply(ActionReply::SuccessReply);
@@ -111,7 +80,7 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
 	    code = clearAllRestriction(root,user);
 	    break;
 	case Lock:
-	    code = (0);
+	    code = lockUnlock(args["user"].toString(),args.value("operation").toInt());
 	    break;
 	case BypassTimeFrame:
 	    code = (0);
@@ -152,8 +121,7 @@ int Helper::clearAllRestriction(QString root,QString user)
     //Should implement this paradigm in a function?
 	
     addAndRemoveUserLimits(user,REMOVE);
-    
-    //unlockuser(user);
+    lockUnlock(user, 0);
     
     return 0;
 }
@@ -175,15 +143,6 @@ int Helper::addTime(QString root,int time)
     //int time = 0;
     QFile timeFile(fileName);
     
-//     if (timeFile.open(QIODevice::ReadOnly))
-//     {
-// 	QTextStream read(&timeFile);
-// 	read >> time;	
-// 	timeFile.close();
-//     }
-    
-    //time = time + time * 60;
-    
     if (!timeFile.open(QIODevice::WriteOnly|QIODevice::Truncate))
 	return false;
     
@@ -192,69 +151,6 @@ int Helper::addTime(QString root,int time)
     timeFile.close();
     return 0;
 }
-
-
-// bool Helper::removeuserlimits(QString user)
-// {
-//     QFile filer("/etc/security/time.conf");
-//     if (!filer.open(QIODevice::ReadOnly))
-// 	return false;
-//     QTextStream timeconfr(&filer);
-//     QString conf = timeconfr.readAll();
-//     filer.close();
-//     
-//     QString regex = "## TIMEKPR START\\n.*(\\*;\\*;" + user + ";[^\\n]*\\n)";
-//     QRegExp re(regex);
-//     
-//     if(re.indexIn(conf) > -1)
-// 	conf.replace(re.cap(1),"");
-//     else
-// 	return false;
-//     
-//     //TODO:Better to make a backup copy of the file before truncating it
-//     QFile filew("/etc/security/time.conf");
-//     if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
-// 	return false;
-//     QTextStream timeconfw(&filew);
-//     timeconfw << conf;
-//     filew.close();
-//     
-//     return true;
-// }
-// 
-// bool Helper::adduserlimits(QString user, QString line)
-// {
-//     QFile filer("/etc/security/time.conf");
-//     if (!filer.open(QIODevice::ReadOnly))
-// 	return false;
-//     QTextStream timeconfr(&filer);
-//     QString conf = timeconfr.readAll();
-//     filer.close();
-//     
-//     QString regex = "(## TIMEKPR END)";
-//     QRegExp re(regex);
-//     
-//     if(re.indexIn(conf) > -1)
-// 	if(operation == 1)
-// 	{
-// 	    QString newline = line + re.cap(0);
-// 	    conf.replace(re.cap(0),newline);
-// 	}
-// 	else
-// 	    conf.replace(re.cap(1),"");
-//     else
-// 	return false;
-//     
-//     //TODO:Better to make a backup copy of the file before truncating it
-//     QFile filew("/etc/security/time.conf");
-//     if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
-// 	return false;
-//     QTextStream timeconfw(&filew);
-//     timeconfw << conf;
-//     filew.close();
-//     
-//     return true;
-// }
 
 bool Helper::addAndRemoveUserLimits(QString user, Operation op, QString line)
 {
@@ -295,5 +191,42 @@ bool Helper::addAndRemoveUserLimits(QString user, Operation op, QString line)
     return true;
 }
 
+int Helper::lockUnlock(QString user, int op)
+{
+    QFile filer("/etc/security/access.conf");
+    if (!filer.open(QIODevice::ReadOnly))
+	return false;
+    QTextStream accessconfr(&filer);
+    QString conf = accessconfr.readAll();
+    filer.close();
     
+    QString regex;
+    if(op == 1)
+	regex = "(## TIMEKPR END)";
+    else
+	regex = "## TIMEKPR START\\n.*(-:" + user + ":ALL\\n)";
+    
+    QRegExp re(regex);
+    
+    if(re.indexIn(conf) > -1)
+	if(op == 1)
+	{
+	    QString newline = "-:" + user + ":ALL\n" + re.cap(0);
+	    conf.replace(re.cap(0),newline);
+	}
+	else
+	    conf.replace(re.cap(1),"");
+    else
+	return false;
+    
+    QFile filew("/etc/security/access.conf");
+    if (!filew.open(QIODevice::WriteOnly|QIODevice::Truncate))
+	return false;
+    QTextStream accessconfw(&filew);
+    accessconfw << conf;
+    filew.close();
+    
+    return true;
+}
+
 KDE4_AUTH_HELPER_MAIN("org.kde.kcontrol.kcmtimekpr", Helper)

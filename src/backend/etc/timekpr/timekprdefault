@@ -1,0 +1,12 @@
+[default]
+locked=false
+bounded=false
+boundedByDay=false
+limited=false
+limitedByday=false
+limits_hr=[3, 3, 3, 3, 3, 3, 3]
+limits_mn=[0, 0, 0, 0, 0, 0, 0]
+time_from_hr=[7, 7, 7, 7, 7, 7, 7]
+time_from_mn=[0, 0, 0, 0, 0, 0, 0]
+time_to_hr=[22, 22, 22, 22, 22, 22, 22]
+time_to_mn=[0, 0, 0, 0, 0, 0, 0]
