@@ -28,6 +28,9 @@
 #include <Plasma/DataEngine>
 #include <Plasma/Svg>
 #include <KCModuleProxy>
+#include <Plasma/ToolTipContent>
+
+#include <QTimer>
 
 
 class QSizeF;
@@ -46,13 +49,20 @@ public:
                        // const QRect& contentsRect);
     void init();
 
-	public Q_SLOTS:
+public Q_SLOTS:
     void toolTipAboutToShow();
+    void toolTipHidden();
+    void updateTooltip();
 protected:
     void initExtenderItem(Plasma::ExtenderItem *item);
     void createConfigurationInterface(KConfigDialog *parent);
 private:
+    Plasma::DataEngine *m_dataengine;
+    Plasma::ToolTipContent m_tooltip;
     KIcon m_icon;
+    int m_timeleft;
+    QString m_user;
+    QTimer m_timer;
     Plasma::Svg m_theme;
     KCModuleProxy *m_timekprSettingsWidget;
 };
