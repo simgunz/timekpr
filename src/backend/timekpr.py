@@ -120,11 +120,20 @@ def is_file_ok(fname):
         return True
     return False
 
+#def get_users():
+#    u = get_cmd_output('users')
+#    u = u.split()
+#    u = set(u)
+#    return list(u)
+
 def get_users():
-    u = get_cmd_output('users')
-    u = u.split()
-    u = set(u)
-    return list(u)
+    users = list()
+    rawusers = get_cmd_output('last')
+    rawloggedusers = re.findall('(^.*)still logged in',rawusers,re.M)
+    for i in rawloggedusers:
+	users.append(re.split(' ',i)[0])
+    users = set(users)
+    return users
 
 def is_session_alive(user):
     # Checking if session process still running
@@ -201,11 +210,9 @@ while (True):
         THISDAY = strftime("%Y%m%d")
     
     # Get the usernames and PIDs of sessions
-    print get_users()
     for username in get_users():
         conffile = VAR['TIMEKPRDIR'] + '/' + username
         # Check if user configfile exists and if user was not already notified
-        print 'inin'
         if not is_notified(username):
             logkpr('configuration file for %s exists' % username)
             # Read lists: from, to and limit
@@ -213,7 +220,6 @@ while (True):
             limits, bfrom, bto = parse_settings(settings)
 	    
             timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
-            print timefile
             allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
             latefile = VAR['TIMEKPRWORK'] + '/' + username + '.late'
             logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
