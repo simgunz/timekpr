@@ -100,8 +100,9 @@ class Timekpr (KCModule):
         self.lyMainLayout.addWidget(self.ui)
         
         #Disable the limits by default
-        self.ui.limits.wgLimitConfDay.setEnabled(False)
-	self.ui.limits.wgBoundConfDay.setEnabled(False)
+        self.ui.limits.wgLimitConf.setEnabled(False)
+	self.ui.limits.wgBoundConf.setEnabled(False)
+	self.ui.limits.wgLabels.setEnabled(False)
         
         #Initializing the user combobox
         self.loadUser() 
@@ -142,9 +143,9 @@ class Timekpr (KCModule):
         self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.changed)
         self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.changed)
         
-        for i in range(6):
-	    for j in range(7):
-		self.connect(self.spin[i][j],SIGNAL('valueChanged(int)'),self.changed)		
+        for i in range(3):
+	    for j in range(8):
+		self.connect(self.spin[i][j],SIGNAL('timeChanged(QTime)'),self.changed)		
 		
         
 	#Ensure we have at least one available normal user otherwise we disable all the modules
@@ -175,19 +176,24 @@ class Timekpr (KCModule):
 	locale = KGlobal.locale()
         startday = locale.weekStartDay()
 	if startday == 7:
-	    self.ui.limits.vLineLimit = self.ui.limits.vLine_0
-	    self.ui.limits.vLineBound = self.ui.limits.vLine_7
-	    self.ui.limits.vLine_6.hide()
-	    self.ui.limits.vLine_13.hide()
+	    #self.ui.limits.vLineLimit = self.ui.limits.vLine_0
+	    #self.ui.limits.vLineBound = self.ui.limits.vLine_7
+	    #self.ui.limits.vLine_6.hide()
+	    #self.ui.limits.vLine_13.hide()
+	    print '7'
 	else:
-	    everydayLimit = self.ui.limits.lyLimitConfDay.takeAt(3)
-	    everydayBound = self.ui.limits.lyBoundConfDay.takeAt(3)
-	    self.ui.limits.lyLimitConfDay.addItem(everydayLimit)
-	    self.ui.limits.lyBoundConfDay.addItem(everydayBound)
-	    self.ui.limits.vLineLimit = self.ui.limits.vLine_6
-	    self.ui.limits.vLineBound = self.ui.limits.vLine_13
-	    self.ui.limits.vLine_0.hide()
-	    self.ui.limits.vLine_7.hide()
+	    #everydayLimit = self.ui.limits.lyLimitConfDay.takeAt(3)
+	    #everydayBound = self.ui.limits.lyBoundConfDay.takeAt(3)
+	    lbSunday = self.ui.limits.lyLabels.takeAt(2)
+	    self.ui.limits.lyLabels.addItem(lbSunday)
+	    spacer = self.ui.limits.lyLabels.takeAt(3)
+	    self.ui.limits.lyLabels.addItem(spacer)
+	    #self.ui.limits.lyLimitConfDay.addItem(everydayLimit)
+	    #self.ui.limits.lyBoundConfDay.addItem(everydayBound)
+	    #self.ui.limits.vLineLimit = self.ui.limits.vLine_6
+	    #self.ui.limits.vLineBound = self.ui.limits.vLine_13
+	    #self.ui.limits.vLine_0.hide()
+	    #self.ui.limits.vLine_7.hide()
 	
 	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
@@ -206,43 +212,84 @@ class Timekpr (KCModule):
     
     
     def enable_limit(self,checked):
+	self.enable_labels()
+	self.toggle_daily_labels()
         if checked:
-            self.ui.limits.wgLimitConfDay.setEnabled(True)
+            self.ui.limits.wgLimitConf.setEnabled(True)
         else:
-            self.ui.limits.wgLimitConfDay.setEnabled(False)
+            self.ui.limits.ckLimitDay.setChecked(False)
+            self.ui.limits.wgLimitConf.setEnabled(False)            
             
                         
     def enable_bound(self,checked):
+	self.enable_labels()
 	if checked:
-            self.ui.limits.wgBoundConfDay.setEnabled(True)
+            self.ui.limits.wgBoundConf.setEnabled(True)
         else:
-            self.ui.limits.wgBoundConfDay.setEnabled(False)  
+	    self.ui.limits.ckBoundDay.setChecked(False)
+            self.ui.limits.wgBoundConf.setEnabled(False)
             
             
     def toggle_daily_limit(self,checked):
+	self.toggle_daily_labels()
+	self.toggle_daily_labels()
         if checked:
-	    self.ui.limits.lbLimit_0.setText("Sunday")
-            self.ui.limits.wgLimitWeek.show()
-            self.ui.limits.vLineLimit.show()
+	    #self.ui.limits.lbLimit_0.setText("Sunday")
+            self.ui.limits.wgLimitEveryDay.setEnabled(False)
+            self.ui.limits.wgLimitWeek.setEnabled(True)
+            self.ui.limits.wgLimitSunday.setEnabled(True)
+            #self.ui.limits.vLineLimit.setEnabled(True)
         else:
-	    self.ui.limits.lbLimit_0.setText("Every day")
-            self.ui.limits.wgLimitWeek.hide()
-            self.ui.limits.vLineLimit.hide()
+	    #self.ui.limits.lbLimit_0.setText("Every day")
+            self.ui.limits.wgLimitWeek.setEnabled(False)
+            self.ui.limits.wgLimitSunday.setEnabled(False)
+            self.ui.limits.wgLimitEveryDay.setEnabled(True)
+            #self.ui.limits.vLineLimit.hide()
 
                 
     def toggle_daily_bound(self,checked):
+	self.toggle_daily_labels()
         if checked:
-            self.ui.limits.lbBound_0.setText("Sunday")
-            self.ui.limits.wgBoundWeek.show()
-            self.ui.limits.vLineBound.show()
+            #self.ui.limits.lbBound_0.setText("Sunday")
+            self.ui.limits.wgBoundEveryDay.setEnabled(False)
+            self.ui.limits.wgBoundWeek.setEnabled(True)
+            self.ui.limits.wgBoundSunday.setEnabled(True)
+            #self.ui.limits.vLineBound.setEnabled(True)
         else:
-            self.ui.limits.wgBoundWeek.hide()
-            self.ui.limits.lbBound_0.setText("Every day")
-            self.ui.limits.vLineBound.hide()
-        
-     
+            self.ui.limits.wgBoundWeek.setEnabled(False)
+            self.ui.limits.wgBoundSunday.setEnabled(False)
+            self.ui.limits.wgBoundEveryDay.setEnabled(True)
+            #self.ui.limits.lbBound_0.setText("Every day")
+            #self.ui.limits.vLineBound.setEnabled(False)
+ 
+ 
+    def enable_labels(self):
+        if self.ui.limits.ckLimit.isChecked() or self.ui.limits.ckBound.isChecked():
+            self.ui.limits.wgLabels.setEnabled(True)
+        else:
+            self.ui.limits.wgLabels.setEnabled(False)
+            
+            
+    def toggle_daily_labels(self):
+	limit = self.ui.limits.ckLimit.isChecked()
+	bound = self.ui.limits.ckBound.isChecked()
+	limitDay = self.ui.limits.ckLimitDay.isChecked()
+	boundDay = self.ui.limits.ckBoundDay.isChecked()
+	if limitDay or boundDay:
+	    self.ui.limits.wgLabelsSunday.setEnabled(True)
+	    self.ui.limits.wgLabelsWeek.setEnabled(True)
+	    if (limitDay and boundDay) or (not limit) or (not bound):
+		self.ui.limits.wgLabelsEveryDay.setEnabled(False)
+	    else:
+		self.ui.limits.wgLabelsEveryDay.setEnabled(True)
+	else:
+	    self.ui.limits.wgLabelsEveryDay.setEnabled(True)
+	    self.ui.limits.wgLabelsSunday.setEnabled(False)
+	    self.ui.limits.wgLabelsWeek.setEnabled(False)
+	
+    
     def get_spin(self):
-	self.spin = [list(),list(),list(),list(),list(),list()]
+	self.spin = [list(),list(),list()]
 	
 	self.spin[0].append(self.ui.limits.sbLimitHr_0)
         self.spin[0].append(self.ui.limits.sbLimitHr_1)
@@ -251,43 +298,46 @@ class Timekpr (KCModule):
         self.spin[0].append(self.ui.limits.sbLimitHr_4)
         self.spin[0].append(self.ui.limits.sbLimitHr_5)
         self.spin[0].append(self.ui.limits.sbLimitHr_6)
-        self.spin[1].append(self.ui.limits.sbLimitMn_0)
-        self.spin[1].append(self.ui.limits.sbLimitMn_1)
-        self.spin[1].append(self.ui.limits.sbLimitMn_2)
-        self.spin[1].append(self.ui.limits.sbLimitMn_3)
-        self.spin[1].append(self.ui.limits.sbLimitMn_4)
-        self.spin[1].append(self.ui.limits.sbLimitMn_5)
-        self.spin[1].append(self.ui.limits.sbLimitMn_6)
+        self.spin[0].append(self.ui.limits.sbLimitHr_7)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_0)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_1)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_2)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_3)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_4)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_5)
+        #self.spin[1].append(self.ui.limits.sbLimitMn_6)
         
-        self.spin[2].append(self.ui.limits.sbFromHr_0)
-        self.spin[2].append(self.ui.limits.sbFromHr_1)
-        self.spin[2].append(self.ui.limits.sbFromHr_2)
-        self.spin[2].append(self.ui.limits.sbFromHr_3)
-        self.spin[2].append(self.ui.limits.sbFromHr_4)
-        self.spin[2].append(self.ui.limits.sbFromHr_5)
-        self.spin[2].append(self.ui.limits.sbFromHr_6)
-        self.spin[3].append(self.ui.limits.sbFromMn_0)
-        self.spin[3].append(self.ui.limits.sbFromMn_1)
-        self.spin[3].append(self.ui.limits.sbFromMn_2)
-        self.spin[3].append(self.ui.limits.sbFromMn_3)
-        self.spin[3].append(self.ui.limits.sbFromMn_4)
-        self.spin[3].append(self.ui.limits.sbFromMn_5)
-        self.spin[3].append(self.ui.limits.sbFromMn_6)
+        self.spin[1].append(self.ui.limits.sbFromHr_0)
+        self.spin[1].append(self.ui.limits.sbFromHr_1)
+        self.spin[1].append(self.ui.limits.sbFromHr_2)
+        self.spin[1].append(self.ui.limits.sbFromHr_3)
+        self.spin[1].append(self.ui.limits.sbFromHr_4)
+        self.spin[1].append(self.ui.limits.sbFromHr_5)
+        self.spin[1].append(self.ui.limits.sbFromHr_6)
+        self.spin[1].append(self.ui.limits.sbFromHr_7)
+        #self.spin[3].append(self.ui.limits.sbFromMn_0)
+        #self.spin[3].append(self.ui.limits.sbFromMn_1)
+        #self.spin[3].append(self.ui.limits.sbFromMn_2)
+        #self.spin[3].append(self.ui.limits.sbFromMn_3)
+        #self.spin[3].append(self.ui.limits.sbFromMn_4)
+        #self.spin[3].append(self.ui.limits.sbFromMn_5)
+        #self.spin[3].append(self.ui.limits.sbFromMn_6)
         
-        self.spin[4].append(self.ui.limits.sbToHr_0)
-        self.spin[4].append(self.ui.limits.sbToHr_1)
-        self.spin[4].append(self.ui.limits.sbToHr_2)
-        self.spin[4].append(self.ui.limits.sbToHr_3)
-        self.spin[4].append(self.ui.limits.sbToHr_4)
-        self.spin[4].append(self.ui.limits.sbToHr_5)
-        self.spin[4].append(self.ui.limits.sbToHr_6)
-        self.spin[5].append(self.ui.limits.sbToMn_0)
-        self.spin[5].append(self.ui.limits.sbToMn_1)
-        self.spin[5].append(self.ui.limits.sbToMn_2)
-        self.spin[5].append(self.ui.limits.sbToMn_3)
-        self.spin[5].append(self.ui.limits.sbToMn_4)
-        self.spin[5].append(self.ui.limits.sbToMn_5)
-        self.spin[5].append(self.ui.limits.sbToMn_6)   
+        self.spin[2].append(self.ui.limits.sbToHr_0)
+        self.spin[2].append(self.ui.limits.sbToHr_1)
+        self.spin[2].append(self.ui.limits.sbToHr_2)
+        self.spin[2].append(self.ui.limits.sbToHr_3)
+        self.spin[2].append(self.ui.limits.sbToHr_4)
+        self.spin[2].append(self.ui.limits.sbToHr_5)
+        self.spin[2].append(self.ui.limits.sbToHr_6)
+        self.spin[2].append(self.ui.limits.sbToHr_7)
+        #self.spin[5].append(self.ui.limits.sbToMn_0)
+        #self.spin[5].append(self.ui.limits.sbToMn_1)
+        #self.spin[5].append(self.ui.limits.sbToMn_2)
+        #self.spin[5].append(self.ui.limits.sbToMn_3)
+        #self.spin[5].append(self.ui.limits.sbToMn_4)
+        #self.spin[5].append(self.ui.limits.sbToMn_5)
+        #self.spin[5].append(self.ui.limits.sbToMn_6)   
     
     
     #TODO:Use plasmadataengine if possible to save file access
@@ -580,11 +630,12 @@ class Timekpr (KCModule):
 	userGroup.writeEntry("bounded",self.ui.limits.ckBound.isChecked())
 	userGroup.writeEntry("boundedByDay",self.ui.limits.ckBoundDay.isChecked())
 	
-	for i in range(6):
+	for i in range(3):
 	    vector = list()
-	    for j in range(7):
-		vector.append(self.spin[i][j].value())
+	    for j in range(8):
+		vector.append(str(self.spin[i][j].time().toString("hh:mm")))
 	    userGroup.writeEntry(LABELS[i],json.dumps(vector))
+
 	
 	self.config.sync()
     
@@ -595,13 +646,10 @@ class Timekpr (KCModule):
 	self.ui.limits.ckBound.setChecked(self.status['bounded'])
 	self.ui.limits.ckBoundDay.setChecked(self.status['boundedByDay'])	
 	
-	for i in range(7):
-	    self.spin[0][i].setValue(self.limits[HR][i])
-	    self.spin[1][i].setValue(self.limits[MN][i])
-	    self.spin[2][i].setValue(self.time_from[HR][i])
-	    self.spin[3][i].setValue(self.time_from[MN][i])
-	    self.spin[4][i].setValue(self.time_to[HR][i])
-	    self.spin[5][i].setValue(self.time_to[MN][i])
+	#for i in range(7):
+	#    self.spin[0][i].setValue(self.limits[HR][i])
+	#    self.spin[1][i].setValue(self.limits[MN][i])
+	#    self.spin[2][i].setValue(self.time_from[HR][i])
     
     
 def CreatePlugin(widget_parent, parent, component_data):

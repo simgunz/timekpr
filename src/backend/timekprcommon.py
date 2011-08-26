@@ -23,7 +23,7 @@ NOBOUND, BOUND, NOBOUNDTODAY = range(3)
 NOLIMIT, LIMIT, NOLIMITTODAY = range(3)
 NORESET, RESET = range(2)
 HR, MN = range(2)
-LABELS = ['limits_hr','limits_mn','time_from_hr','time_from_mn','time_to_hr','time_to_mn']
+LABELS = ['limits','time_from','time_to']
 
 
 def get_version():
