@@ -163,8 +163,9 @@ def is_restricted_user(username, limit):
 
 
 def convert_limits(limits,index):
-	lims = limits[HR][index] * 3600 + limits[MN][index] * 60
-	return lims
+    hr,mn = map(int,limits[index].split(':'))
+    lims = hr * 3600 + mn * 60
+    return lims
 
 
 def getuserlimits(u):
@@ -200,9 +201,9 @@ def getuserlimits(u):
     
     
 def read_user_settings(user = None, conffile = None):  
-    limits = [[]]*2
-    time_from = [[]]*2
-    time_to = [[]]*2
+    limits = []
+    time_from = []
+    time_to = []
     status = dict()
     default = True
     
@@ -217,13 +218,10 @@ def read_user_settings(user = None, conffile = None):
 	var = get_variables()
 	config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
 	user = 'default'
-
-    limits[HR] = json.loads(config.get(user,LABELS[0]))
-    limits[MN] = json.loads(config.get(user,LABELS[1]))
-    time_from[HR] = json.loads(config.get(user,LABELS[2]))
-    time_from[MN] = json.loads(config.get(user,LABELS[3]))
-    time_to[HR] = json.loads(config.get(user,LABELS[4]))
-    time_to[MN] = json.loads(config.get(user,LABELS[5]))    
+    
+    limits    = json.loads( config.get(user,LABELS[0]).replace("'",'"') )
+    time_from = json.loads( config.get(user,LABELS[1]).replace("'",'"') )
+    time_to   = json.loads( config.get(user,LABELS[2]).replace("'",'"') )   
     #status['locked'] = config.getboolean(user,'locked')
     status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
@@ -238,20 +236,23 @@ def parse_settings(settings):
     if settings[3]['limited']:
 	if settings[3]['limitedByDay']:
 	    limits = settings[0]
+	    limits.pop(0)
 	else:
-	    limits = [ [settings[0][HR][0]]*7 , [settings[0][MN][0]]*7 ]
+	    limits = [settings[0][0]]*7
+	    print limits
     else:
-	limits = [ [24]*7 , [0]*7 ]
+	limits = ['24:00']*7
 	
     if settings[3]['bounded']:
 	if settings[3]['boundedByDay']:
 	    time_from = settings[1]
-	    time_to = settings[2]
+	    time_to =   settings[2]
+	    time_from.pop(0)
+	    time_to.pop(0)
 	else:
-	    time_from = [ [settings[1][HR][0]]*7 , [settings[1][MN][0]]*7 ]
-	    time_to = [ [settings[2][HR][0]]*7 , [settings[2][MN][0]]*7 ]
+	    time_from = [settings[1][0]]*7 
+	    time_to =   [settings[2][0]]*7
     else:
-	time_from = [ [0]*7 , [0]*7 ]
-	time_to = [ [24]*7 , [0]*7 ]
-	
+	time_from = ['00:00']*7
+	time_to =   ['24:00']*7
     return limits, time_from, time_to

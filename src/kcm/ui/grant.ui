@@ -164,7 +164,7 @@
       </widget>
      </item>
      <item>
-      <widget class="KIntSpinBox" name="sbAddTime1">
+      <widget class="KIntSpinBox" name="sbAddTime">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>

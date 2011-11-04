@@ -104,10 +104,7 @@ def lockuser(u, f='/etc/security/access.conf'):
 
 ## Read/write time.conf
 def hourize(n):
-    """Makes integers, e.g. 7 into 0700, or 22 into 2200 - used in converttimeline()"""
-    if int(n) < 10:
-        return '0%s00' % n
-    return '%s00' % n
+    return n.replace(':','')
 
 def converttimeline(hfrom, hto):
     """Converts a list of hours (from and to limits) into a time.conf line
