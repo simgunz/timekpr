@@ -90,19 +90,20 @@ class Timekpr (KCModule):
         
         #Create the layout using group box 
         #Since the UI is modular it's possible to change this layout for displaying the UI modules in tab, etc
-        self.ui.lyStatus = QVBoxLayout(self.ui.gbStatus)
         self.ui.lyStatus.addWidget(self.ui.status)
-        self.ui.lyGrant = QVBoxLayout(self.ui.gbGrant)
+        self.ui.lyGrant = QVBoxLayout(self.ui.tbGrant)
         self.ui.lyGrant.addWidget(self.ui.grant)
-        self.ui.lyLimitBound = QVBoxLayout(self.ui.gbLimitBound)
+        self.ui.lyLimitBound = QVBoxLayout(self.ui.tbLimitBound)
         self.ui.lyLimitBound.addWidget(self.ui.limits)            
+        #self.ui.lyLimitBound.insertStretch(-1)
         self.lyMainLayout = QVBoxLayout(self)
         self.lyMainLayout.addWidget(self.ui)
+        #self.lyMainLayout.insertStretch(-1)
         
         #Disable the limits by default
         self.ui.limits.wgLimitConf.setEnabled(False)
 	self.ui.limits.wgBoundConf.setEnabled(False)
-	self.ui.limits.wgLabels.setEnabled(False)
+	#self.ui.limits.wgLabels.setEnabled(False)
         
         #Initializing the user combobox
         self.loadUser() 
@@ -112,7 +113,7 @@ class Timekpr (KCModule):
         self.status = dict()
         
         #Set the format of the week
-        self.set_week_format()
+        #self.set_week_format()
 
         ##Timer initializing
         self.timer = QTimer()
@@ -170,6 +171,8 @@ class Timekpr (KCModule):
 	aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")
 	
 	return aboutdata
+	
+    #def buildUI(self):
 	
 	
     def set_week_format(self):
@@ -231,8 +234,8 @@ class Timekpr (KCModule):
             
             
     def toggle_daily_limit(self,checked):
-	self.toggle_daily_labels()
-	self.toggle_daily_labels()
+	#self.toggle_daily_labels()
+	#self.toggle_daily_labels()
         if checked:
 	    #self.ui.limits.lbLimit_0.setText("Sunday")
             self.ui.limits.wgLimitEveryDay.setEnabled(False)
@@ -248,7 +251,7 @@ class Timekpr (KCModule):
 
                 
     def toggle_daily_bound(self,checked):
-	self.toggle_daily_labels()
+	#self.toggle_daily_labels()
         if checked:
             #self.ui.limits.lbBound_0.setText("Sunday")
             self.ui.limits.wgBoundEveryDay.setEnabled(False)
