@@ -163,12 +163,14 @@ def is_restricted_user(username, limit):
 
 
 def convert_limits(limits,index):
-    hr,mn = map(int,limits[index].split(':'))
+    hr = int(limits[index][0:2])
+    mn = int(limits[index][2:4])
     lims = hr * 3600 + mn * 60
     return lims
 
 def convert_bounds(bounds,index):
-    hr,mn = map(int,bounds[index].split(':'))
+    hr = int(bounds[index][0:2])
+    mn = int(bounds[index][2:4])
     return hr,mn 
 
 def getuserlimits(u):
@@ -243,7 +245,7 @@ def parse_settings(settings):
 	else:
 	    limits = [settings[0][7]]*7
     else:
-	limits = ['24:00']*7
+	limits = ['2400']*7
 	
     if settings[3]['bounded']:
 	if settings[3]['boundedByDay']:
@@ -255,6 +257,6 @@ def parse_settings(settings):
 	    time_from = [settings[1][7]]*7 
 	    time_to =   [settings[2][7]]*7
     else:
-	time_from = ['00:00']*7
-	time_to =   ['24:00']*7
+	time_from = ['0000']*7
+	time_to =   ['2400']*7
     return limits, time_from, time_to

@@ -103,8 +103,6 @@ def lockuser(u, f='/etc/security/access.conf'):
     return True
 
 ## Read/write time.conf
-def hourize(n):
-    return n.replace(':','')
 
 def converttimeline(hfrom, hto):
     """Converts a list of hours (from and to limits) into a time.conf line
@@ -112,7 +110,7 @@ def converttimeline(hfrom, hto):
     Arguments hfrom and hto MUST be lists and text strings inside, e.g.
      ['0','0','0','0','0','0','0']
     Does NOT support all of the features of time.conf, e.g. negation!
-
+    
     """
     if len(hfrom) != 7 or len(hto) != 7:
         exit('Error: converttimeline accepts from-to lists of 7 items each')
@@ -121,16 +119,16 @@ def converttimeline(hfrom, hto):
     mto = re.compile('^(\d+) \\1 \\1 \\1 \\1 \\1 \\1$').search(' '.join(hto))
     #return Al0700-2400
     if mfrom and mto:
-        return 'Al' + hourize(mfrom.group(1)) + '-' + hourize(mto.group(1))
+        return 'Al' + mfrom.group(1) + '-' + mto.group(1)
     
     #or if all days separate
-    su = 'Su' + hourize(hfrom[0]) + '-' + hourize(hto[0])
-    mo = 'Mo' + hourize(hfrom[1]) + '-' + hourize(hto[1])
-    tu = 'Tu' + hourize(hfrom[2]) + '-' + hourize(hto[2])
-    we = 'We' + hourize(hfrom[3]) + '-' + hourize(hto[3])
-    th = 'Th' + hourize(hfrom[4]) + '-' + hourize(hto[4])
-    fr = 'Fr' + hourize(hfrom[5]) + '-' + hourize(hto[5])
-    sa = 'Sa' + hourize(hfrom[6]) + '-' + hourize(hto[6])
+    su = 'Su' + hfrom[0] + '-' + hto[0]
+    mo = 'Mo' + hfrom[1] + '-' + hto[1]
+    tu = 'Tu' + hfrom[2] + '-' + hto[2]
+    we = 'We' + hfrom[3] + '-' + hto[3]
+    th = 'Th' + hfrom[4] + '-' + hto[4]
+    fr = 'Fr' + hfrom[5] + '-' + hto[5]
+    sa = 'Sa' + hfrom[6] + '-' + hto[6]
     return ' | '.join([su, mo, tu, we, th, fr, sa])
 
 

@@ -229,18 +229,25 @@ while (True):
 	    
 	    fromHR,fromMN = convert_bounds(bfrom,index)
 	    toHR,toMN = convert_bounds(bto,index)
+	    
+	    print hour
+	    print minute
+	    print fromHR
+	    print fromMN
+	    print toHR
+	    print toMN
             # Compare: is current hour less than the one in bfrom list?
             if ( (hour < fromHR) or ( (hour == fromHR) and (minute < fromMN) ) ):
                 logkpr('Current hour less than the defined hour in conffile for user %s' % username)
                 if isfile(allowfile):
                     if not from_today(allowfile):
                         logkpr('Extended login hours detected from %s.allow, but not from today' % username)
-                        thread_it(0.5, logOut, username)
+                        #thread_it(0.5, logOut, username)
                         remove(allowfile)
                 else:
                     # User has not been given extended login hours
                     logkpr('Extended hours not detected, %s not in allowed period from-to' %username)
-                    thread_it(0.5, logOut, username)
+                    #thread_it(0.5, logOut, username)
 
             # Compare: is current hour greater/equal to $to array?
             if ( (hour > toHR) or ( (hour == toHR) and (minute > toMN) ) ):
@@ -253,14 +260,14 @@ while (True):
                         if isfile(latefile):
                             if from_today(latefile):
                                 logkpr('User %s has been late-kicked today' % username)
-                                thread_it(0.5, logOut, username)
+                                #thread_it(0.5, logOut, username)
                                 remove(allowfile)
                                 #Lock account
                                 lock_account(username)
                             else:
                                 logkpr('User %s has NOT been late-kicked today' % username)
-                                thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
-                                thread_it(float(VAR['GRACEPERIOD']), remove, allowfile)
+                                #thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
+                                #thread_it(float(VAR['GRACEPERIOD']), remove, allowfile)
                                 add_notified(username)
                                 thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                                 lock_account(username)
@@ -271,12 +278,12 @@ while (True):
                     logkpr('Extended hours and %s.allow file not detected, %s not in allowed period from-to' % (username, username))
                     if isfile(latefile) and from_today(latefile):
                         logkpr('User %s has been late-kicked today' % username)
-                        thread_it(0.5, logOut, username)
+                        #thread_it(0.5, logOut, username)
                         #Lock account
                         lock_account(username)
                     else:
                         logkpr('User %s has NOT been late-kicked today' % username)
-                        thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
+                        #thread_it(float(VAR['GRACEPERIOD']), logOut, username, latefile)
                         add_notified(username)
                         thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                         lock_account(username)
@@ -292,20 +299,20 @@ while (True):
                     # Was he kicked out today?
                     if from_today(logoutfile):
                         logkpr('%s has been kicked out today' % username)
-                        thread_it(0.5, logOut, username)
+                        #thread_it(0.5, logOut, username)
                         #Lock account
                         lock_account(username)
                     else:
                         # The user has not been kicked out today
                         logkpr('%s has been kicked out, but not today' % username)
-                        thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
+                        #thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
                         add_notified(username)
                         thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                         lock_account(username)
                 else:
                     # The user has not been kicked out before
                     logkpr('Not found: %s.logout' % username)
-                    thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
+                    #thread_it(float(VAR['GRACEPERIOD']), logOut, username, logoutfile)
                     add_notified(username)
                     thread_it(VAR['GRACEPERIOD'], remove_notified, username)
                     lock_account(username)

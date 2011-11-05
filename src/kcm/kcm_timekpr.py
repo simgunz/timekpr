@@ -295,7 +295,7 @@ class Timekpr (KCModule):
 		dayIndex = int(strftime("%w"))
 		limit = convert_limits(self.limits,dayIndex)
 	    else:
-		limit = convert_limits(self.limits,0)
+		limit = convert_limits(self.limits,7)
 	return limit
 	    
 	    
@@ -570,7 +570,7 @@ class Timekpr (KCModule):
 	for i in range(3):
 	    vector = list()
 	    for j in range(8):
-		vector.append(str(self.spin[i][j].time().toString("hh:mm")))
+		vector.append(str(self.spin[i][j].time().toString("hhmm")))
 	    userGroup.writeEntry(LABELS[i],json.dumps(vector))
 
 	
@@ -584,9 +584,9 @@ class Timekpr (KCModule):
 	self.ui.limits.ckBoundDay.setChecked(self.status['boundedByDay'])	
 	
 	for i in range(8):
-	    self.spin[0][i].setTime(QTime.fromString(self.limits[i],'hh:mm'))
-	    self.spin[1][i].setTime(QTime.fromString(self.time_from[i],'hh:mm'))
-	    self.spin[2][i].setTime(QTime.fromString(self.time_to[i],'hh:mm'))
+	    self.spin[0][i].setTime(QTime.fromString(self.limits[i],'hhmm'))
+	    self.spin[1][i].setTime(QTime.fromString(self.time_from[i],'hhmm'))
+	    self.spin[2][i].setTime(QTime.fromString(self.time_to[i],'hhmm'))
     
     
 def CreatePlugin(widget_parent, parent, component_data):
