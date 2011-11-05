@@ -172,37 +172,6 @@ def convert_bounds(bounds,index):
     hr = int(bounds[index][0:2])
     mn = int(bounds[index][2:4])
     return hr,mn 
-
-def getuserlimits(u):
-    """Gets user from-to time limitations defined in time.conf
-    
-    Argument: username
-    Return example:
-        [0] = from ['0', '0', '0', '0', '0', '0', '0']
-        [1] = to ['24', '24', '24', '24', '24', '24', '24']
-
-    """
-    hrFrom = ['0', '0', '0', '0', '0', '0', '0']
-    hrTo =  ['24', '24', '24', '24', '24', '24', '24']
-    mnFrom = ['0', '0', '0', '0', '0', '0', '0']
-    mnTo = ['0', '0', '0', '0', '0', '0', '0']
-    
-    config = ConfigParser()
-    var = get_variables()
-    config.read(var['TIMEKPRDIR'] + '/timekprrc')
-    
-    if config.has_section(u):
-	for i in range(7):
-	    hrFrom[i] = config.getint(u,"fromHr_" + str(i))
-	    mnFrom[i] = config.getint(u,"fromMn_" + str(i))
-	    hrTo[i] = config.getint(u,"toHr_" + str(i))
-	    mnTo[i] = config.getint(u,"toMn_" + str(i))
-
-    #ls = parseutlist(parsetimeconf())
-    #for user, [bfrom, bto] in ls:
-    #    if u == user:
-    #        return [bfrom, bto]
-    return [hrFrom, hrTo, mnFrom, mnTo]
     
     
 def read_user_settings(user = None, conffile = None):  
