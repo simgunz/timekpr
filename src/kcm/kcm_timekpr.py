@@ -276,8 +276,7 @@ class Timekpr (KCModule):
 	if self.status['limited'] != 1:
 	    self.ui.status.lbTimeLeftStatus.setText("Not limited")     
 	else:
-	    left = self.get_time_left()
-	    hours, minutes = sec_to_hr_mn(left)
+	    hours, minutes = self.get_time_left()
 	    self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hr " + str(minutes) + " min")     
 	    self.reset_button_state()
     
@@ -285,8 +284,12 @@ class Timekpr (KCModule):
     def get_time_left(self):
 	limit = self.get_limit()
 	used = self.get_used_time()
-	return limit - used
-	
+	left = limit - used
+	left = max(0,left)
+	currentime = int(strftime("%H")) * 3600 + int(strftime("%M")) * 60
+	lefttoday = 86400 - currentime 
+	left = min(lefttoday,left)
+	return sec_to_hr_mn(left)
                 
     def get_limit(self):
 	limit = 86400
@@ -501,10 +504,17 @@ class Timekpr (KCModule):
 	if not rewardtime:
 	    return
 	limit = self.get_limit()
-	used = self.get_used_time()
+	used = self.get_used_time() 
 	time = used - rewardtime
-	time = max(time,limit - 86400)
+	#time = max(time,limit - 86400)
+	currenttime = int(strftime("%H")) * 3600 + int(strftime("%M")) * 60
+	lefttoday = 86400 - currenttime 	
+	time = max(time,limit - lefttoday)
 	time = min(time,limit)
+	#time = max(time,currenttime)
+	
+	
+	
 	
 	args['time'] = time
 	reply = self.executePermissionsAction(args)
