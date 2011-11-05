@@ -167,7 +167,7 @@ def convert_limits(limits,index):
     lims = hr * 3600 + mn * 60
     return lims
 
-def convert_bounds(bound,index):
+def convert_bounds(bounds,index):
     hr,mn = map(int,bounds[index].split(':'))
     return hr,mn 
 
@@ -239,9 +239,9 @@ def parse_settings(settings):
     if settings[3]['limited']:
 	if settings[3]['limitedByDay']:
 	    limits = settings[0]
-	    limits.pop(0)
+	    limits.pop()
 	else:
-	    limits = [settings[0][0]]*7
+	    limits = [settings[0][7]]*7
     else:
 	limits = ['24:00']*7
 	
@@ -249,11 +249,11 @@ def parse_settings(settings):
 	if settings[3]['boundedByDay']:
 	    time_from = settings[1]
 	    time_to =   settings[2]
-	    time_from.pop(0)
-	    time_to.pop(0)
+	    time_from.pop()
+	    time_to.pop()
 	else:
-	    time_from = [settings[1][0]]*7 
-	    time_to =   [settings[2][0]]*7
+	    time_from = [settings[1][7]]*7 
+	    time_to =   [settings[2][7]]*7
     else:
 	time_from = ['00:00']*7
 	time_to =   ['24:00']*7

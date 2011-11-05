@@ -201,11 +201,9 @@ while (True):
         THISDAY = strftime("%Y%m%d")
     
     # Get the usernames and PIDs of sessions
-    print get_users()
     for username in get_users():
         conffile = VAR['TIMEKPRDIR'] + '/' + username
         # Check if user configfile exists and if user was not already notified
-        print 'inin'
         if not is_notified(username):
             logkpr('configuration file for %s exists' % username)
             # Read lists: from, to and limit
@@ -213,7 +211,6 @@ while (True):
             limits, bfrom, bto = parse_settings(settings)
 	    
             timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
-            print timefile
             allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
             latefile = VAR['TIMEKPRWORK'] + '/' + username + '.late'
             logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
