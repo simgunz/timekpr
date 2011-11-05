@@ -44,6 +44,9 @@
 #include <KConfigDialog>
 #include <KCModuleProxy>
 
+#include <QDebug>
+#include <QTimer>
+
 TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
     m_theme(this),
@@ -74,6 +77,8 @@ TimekprApplet::~TimekprApplet()
 void TimekprApplet::init()
 {
     // A small demonstration of the setFailedToLaunch function
+    m_user = getenv("USER");
+    m_dataengine = dataEngine("timekpr");
     extender()->setEmptyExtenderMessage(i18n("Timekpr not running..."));
     if (m_icon.isNull()) {
         setFailedToLaunch(true, i18n("No world to say hello"));
@@ -87,9 +92,13 @@ void TimekprApplet::init()
 	initExtenderItem(eItem);
     }
 
-    Plasma::ToolTipContent tooltip("Main text", "SubText", KIcon("timekpr"));
-    Plasma::ToolTipManager::self()->setContent(this, tooltip);
+    m_tooltip.setMainText("User: " + m_user);
+    m_tooltip.setImage(KIcon("timekpr"));
+    m_tooltip.setAutohide(false);
+    Plasma::ToolTipManager::self()->setContent(this,m_tooltip);
     
+    m_timer.setInterval(1000);
+    connect(&m_timer, SIGNAL(timeout()), this, SLOT(updateTooltip()));
 }
 
 void TimekprApplet::createConfigurationInterface(KConfigDialog *parent)
@@ -107,8 +116,26 @@ void TimekprApplet::toolTipAboutToShow()
 {
     //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
     //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
+    Plasma::DataEngine::Data data = m_dataengine->query(m_user);
+    m_timeleft = data["time_left"].toInt();
+    updateTooltip();
+    m_timer.start();
 }
 
+void TimekprApplet::toolTipHidden()
+{
+    m_timer.stop();
+    m_timeleft = 0;
+}
+
+void TimekprApplet::updateTooltip()
+{
+    QString left;
+    left.append(QString("%1").arg(m_timeleft));
+    m_timeleft--;
+    m_tooltip.setSubText("Time left fo today: " + left);
+    Plasma::ToolTipManager::self()->setContent(this, m_tooltip);
+}
 
 void TimekprApplet::initExtenderItem(Plasma::ExtenderItem *item)
 {

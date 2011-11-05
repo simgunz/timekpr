@@ -120,11 +120,20 @@ def is_file_ok(fname):
         return True
     return False
 
+#def get_users():
+#    u = get_cmd_output('users')
+#    u = u.split()
+#    u = set(u)
+#    return list(u)
+
 def get_users():
-    u = get_cmd_output('users')
-    u = u.split()
-    u = set(u)
-    return list(u)
+    users = list()
+    rawusers = get_cmd_output('last')
+    rawloggedusers = re.findall('(^.*)still logged in',rawusers,re.M)
+    for i in rawloggedusers:
+	users.append(re.split(' ',i)[0])
+    users = set(users)
+    return users
 
 def is_session_alive(user):
     # Checking if session process still running
