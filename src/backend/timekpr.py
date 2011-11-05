@@ -230,8 +230,10 @@ while (True):
 
             logkpr('User: %s Day-Index: %s Seconds-passed: %s' % (username, index, time))
 	    
+	    fromHR,fromMN = convert_bounds(bfrom,index)
+	    toHR,toMN = convert_bounds(bto,index)
             # Compare: is current hour less than the one in bfrom list?
-            if ( (hour < bfrom[HR][index]) or ( (hour == bfrom[HR][index]) and (minute < bfrom[MN][index]) ) ):
+            if ( (hour < fromHR) or ( (hour == fromHR) and (minute < fromMN) ) ):
                 logkpr('Current hour less than the defined hour in conffile for user %s' % username)
                 if isfile(allowfile):
                     if not from_today(allowfile):
@@ -244,7 +246,7 @@ while (True):
                     thread_it(0.5, logOut, username)
 
             # Compare: is current hour greater/equal to $to array?
-            if ( (hour > bto[HR][index]) or ( (hour == bto[HR][index]) and (minute > bto[MN][index]) ) ):
+            if ( (hour > toHR) or ( (hour == toHR) and (minute > toMN) ) ):
                 logkpr('Current hour greater than the defined hour in conffile for user %s' % username)
                 # Has the user been given extended login hours?
                 if isfile(allowfile):

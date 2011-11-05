@@ -113,7 +113,7 @@ class Timekpr (KCModule):
         self.status = dict()
         
         #Set the format of the week
-        #self.set_week_format()
+        self.set_week_format()
 
         ##Timer initializing
         self.timer = QTimer()
@@ -134,8 +134,11 @@ class Timekpr (KCModule):
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
+        self.connect(self.ui.grant.btnUnlockAccount,SIGNAL('clicked()'),self.lockunlock)
         self.connect(self.ui.grant.btnBoundBypass,SIGNAL('clicked()'),self.bypass_time_frame)
+        self.connect(self.ui.grant.btnClearBoundBypass,SIGNAL('clicked()'),self.bypass_time_frame)
         self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
+        self.connect(self.ui.grant.btnClearLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
         self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clear_all_restrictions)
@@ -158,6 +161,8 @@ class Timekpr (KCModule):
 	#Needed for using KAuth authentication
         self.setNeedsAuthorization(True)
    
+   
+   
 #Function definition
     def MakeAboutData(self):
 	aboutdata = KAboutData("kcmtimekpr", "userconfig", ki18n("Timekpr control module"), "0.4",
@@ -172,31 +177,15 @@ class Timekpr (KCModule):
 	
 	return aboutdata
 	
-    #def buildUI(self):
-	
 	
     def set_week_format(self):
 	locale = KGlobal.locale()
         startday = locale.weekStartDay()
-	if startday == 7:
-	    #self.ui.limits.vLineLimit = self.ui.limits.vLine_0
-	    #self.ui.limits.vLineBound = self.ui.limits.vLine_7
-	    #self.ui.limits.vLine_6.hide()
-	    #self.ui.limits.vLine_13.hide()
-	    print '7'
-	else:
-	    #everydayLimit = self.ui.limits.lyLimitConfDay.takeAt(3)
-	    #everydayBound = self.ui.limits.lyBoundConfDay.takeAt(3)
-	    lbSunday = self.ui.limits.lyLabels.takeAt(2)
-	    self.ui.limits.lyLabels.addItem(lbSunday)
-	    spacer = self.ui.limits.lyLabels.takeAt(3)
-	    self.ui.limits.lyLabels.addItem(spacer)
-	    #self.ui.limits.lyLimitConfDay.addItem(everydayLimit)
-	    #self.ui.limits.lyBoundConfDay.addItem(everydayBound)
-	    #self.ui.limits.vLineLimit = self.ui.limits.vLine_6
-	    #self.ui.limits.vLineBound = self.ui.limits.vLine_13
-	    #self.ui.limits.vLine_0.hide()
-	    #self.ui.limits.vLine_7.hide()
+	if startday != 7:
+	    sundayLimit = self.ui.limits.lyLimitWeek.takeAt(0)
+	    self.ui.limits.lyLimitWeek.addItem(sundayLimit)
+	    sundayBound = self.ui.limits.lyBoundWeek.takeAt(0)
+	    self.ui.limits.lyBoundWeek.addItem(sundayBound)
 	
 	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
@@ -211,85 +200,45 @@ class Timekpr (KCModule):
             if isnormal(userinfo[0],int(userinfo[2])):
 		self.ui.cbActiveUser.addItem(userinfo[0])               
         self.ui.cbActiveUser.setCurrentIndex(0)
-        #TODO:Set index to 1 (just for testing)
     
     
     def enable_limit(self,checked):
-	#self.enable_labels()
-	#self.toggle_daily_labels()
         if checked:
             self.ui.limits.wgLimitConf.setEnabled(True)
         else:
-            self.ui.limits.ckLimitDay.setChecked(False)
+            #self.ui.limits.ckLimitDay.setChecked(False)
             self.ui.limits.wgLimitConf.setEnabled(False)            
             
                         
     def enable_bound(self,checked):
-	#self.enable_labels()
 	if checked:
             self.ui.limits.wgBoundConf.setEnabled(True)
         else:
-	    self.ui.limits.ckBoundDay.setChecked(False)
+	    #self.ui.limits.ckBoundDay.setChecked(False)
             self.ui.limits.wgBoundConf.setEnabled(False)
             
             
     def toggle_daily_limit(self,checked):
-	#self.toggle_daily_labels()
-	#self.toggle_daily_labels()
         if checked:
-	    #self.ui.limits.lbLimit_0.setText("Sunday")
             self.ui.limits.wgLimitEveryDay.hide()
             self.ui.limits.wgLimitWeek.show()
             self.ui.limits.wgLimitSunday.show()
-            #self.ui.limits.vLineLimit.setEnabled(True)
         else:
-	    #self.ui.limits.lbLimit_0.setText("Every day")
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.wgLimitSunday.hide()
             self.ui.limits.wgLimitEveryDay.show()
-            #self.ui.limits.vLineLimit.hide()
 
                 
     def toggle_daily_bound(self,checked):
-	#self.toggle_daily_labels()
         if checked:
-            #self.ui.limits.lbBound_0.setText("Sunday")
             self.ui.limits.wgBoundEveryDay.hide()
             self.ui.limits.wgBoundWeek.show()
             self.ui.limits.wgBoundSunday.show()
-            #self.ui.limits.vLineBound.show()
         else:
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.wgBoundSunday.hide()
-            self.ui.limits.wgBoundEveryDay.show()
-            #self.ui.limits.lbBound_0.setText("Every day")
-            #self.ui.limits.vLineBound.setEnabled(False)
- 
- 
-    def enable_labels(self):
-        if self.ui.limits.ckLimit.isChecked() or self.ui.limits.ckBound.isChecked():
-            self.ui.limits.wgLabels.setEnabled(True)
-        else:
-            self.ui.limits.wgLabels.setEnabled(False)
-            
-            
-    def toggle_daily_labels(self):
-	limit = self.ui.limits.ckLimit.isChecked()
-	bound = self.ui.limits.ckBound.isChecked()
-	limitDay = self.ui.limits.ckLimitDay.isChecked()
-	boundDay = self.ui.limits.ckBoundDay.isChecked()
-	if limitDay or boundDay:
-	    self.ui.limits.wgLabelsSunday.setEnabled(True)
-	    self.ui.limits.wgLabelsWeek.setEnabled(True)
-	    if (limitDay and boundDay) or (not limit) or (not bound):
-		self.ui.limits.wgLabelsEveryDay.setEnabled(False)
-	    else:
-		self.ui.limits.wgLabelsEveryDay.setEnabled(True)
-	else:
-	    self.ui.limits.wgLabelsEveryDay.setEnabled(True)
-	    self.ui.limits.wgLabelsSunday.setEnabled(False)
-	    self.ui.limits.wgLabelsWeek.setEnabled(False)
-	
+            self.ui.limits.wgBoundEveryDay.show()	
+    
     
     def get_spin(self):
 	self.spin = [list(),list(),list()]
@@ -324,12 +273,12 @@ class Timekpr (KCModule):
     
     #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
-	if not self.status['limited']:
+	if self.status['limited'] != 1:
 	    self.ui.status.lbTimeLeftStatus.setText("Not limited")     
 	else:
 	    left = self.get_time_left()
 	    hours, minutes = sec_to_hr_mn(left)
-	    self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hours " + str(minutes) + " min")     
+	    self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hr " + str(minutes) + " min")     
 	    self.reset_button_state()
     
     
@@ -338,8 +287,7 @@ class Timekpr (KCModule):
 	used = self.get_used_time()
 	return limit - used
 	
-        
-        
+                
     def get_limit(self):
 	limit = 86400
         if self.status['limited']:
@@ -361,29 +309,31 @@ class Timekpr (KCModule):
         return used
           
     def statusicons(self):
-	if not isuserlimitedtoday(self.user) and not self.status['locked']:
-	    self.ui.status.lbAllDayLoginStatus.setText("Yes")
+	if (not self.status['bounded'] or self.status['bounded']==2) and not self.status['locked']:
+	    self.ui.status.ldAllDayLoginStatus.on()
 	else:
-	    self.ui.status.lbAllDayLoginStatus.setText("No")
+	    self.ui.status.ldAllDayLoginStatus.off()
 	
 	if self.status['locked']:
-	    self.ui.status.lbLockStatus.setText("Yes")
+	    self.ui.status.ldLockStatus.on()
 	else:
-	    self.ui.status.lbLockStatus.setText("No")
+	    self.ui.status.ldLockStatus.off()
 	    
 	if self.status['bounded'] == BOUND:
-	    self.ui.status.lbBoundStatus.setText("Yes")
+	    self.ui.status.ldBoundStatus.on()
 	elif self.status['bounded'] == NOBOUND:
-	    self.ui.status.lbBoundStatus.setText("No")
+	    self.ui.status.ldBoundStatus.off()
 	else:
-	    self.ui.status.lbBoundStatus.setText("No (just for today)")
+	    self.ui.status.ldBoundStatus.off()
+	    #TODO:Add just for today label
 	    
 	if self.status['limited'] == LIMIT:
-	    self.ui.status.lbLimitStatus.setText("Yes")
+	    self.ui.status.ldLimitStatus.on()
 	elif self.status['limited'] == NOLIMIT:
-	    self.ui.status.lbLimitStatus.setText("No")
+	    self.ui.status.ldLimitStatus.off()
 	else:
-	    self.ui.status.lbLimitStatus.setText("No (just for today)")
+	    self.ui.status.ldLimitStatus.off()
+	    #TODO:Add just for today label
 	
 	self.update_time_left()
 	    
@@ -397,33 +347,40 @@ class Timekpr (KCModule):
 	    
     def buttonstates(self):
 	if self.status['locked']:
-	    self.ui.grant.btnLockAccount.setText("Unlock account")
+	    self.ui.grant.btnLockAccount.setEnabled(False)
+	    self.ui.grant.btnUnlockAccount.setEnabled(True)
 	else:
-	    self.ui.grant.btnLockAccount.setText("Lock account")
+	    self.ui.grant.btnLockAccount.setEnabled(True)
+	    self.ui.grant.btnUnlockAccount.setEnabled(False)
 	    
-	self.ui.grant.btnBoundBypass.setText("Bypass time frame for today")
+	
 	if self.status['bounded']:
-	    if self.status['bounded']==1:
+	    if self.status['bounded'] == BOUND:
 		index = int(strftime("%w"))
-		wfrom = self.time_from[0]
-		wto = self.time_to[0]
-		if wfrom[index] != '0' or wto[index] != '24':
+		wfrom = self.time_from
+		wto = self.time_to
+		if wfrom[index] != '00:00' or wto[index] != '24:00':
 		    self.ui.grant.btnBoundBypass.setEnabled(True)
+		    self.ui.grant.btnClearBoundBypass.setEnabled(False)
 		else:
 		    self.ui.grant.btnBoundBypass.setEnabled(False)
+		    self.ui.grant.btnClearBoundBypass.setEnabled(True)
 	    else:
-		self.ui.grant.btnBoundBypass.setText("Clear bypass time frame for today")
-		self.ui.grant.btnBoundBypass.setEnabled(True)
+		self.ui.grant.btnBoundBypass.setEnabled(False)
+		self.ui.grant.btnClearBoundBypass.setEnabled(True)
 	else:
 	    self.ui.grant.btnBoundBypass.setEnabled(False)
-	 
-	self.ui.grant.btnLimitBypass.setText("Bypass access duration for today") 
+	    self.ui.grant.btnClearBoundBypass.setEnabled(False)
+	
+	
+	
 	if self.status['limited'] == LIMIT:
 	    timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
             #if isfile(timefile):
 	    self.reset_button_state()
 	    #Reward button should add time even if .time is not there?
 	    self.ui.grant.btnLimitBypass.setEnabled(True)
+	    self.ui.grant.btnClearLimitBypass.setEnabled(False)
 	    self.ui.grant.btnAddTime.setEnabled(True)
 	    self.ui.grant.sbAddTime.setEnabled(True)
 	    self.ui.grant.lbAddTime.setEnabled(True)
@@ -434,10 +391,11 @@ class Timekpr (KCModule):
 	    self.ui.grant.lbAddTime.setEnabled(False)
 	    if self.status['limited'] == NOLIMIT:
 		self.ui.grant.btnLimitBypass.setEnabled(False)
+		self.ui.grant.btnClearLimitBypass.setEnabled(False)
 	    else:
-		self.ui.grant.btnLimitBypass.setText("Clear bypass access duration for today")
-		self.ui.grant.btnLimitBypass.setEnabled(True)
-	
+		self.ui.grant.btnLimitBypass.setEnabled(False)
+		self.ui.grant.btnClearLimitBypass.setEnabled(True)
+		
 	if ((self.status['locked'] == LOCK) or (self.status['bounded']) or (self.status['limited'])):
 	    self.ui.grant.btnClearAllRestriction.setEnabled(True)
 	else:
@@ -455,8 +413,8 @@ class Timekpr (KCModule):
 	
 	self.limits, self.time_from, self.time_to ,self.status = read_user_settings(self.user,VAR['TIMEKPRDIR'] + '/timekprrc')
 	self.load_module_values()
-	#self.statusicons()
-	#self.buttonstates()
+	self.statusicons()
+	self.buttonstates()
 	self.emit(SIGNAL("changed(bool)"), False)
 	
     def executePermissionsAction(self,args):
@@ -482,7 +440,7 @@ class Timekpr (KCModule):
 	    self.load_module_values()
 	    self.save()
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 	    
     def lockunlock(self):
 	args = {'subaction':1}
@@ -494,7 +452,7 @@ class Timekpr (KCModule):
 	if not reply.failed():
 	    self.status['locked'] = not self.status['locked']
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 	
 	
     def bypass_time_frame(self):
@@ -510,7 +468,7 @@ class Timekpr (KCModule):
 	    else:
 		self.status['bounded'] = BOUND
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 
 
     def bypassAccessDuration(self):
@@ -526,7 +484,7 @@ class Timekpr (KCModule):
 	    else:
 		self.status['limited'] = LIMIT
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 	
 	
     def resetTime(self):
@@ -534,7 +492,7 @@ class Timekpr (KCModule):
 	reply = self.executePermissionsAction(args)
 	if not reply.failed():
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 
 
     def addTime(self):
@@ -553,7 +511,7 @@ class Timekpr (KCModule):
 	if not reply.failed():
 	    self.ui.grant.sbAddTime.setValue(0)
 	    self.buttonstates()
-	    #self.statusicons()
+	    self.statusicons()
 	
 	
     def changed(self):

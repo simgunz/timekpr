@@ -167,6 +167,9 @@ def convert_limits(limits,index):
     lims = hr * 3600 + mn * 60
     return lims
 
+def convert_bounds(bound,index):
+    hr,mn = map(int,bounds[index].split(':'))
+    return hr,mn 
 
 def getuserlimits(u):
     """Gets user from-to time limitations defined in time.conf
@@ -239,7 +242,6 @@ def parse_settings(settings):
 	    limits.pop(0)
 	else:
 	    limits = [settings[0][0]]*7
-	    print limits
     else:
 	limits = ['24:00']*7
 	
