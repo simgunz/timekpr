@@ -230,12 +230,6 @@ while (True):
 	    fromHR,fromMN = convert_bounds(bfrom,index)
 	    toHR,toMN = convert_bounds(bto,index)
 	    
-	    print hour
-	    print minute
-	    print fromHR
-	    print fromMN
-	    print toHR
-	    print toMN
             # Compare: is current hour less than the one in bfrom list?
             if ( (hour < fromHR) or ( (hour == fromHR) and (minute < fromMN) ) ):
                 logkpr('Current hour less than the defined hour in conffile for user %s' % username)
