@@ -46,6 +46,7 @@
 
 #include <QDebug>
 #include <QTimer>
+#include <QTime>
 
 TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     : Plasma::PopupApplet(parent, args),
@@ -92,13 +93,23 @@ void TimekprApplet::init()
 	initExtenderItem(eItem);
     }
 
-    m_tooltip.setMainText("User: " + m_user);
+    m_tooltip.setMainText("Time left for user " + m_user);
     m_tooltip.setImage(KIcon("timekpr"));
-    m_tooltip.setAutohide(false);
+    m_tooltip.setAutohide(true);
     Plasma::ToolTipManager::self()->setContent(this,m_tooltip);
     
-    m_timer.setInterval(1000);
-    connect(&m_timer, SIGNAL(timeout()), this, SLOT(updateTooltip()));
+    
+    m_tooltiptimer.setInterval(1000);
+    connect(&m_tooltiptimer, SIGNAL(timeout()), this, SLOT(updateTooltip()));
+    
+    //Plasma::DataEngine::Data data = m_dataengine->query(m_user);
+    m_dataengine->connectSource(m_user,this);
+}
+
+void TimekprApplet::dataUpdated(const QString &sourceName, const Plasma::DataEngine::Data &data)
+{
+    m_timelimit = data["time_left"].toInt();
+    m_timeelapsed.restart();
 }
 
 void TimekprApplet::createConfigurationInterface(KConfigDialog *parent)
@@ -115,25 +126,32 @@ void TimekprApplet::createConfigurationInterface(KConfigDialog *parent)
 void TimekprApplet::toolTipAboutToShow()
 {
     //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
-    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
-    Plasma::DataEngine::Data data = m_dataengine->query(m_user);
-    m_timeleft = data["time_left"].toInt();
+    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));    
     updateTooltip();
-    m_timer.start();
+    m_tooltiptimer.start();
 }
 
 void TimekprApplet::toolTipHidden()
 {
-    m_timer.stop();
-    m_timeleft = 0;
+    m_tooltiptimer.stop();
+    //m_timeleft = 0;
 }
 
 void TimekprApplet::updateTooltip()
 {
-    QString left;
-    left.append(QString("%1").arg(m_timeleft));
-    m_timeleft--;
-    m_tooltip.setSubText("Time left fo today: " + left);
+    QTime timeleft(0,0,0);
+    timeleft = timeleft.addSecs(m_timelimit - m_timeelapsed.elapsed()/1000);
+    /*int tleft = m_timeleft%3600;
+    int hr = tleft/3600;
+    tleft%=3600;
+    int mn=tleft/60;
+    int ss=tleft%60;
+    QString hour, minute, second;
+    hour.append(QString("%1").arg(hr));
+    minute.append(QString("%1").arg(mn));
+    second.append(QString("%1").arg(ss));
+    m_timeleft--;*/
+    m_tooltip.setSubText("<div style=\"margin-top: 5px\" align=\"center\">" + timeleft.toString("hh:mm:ss") + "</div>");
     Plasma::ToolTipManager::self()->setContent(this, m_tooltip);
 }
 

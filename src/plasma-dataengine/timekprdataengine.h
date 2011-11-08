@@ -10,7 +10,7 @@
 #include <QStringList>
 #include <QDate>
 #include <QFile>
-
+#include <QFileSystemWatcher>
 class TimekprDataEngine : public Plasma::DataEngine
 {
     Q_OBJECT
@@ -18,16 +18,17 @@ class TimekprDataEngine : public Plasma::DataEngine
     public:
         TimekprDataEngine(QObject* parent, const QVariantList& args);
 	QStringList sources() const;
-	
+    protected Q_SLOTS:
+	bool updateSourceEvent(const QString& source);
     protected:
         bool sourceRequestEvent(const QString& name);
-        bool updateSourceEvent(const QString& source);
     private:
 	void init();
 	QStringList parseVector(QString vector);
 	QStringList m_users;
 	QStringList m_keys;
 	KSharedConfigPtr m_config;
+	QFileSystemWatcher m_watcher;
 };
 
 #endif //TIMEKPRDATAENGINE_H

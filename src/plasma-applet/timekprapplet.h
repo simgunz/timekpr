@@ -31,6 +31,7 @@
 #include <Plasma/ToolTipContent>
 
 #include <QTimer>
+#include <QElapsedTimer>
 
 
 class QSizeF;
@@ -53,6 +54,7 @@ public Q_SLOTS:
     void toolTipAboutToShow();
     void toolTipHidden();
     void updateTooltip();
+    void dataUpdated(const QString &sourceName, const Plasma::DataEngine::Data &data);
 protected:
     void initExtenderItem(Plasma::ExtenderItem *item);
     void createConfigurationInterface(KConfigDialog *parent);
@@ -60,9 +62,10 @@ private:
     Plasma::DataEngine *m_dataengine;
     Plasma::ToolTipContent m_tooltip;
     KIcon m_icon;
-    int m_timeleft;
     QString m_user;
-    QTimer m_timer;
+    QTimer m_tooltiptimer;
+    QElapsedTimer m_timeelapsed;
+    int m_timelimit;
     Plasma::Svg m_theme;
     KCModuleProxy *m_timekprSettingsWidget;
 };
