@@ -214,7 +214,7 @@ def parse_settings(settings):
 	else:
 	    limits = [settings[0][7]]*7
     else:
-	limits = ['2400']*7
+	limits = ['2359']*7
 	
     if settings[3]['bounded']:
 	if settings[3]['boundedByDay']:
@@ -227,5 +227,5 @@ def parse_settings(settings):
 	    time_to =   [settings[2][7]]*7
     else:
 	time_from = ['0000']*7
-	time_to =   ['2400']*7
+	time_to =   ['2359']*7
     return limits, time_from, time_to
