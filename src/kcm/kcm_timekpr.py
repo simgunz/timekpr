@@ -105,23 +105,23 @@ class Timekpr (KCModule):
 	self.ui.limits.wgBoundConf.setEnabled(False)
 	#self.ui.limits.wgLabels.setEnabled(False)
         
+        #Copying the spinboxes to a list for faster access
+	self.get_spin()
+	
+	#Set the format of the week
+        self.set_locale()
+        
         #Initializing the user combobox
         self.loadUser() 
 
         #Initializing an empty list for time limits
         self.limits = []
         self.status = dict()
-        
-        #Set the format of the week
-        self.set_week_format()
 
         ##Timer initializing
         self.timer = QTimer()
         self.timer.setInterval(10000)
         self.timer.start()
-        
-        #Copying the spinboxes to a list for faster access
-	self.get_spin()
 	
 	#KConfig
 	self.config = self.createTempConfig()
@@ -178,14 +178,20 @@ class Timekpr (KCModule):
 	return aboutdata
 	
 	
-    def set_week_format(self):
+    def set_locale(self):
 	locale = KGlobal.locale()
         startday = locale.weekStartDay()
+        
 	if startday != 7:
 	    sundayLimit = self.ui.limits.lyLimitWeek.takeAt(0)
 	    self.ui.limits.lyLimitWeek.addItem(sundayLimit)
 	    sundayBound = self.ui.limits.lyBoundWeek.takeAt(0)
 	    self.ui.limits.lyBoundWeek.addItem(sundayBound)
+	    
+	    for i in range(3):
+		for j in range(8):
+		    self.spin[i][j].setDisplayFormat("hh:mm")
+	    
 	
 	self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
 	self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
