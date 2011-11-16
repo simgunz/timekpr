@@ -225,7 +225,7 @@ def logitout(username,late):
     logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
 		    
     # Kicked out because time frame is over
-    if late:
+    if late == 1:
 	logkpr('Current hour greater than the defined hour in conffile for user %s' % username)
 	# Has the user been given extended login hours?
 	if isfile(allowfile):
@@ -267,6 +267,19 @@ def logitout(username,late):
 		thread_it(VAR['GRACEPERIOD'], remove_notified, username)
 		#lock_account(username)
 
+    # Compare: is current hour less than the one in bfrom list?
+    elif late == 2:
+	logkpr('Current hour less than the defined hour in conffile for user %s' % username)
+	if isfile(allowfile):
+	    if not fromtoday(allowfile):
+		logkpr('Extended login hours detected from %s.allow, but not from today' % username)
+		threadit(0.5, logOut, username)
+		remove(allowfile)
+	    else:
+		# User has not been given extended login hours
+		logkpr('Extended hours not detected, %s not in allowed period from-to' %username)
+		threadit(0.5, logOut, username)
+                    
     # Kicked out because limit exeeded
     else:
 	logkpr('Exceeded today\'s access login duration user %s' % username)
@@ -381,9 +394,10 @@ while (True):
 				if nowdatetime > timefrom:
 				    tomorrow = datetime.date(nowdatetime + timedelta(days=1))
 				    timeto = datetime.combine(tomorrow,datetime.time(datetime.strptime(toHM,'%H%M')))
-			
+			    
 			    leftwindow = max(0,(timeto - nowdatetime).total_seconds())
 			    late = 1
+			    			    
 			
 			    if timebeforelogut != 'NULL':
 				timebeforelogut = min(leftwindow, timebeforelogut)
@@ -391,6 +405,11 @@ while (True):
 				    late = 0
 			    else:
 				timebeforelogut = leftwindow
+				
+			    if timeto > timefrom:
+				if nowdatetime < timefrom:
+				    timebeforelogut = 0
+				    late = 2
 			
 			    #timefrom = datetime.combine(today,datetime.time(datetime.strptime(fromHM,'%H%M')))
 			    #timeto   = datetime.combine(today,datetime.time(datetime.strptime(toHMS,'%H%M%S')))
