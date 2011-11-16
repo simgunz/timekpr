@@ -9,7 +9,7 @@ from os.path import split as splitpath, isfile, isdir, getmtime
 from os import popen, mkdir, kill, remove
 from glob import glob
 from threading import Timer
-from datetime import date, time, datetime
+from datetime import date, time, datetime, timedelta
 
 import sys
 
@@ -17,6 +17,8 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 import gobject
+
+#TODO:Put this variable and code in a proper place
 
 #If DEVACTIVE is true, it uses files from local directory
 DEVACTIVE = False
@@ -57,13 +59,15 @@ def logkpr(string,clear = 0):
         l = open(VAR['LOGFILE'], 'a')
     nowtime = strftime('%Y-%m-%d %H:%M:%S ')
     l.write(nowtime + string +'\n')
-    print nowtime + string
+    
+    if fakerun:
+	print nowtime + string
 
 def logOut(user, somefile = ''):
     logkpr('logOut called with user: %s and somefile: %s' % (user, somefile))
     if somefile != '':
         f = open(somefile, 'w').close()
-    if fakerun != 'True':
+    if not fakerun:
 	if is_session_alive(user):
 	    logkpr('logOut: Attempting killing %s (SIGTERM)...' % user)
 	    #this is a pretty bad way of killing a users processes, but we warned 'em
@@ -75,7 +79,11 @@ def logOut(user, somefile = ''):
     else:
 	logkpr('LOGGED OUT')
 
-
+def is_fakerun():
+    if isfile('/etc/timekpr/fakerun'):
+	return 1
+    return 0
+    
 ## Using Linux-PAM to lock and disable users
 def get_lock_lasts():
     #Returns the VAR['LOCKLASTS'] variable in seconds
@@ -209,18 +217,7 @@ def remove_notified(u):
         return
     notifiedusers.remove(u)
 
-logkpr('Starting timekpr version %s' % get_version())
-logkpr('Variables: GRACEPERIOD: %s POLLTIME: %s DEBUGME: %s LOCKLASTS: %s' % (\
-        VAR['GRACEPERIOD'],
-        VAR['POLLTIME'],
-        VAR['DEBUGME'],
-        VAR['LOCKLASTS']))
-logkpr('Directories: LOGFILE: %s TIMEKPRDIR: %s TIMEKPRWORK: %s TIMEKPRSHARED: %s' % (\
-        VAR['LOGFILE'],
-        VAR['TIMEKPRDIR'],
-        VAR['TIMEKPRWORK'],
-        VAR['TIMEKPRSHARED']))
-
+    
 def logitout(username,late):        
     
     allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
@@ -228,7 +225,7 @@ def logitout(username,late):
     logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
 		    
     # Kicked out because time frame is over
-    if not late:
+    if late:
 	logkpr('Current hour greater than the defined hour in conffile for user %s' % username)
 	# Has the user been given extended login hours?
 	if isfile(allowfile):
@@ -303,8 +300,20 @@ def logitout(username,late):
                    
 #Main code begin
 
-fakerun = sys.argv[1]
+fakerun = is_fakerun()
 
+logkpr('Starting timekpr version %s' % get_version())
+logkpr('Variables: GRACEPERIOD: %s POLLTIME: %s DEBUGME: %s LOCKLASTS: %s' % (\
+        VAR['GRACEPERIOD'],
+        VAR['POLLTIME'],
+        VAR['DEBUGME'],
+        VAR['LOCKLASTS']))
+logkpr('Directories: LOGFILE: %s TIMEKPRDIR: %s TIMEKPRWORK: %s TIMEKPRSHARED: %s' % (\
+        VAR['LOGFILE'],
+        VAR['TIMEKPRDIR'],
+        VAR['TIMEKPRWORK'],
+        VAR['TIMEKPRSHARED']))
+        
 users = set()
 timers = dict()
 logouttime = dict()
@@ -329,50 +338,75 @@ while (True):
 	    if not is_notified(username):
 		# Read lists: from, to and limit
 		settings = read_user_settings(username, VAR['TIMEKPRDIR'] + '/timekprrc')
-		limited = settings[3]['limited']
-		bounded = settings[3]['bounded']
+		limits, bfrom, bto = parse_settings(settings)
 		
-		if limited or bounded:
-		    limits, bfrom, bto = parse_settings(settings)
+		if limits or bfrom:
+		    
+		    timebeforelogut = 'NULL'
+		    # Get current day index and hour of day
+		    index = int(strftime("%w"))
+		    #hour = int(strftime("%H"))
+		    #minute = int(strftime("%M"))
+		    logkpr('User: %s Day-Index: %s' % (username, index))
 		    
 		    timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
 		    #allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
 		    #latefile = VAR['TIMEKPRWORK'] + '/' + username + '.late'
 		    #logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
-		    time = int(get_time(timefile, username))
-		    '''Is the user allowed to be logged in at this time?
-		    We take it for granted that if they are allowed to login all day ($default_limit) then
-		    they can login whenever they want, ie they are normal users'''
-	    
-		    # Get current day index and hour of day
-		    index = int(strftime("%w"))
-		    #hour = int(strftime("%H"))
-		    #minute = int(strftime("%M"))
-		    
-		    logkpr('User: %s Day-Index: %s' % (username, index))
-		    
-		    lims = convert_limits(limits,index)
-		    fromHM = bfrom[index]
-		    toHM = bto[index]
-		    toHMS = toHM + '59'
-		    #fromHR,fromMN = convert_bounds(bfrom,index)
-		    #toHR,toMN = convert_bounds(bto,index)
-		    nowtime  = datetime.now()
-		    today = datetime.date(nowtime)
-		    timefrom = datetime.combine(today,datetime.time(datetime.strptime(fromHM,'%H%M')))
-		    timeto   = datetime.combine(today,datetime.time(datetime.strptime(toHMS,'%H%M%S')))
-		    #timefrom = datetime.combine(datetime.date(nowtime),timefrom)
-		    #timeto   = datetime.combine(datetime.date(nowtime),timeto)
-		    leftwindow = (timeto - nowtime).total_seconds()
-		    lefttime = lims - time
-		    timebeforelogut = min(leftwindow, lefttime)
-		    if leftwindow > lefttime:
-			late = 1
-		    else:
+		    if limits:
+			time = int(get_time(timefile, username))
+			'''Is the user allowed to be logged in at this time?
+			We take it for granted that if they are allowed to login all day ($default_limit) then
+			they can login whenever they want, ie they are normal users'''
+			lims = convert_limits(limits,index)
+			
+			lefttime = lims - time
+			timebeforelogut = max(0,lefttime)
 			late = 0
-		
-		    timers[username] = thread_it(timebeforelogut,logitout,username,late)
-		    logouttime[username] = int(timenow()) + timebeforelogut
+			
+		    if bfrom:
+			fromHM = bfrom[index]
+			toHM = bto[index]
+			#fromHR,fromMN = convert_bounds(bfrom,index)
+			#toHR,toMN = convert_bounds(bto,index)
+			if fromHM != toHM:
+			    nowdatetime  = datetime.now()
+			    #nowtime = datetime.time(nowdatetime)
+			    today   = datetime.date(nowdatetime)
+		    
+			    timefrom = datetime.combine(today,datetime.time(datetime.strptime(fromHM,'%H%M')))
+			    timeto   = datetime.combine(today,datetime.time(datetime.strptime(toHM,'%H%M')))
+		    
+			    if timeto < timefrom:
+				if nowdatetime > timefrom:
+				    tomorrow = datetime.date(nowdatetime + timedelta(days=1))
+				    timeto = datetime.combine(tomorrow,datetime.time(datetime.strptime(toHM,'%H%M')))
+			
+			    leftwindow = max(0,(timeto - nowdatetime).total_seconds())
+			    late = 1
+			
+			    if timebeforelogut != 'NULL':
+				timebeforelogut = min(leftwindow, timebeforelogut)
+				if leftwindow > lefttime:
+				    late = 0
+			    else:
+				timebeforelogut = leftwindow
+			
+			    #timefrom = datetime.combine(today,datetime.time(datetime.strptime(fromHM,'%H%M')))
+			    #timeto   = datetime.combine(today,datetime.time(datetime.strptime(toHMS,'%H%M%S')))
+		    
+			    #timefrom = datetime.combine(datetime.date(nowdatetime),timefrom)
+		    
+			    #timeto   = datetime.combine(datetime.date(nowdatetime),timeto)
+		    
+		    
+			    #timebeforelogut = min(leftwindow, lefttime)
+		    
+
+		    if timebeforelogut != 'NULL':
+			timers[username] = thread_it(timebeforelogut,logitout,username,late)
+			logouttime[username] = int(timenow()) + timebeforelogut
+
 	    
 	for username in goneusers:
 	    try:

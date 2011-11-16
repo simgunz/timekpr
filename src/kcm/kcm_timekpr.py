@@ -553,7 +553,10 @@ class Timekpr (KCModule):
 	self.temp_config_save()
 	settings = read_user_settings(self.user,self.config.name()) 
 	lims, bFrom, bTo = parse_settings(settings)
-	bound = mktimeconfline(self.user, map(str,bFrom), map(str,bTo) ) + "\n"
+	if bFrom:
+	    bound = mktimeconfline(self.user, map(str,bFrom), map(str,bTo) ) + "\n"
+	else:
+	    bound = ''
 	temprcfile = self.config.name()
 	helperargs = {"user":self.user,"bound":bound,"temprcfile":temprcfile,"var":VAR}
 	action = self.authAction()
