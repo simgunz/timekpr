@@ -6,18 +6,20 @@
 """
 
 import re
-from ConfigParser import *
 from time import strftime
-
-#TODO: Check/enable/disable to /etc/pam.d/gdm and /etc/pam.d/login
+try:
+    # python3
+    import configparser
+except ImportError:
+    # python2.x
+    import ConfigParser as configparser
 
 ## COMMON
 def getconfsection(conffile):
-    """Returns the content of the timekpr section in a file (access.conf or time.conf)
-
+    """
+    Returns the content of the timekpr section in a file (access.conf or time.conf)
     Also used to check if the timekpr section is set correctly.
     Arguments: conffile (string)
-
     """
     s = open(conffile).read()
     check = re.compile('## TIMEKPR START|## TIMEKPR END').findall(s)
@@ -28,16 +30,17 @@ def getconfsection(conffile):
         exit("Error: Could not find timekpr section in '%s'" % conffile)
     elif len(check) != 2:
         exit("Error: Incorrect format of timekpr section in '%s'" % conffile)
+        
     # Otherwise, get and return the content between the section lines.
     m = re.compile('## TIMEKPR START\n(.*)## TIMEKPR END', re.S).findall(s)
     return m[0]
 
+    
 ## Read/Write access.conf
 def parseaccessconf(f='/etc/security/access.conf'):
-    """Parses the timekpr section in access.conf
-
+    """
+    Parses the timekpr section in access.conf
     Returns a list with the (locked) usernames: ['niania','wawa']
-
     """
     s = getconfsection(f)
     m = re.compile('^-:([^:\s]+):ALL$', re.M).findall(s)

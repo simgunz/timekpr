@@ -3,19 +3,19 @@
     Copyright / License: See COPYRIGHT.txt
 """
 
+
+from os import geteuid
+from os.path import isfile, getmtime
+from time import strftime, localtime
+import json
 try:
     # python3
     import configparser
 except ImportError:
     # python2.x
     import ConfigParser as configparser
-
-from os.path import isfile, getmtime
-from os import geteuid
-from time import strftime, localtime
+    
 from timekprpam import *
-
-import json
 
 #Enum
 UNLOCK, LOCK = range(2)
@@ -182,51 +182,51 @@ def read_user_settings(user = None, conffile = None):
     default = True
     
     if conffile:
-	config = configparser.ConfigParser()
-	config.read(str(conffile))
-	if config.has_section(user):
-	    default = False
-	
-    if default:
-	config = configparser.ConfigParser()
-	var = get_variables()
-	config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
-	user = 'default'
+    config = configparser.ConfigParser()
+    config.read(str(conffile))
+    if config.has_section(user):
+        default = False
     
-    limits    = json.loads( config.get(user,LABELS[0]).replace("'",'"') )
-    time_from = json.loads( config.get(user,LABELS[1]).replace("'",'"') )
-    time_to   = json.loads( config.get(user,LABELS[2]).replace("'",'"') )   
+    if default:
+    config = configparser.ConfigParser()
+    var = get_variables()
+    config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
+    user = 'default'
+    
+    limits = json.loads(config.get(user,LABELS[0]).replace("'",'"'))
+    time_from = json.loads(config.get(user,LABELS[1]).replace("'",'"'))
+    time_to = json.loads(config.get(user,LABELS[2]).replace("'",'"'))   
     #status['locked'] = config.getboolean(user,'locked')
     status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
     status['limitedByDay'] = config.getboolean(user,'limitedByDay')
     status['bounded'] = config.getboolean(user,'bounded')
     status['boundedByDay'] = config.getboolean(user,'boundedByDay')
-	    
+        
     return limits, time_from, time_to, status
     
     
 def parse_settings(settings):
     if settings[3]['limited']:
-	if settings[3]['limitedByDay']:
-	    limits = settings[0]
-	    limits.pop()
-	else:
-	    limits = [settings[0][7]]*7
+    if settings[3]['limitedByDay']:
+        limits = settings[0]
+        limits.pop()
     else:
-	limits = 0
-	
+        limits = [settings[0][7]]*7
+    else:
+    limits = 0
+    
     if settings[3]['bounded']:
-	if settings[3]['boundedByDay']:
-	    time_from = settings[1]
-	    time_to =   settings[2]
-	    time_from.pop()
-	    time_to.pop()
-	else:
-	    time_from = [settings[1][7]]*7 
-	    time_to =   [settings[2][7]]*7
+    if settings[3]['boundedByDay']:
+        time_from = settings[1]
+        time_to = settings[2]
+        time_from.pop()
+        time_to.pop()
     else:
-	time_from = 0
-	time_to   = 0
-	
+        time_from = [settings[1][7]]*7 
+        time_to = [settings[2][7]]*7
+    else:
+    time_from = 0
+    time_to = 0
+    
     return limits, time_from, time_to
