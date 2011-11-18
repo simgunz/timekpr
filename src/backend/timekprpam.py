@@ -15,7 +15,7 @@ except ImportError:
     import ConfigParser as configparser
 
 
-def getconfsection(conffile):
+def get_conf_section(conffile):
     """
     Returns the content of the timekpr section in a file (access.conf or time.conf).
     Also used to check if the timekpr section is set correctly.
@@ -36,7 +36,7 @@ def getconfsection(conffile):
     m = re.compile('## TIMEKPR START\n(.*)## TIMEKPR END', re.S).findall(s)
     return m[0]
 
-def parseaccessconf(accessfile='/etc/security/access.conf'):
+def parse_access_conf(accessfile='/etc/security/access.conf'):
     """
     Parses the timekpr section in access.conf
     
@@ -44,11 +44,11 @@ def parseaccessconf(accessfile='/etc/security/access.conf'):
       A list with the (locked) usernames.
       Example: ['niania','wawa']
     """
-    s = getconfsection(accessfile)
+    s = get_conf_section(accessfile)
     m = re.compile('^-:([^:\s]+):ALL$', re.M).findall(s)
     return m
 
-def converttimeline(hfrom, hto):
+def convert_time_line(hfrom, hto):
     """Converts a list of hours (from and to limits) into a time.conf line
     Does NOT support all of the features of time.conf, e.g. negation!
     
@@ -62,7 +62,7 @@ def converttimeline(hfrom, hto):
                Su0700-2200 | Mo0700-2200 | Tu0700-2200 | We0700-2200 | Th1100-2200 | Fr0700-2200 | Sa0700-2200
     """
     if len(hfrom) != 7 or len(hto) != 7:
-        exit('Error: converttimeline accepts from-to lists of 7 items each')
+        exit('Error: convert_time_line accepts from-to lists of 7 items each')
     # If all same:
     mfrom = re.compile('^(\d+) \\1 \\1 \\1 \\1 \\1 \\1$').search(' '.join(hfrom))
     mto = re.compile('^(\d+) \\1 \\1 \\1 \\1 \\1 \\1$').search(' '.join(hto))
@@ -80,8 +80,8 @@ def converttimeline(hfrom, hto):
     sa = 'Sa' + hfrom[6] + '-' + hto[6]
     return ' | '.join([su, mo, tu, we, th, fr, sa])
 
-def mktimeconfline(username, hfrom, hto):
-    """Makes the time.conf line - uses converttimeline()
+def mk_time_conf_line(username, hfrom, hto):
+    """Makes the time.conf line - uses convert_time_line()
 
     Arguments:
       Example:
@@ -92,4 +92,4 @@ def mktimeconfline(username, hfrom, hto):
       Example:
         '*;*;maria;Al0700-2200'
     """
-    return '*;*;' + username + ';' + converttimeline(hfrom, hto)
+    return '*;*;' + username + ';' + convert_time_line(hfrom, hto)
