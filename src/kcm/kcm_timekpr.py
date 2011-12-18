@@ -394,8 +394,8 @@ class Timekpr (KCModule):
             self.status['bypass'] = 0
         
     def executePermissionsAction(self,args):
-        action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
-        action.setHelperID("org.kde.kcontrol.kcmtimekpr")
+        action = self.authAction()
+        args['action'] = 'permissions';
         args['var'] = VAR
         args['user'] = self.user
         action.setArguments(args)
@@ -513,13 +513,13 @@ class Timekpr (KCModule):
         else:
             bound = ''
         temprcfile = self.config.name()
-        helperargs = {"user":self.user,"bound":bound,"temprcfile":temprcfile,"var":VAR}
+        helperargs = {"action":"save","user":self.user,"bound":bound,"temprcfile":temprcfile,"var":VAR}
         action = self.authAction()
 
         action.setArguments(helperargs)    
         reply = action.execute()
         
-        if not (self.ui.limits.ckLimit.isChecked() and self.ui.limits.ckBound.isChecked()):
+        if not (self.ui.limits.ckLimit.isChecked() or self.ui.limits.ckBound.isChecked()):
             self.clear_bypass()
         
         self.read_settings()

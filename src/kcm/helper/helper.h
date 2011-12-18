@@ -19,21 +19,21 @@ const QString extension[] = {".logout",".late",".allow"};
 
 class Helper : public QObject {
     Q_OBJECT
-    
-public:
-    enum { ClearAllRestriction, Lock, Bypass, ClearBypass, ResetTime, AddTime };
+
 public slots:
     ActionReply save(const QVariantMap &map);
-    ActionReply managepermissions(const QVariantMap &map);
     
 private:
-    //bool removeuserlimits(QString user);
-    //bool adduserlimits(QString user, QString line);
+    bool savelimits(const QVariantMap &args);
+    bool managepermissions(const QVariantMap &args);
     bool addAndRemoveUserLimits(QString user, Operation op, QString line = "");
-    int lockUnlock(QString user, int op);
-    int clearAllRestriction(QString root,QString user);
-    int resetTime(QString root);
-    int addTime(QString root,int rewardTime);
+    bool lockUnlock(QString user, int op);
+    bool clearAllRestriction(QString root,QString user);
+    bool bypass(QString root,QString user);
+    bool clearBypass(QString root,QString user);
+    bool resetTime(QString root);
+    bool addTime(QString root,int rewardTime);
+    enum { ClearAllRestriction, Lock, Bypass, ClearBypass, ResetTime, AddTime };
 };
 
 #endif
