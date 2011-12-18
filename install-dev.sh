@@ -10,4 +10,4 @@ fi
 cd ${buildDir} || exit
 cmake -DCMAKE_INSTALL_PREFIX=`kde4-config --prefix` ../src || exit
 make || exit
-make install || exit
+sudo make install || exit

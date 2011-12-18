@@ -16,8 +16,7 @@ except ImportError:
 
 
 def get_conf_section(conffile):
-    """
-    Returns the content of the timekpr section in a file (access.conf or time.conf).
+    """Returns the content of the timekpr section in a file (access.conf or time.conf).
     Also used to check if the timekpr section is set correctly.
     
     Arguments:
@@ -37,8 +36,7 @@ def get_conf_section(conffile):
     return m[0]
 
 def parse_access_conf(accessfile='/etc/security/access.conf'):
-    """
-    Parses the timekpr section in access.conf
+    """Parses the timekpr section in access.conf
     
     Returns:
       A list with the (locked) usernames.
@@ -48,6 +46,14 @@ def parse_access_conf(accessfile='/etc/security/access.conf'):
     m = re.compile('^-:([^:\s]+):ALL$', re.M).findall(s)
     return m
 
+def isuserlocked(username):
+    """Checks if user is in access.conf"""
+    try:
+        i = parse_access_conf().index(username)
+    except ValueError:
+        return False
+    return True
+    
 def convert_time_line(hfrom, hto):
     """Converts a list of hours (from and to limits) into a time.conf line
     Does NOT support all of the features of time.conf, e.g. negation!

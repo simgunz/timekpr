@@ -1,11 +1,3 @@
-def isuserlocked(username):
-    """Checks if user is in access.conf"""
-    try:
-        i = parseaccessconf().index(username)
-    except ValueError:
-        return False
-    return True
-
 def lockuser(username, accessfile='/etc/security/access.conf'):
     """Adds access.conf line of user to lock/disable user accounts from logging in.
     Returns:

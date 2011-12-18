@@ -3,8 +3,7 @@
     Copyright / License: See COPYRIGHT.txt
 """
 
-
-from os import geteuid
+from os import popen
 from os.path import isfile, getmtime
 from time import strftime, localtime
 import json
@@ -17,27 +16,23 @@ except ImportError:
     
 from timekprpam import *
 
-#Enum
+
+# Constants
 UNLOCK, LOCK = range(2)
 NOBOUND, BOUND, NOBOUNDTODAY = range(3)
 NOLIMIT, LIMIT, NOLIMITTODAY = range(3)
 NORESET, RESET = range(2)
 HR, MN = range(2)
-LABELS = ['limits','time_from','time_to']
 
 
 def get_version():
-    return '0.4.0'
+    return '0.4.0-alpha'
 
-def check_if_admin():
-    if geteuid() != 0:
-        exit('Error: You need to have administrative privileges to run timekpr')
-
-def get_variables(DEVACTIVE = False):
-    #Read timekpr.conf
-    fconf = '/etc/timekpr.conf'
-    if DEVACTIVE:
-        fconf = './etc/timekpr.conf'
+def get_variables():
+    """Return a dictionary containing the following variables:
+    VERSION GRACEPERIOD POLLTIME DEBUGME LOCKLASTS LOGFILE TIMEKPRDIR TIMEKPRWORK TIMEKPRSHARED
+    """
+    fconf = '/etc/timekpr/timekpr.conf'
     if not isfile(fconf):
         exit('Error: Could not find configuration file %s' % fconf)
 
@@ -47,18 +42,12 @@ def get_variables(DEVACTIVE = False):
     except configparser.ParsingError:
         exit('Error: Could not parse the configuration file properly %s' % fconf)
 
-    #Creating a dictionary file
     var = dict()
-    #VARIABLES
-    #VERSION GRACEPERIOD POLLTIME DEBUGME LOCKLASTS LOGFILE TIMEKPRDIR TIMEKPRWORK TIMEKPRSHARED
-    #Exits or sets default if not found
 
     try:
         var['VERSION'] = conf.get("general", "version")
     except configparser.NoOptionError:
         exit('Error: Could not detect variable version in configuration file %s' % fconf)
-    if var['VERSION'] < '0.2.0':
-        exit('Error: You have an old /etc/timekpr.conf - remove and reinstall timekpr')
 
     try:
         var['GRACEPERIOD'] = int(conf.get("variables", "graceperiod"))
@@ -68,7 +57,7 @@ def get_variables(DEVACTIVE = False):
     try:
         var['POLLTIME'] = int(conf.get("variables", "polltime"))
     except configparser.NoOptionError:
-        var['POLLTIME'] = 45
+        var['POLLTIME'] = 15
 
     try:
         var['LOCKLASTS'] = conf.get("variables", "locklasts")
@@ -95,19 +84,15 @@ def get_variables(DEVACTIVE = False):
     except configparser.NoOptionError:
         var['TIMEKPRWORK'] = '/var/lib/timekpr'
 
-    try:
-        var['TIMEKPRSHARED'] = conf.get("directories", "timekprshared")
-    except configparser.NoOptionError:
-        var['TIMEKPRSHARED'] = '/usr/share/timekpr'
-    if DEVACTIVE:
-        var['TIMEKPRSHARED'] = './gui'
-
     return var
 
+def is_fakerun():
+    if isfile('/etc/timekpr/fakerun'):
+        return 1
+    return 0
+    
 def get_cmd_output(cmd):
-    #TODO: timekpr-gui.py: Use it for "/etc/init.d/timekpr status" and a button enable/disable
-    from os import popen
-    #Execute a command, returns its output
+    # Execute a shell command and returns its output
     out = popen(cmd)
     return out.read()
 
@@ -117,86 +102,46 @@ def from_today(fname):
     today = strftime("%Y%m%d")
     return fdate == today
 
-def is_late(bto, allowfile):
-    # Get current day index and hour of day
-    index = int(strftime("%w"))
-    hour = int(strftime("%H"))
-    if (hour > bto[index]):
-        if isfile(allowfile):
-            if not from_today(allowfile):
-                return True
-            else:
-                return False
-        else:
-            return True
-    else:
-        return False
-
-def is_past_time(limits, time):
-    index = int(strftime("%w"))
-    if (time > limits[index]):
-        return True
-    else:
-        return False
-
-def is_early(bfrom, allowfile):
-    # Get current day index and hour of day
-    index = int(strftime("%w"))
-    hour = int(strftime("%H"))
-    if (hour < bfrom[index]):
-        if isfile(allowfile):
-            if not from_today(allowfile):
-                return True
-            else:
-                return False
-        else:
-            return True
-    else:
-        return False
-
-
-def is_restricted_user(username, limit):
-    if not isuserlimited(username) and limit == 86400:
-        return False
-    else:
-        return True
-
-
 def convert_limits(limits,index):
+    # Return the duration limit expressed in minute
     hr = int(limits[index][0:2])
     mn = int(limits[index][2:4])
     lims = hr * 3600 + mn * 60
     return lims
-
+    
 def convert_bounds(bounds,index):
+    # Return the bound time string as integer
     hr = int(bounds[index][0:2])
     mn = int(bounds[index][2:4])
     return hr,mn 
     
-    
-def read_user_settings(user = None, conffile = None):  
+def read_user_settings(user=None, conffile=None):  
+    """Read user settings from timekprrc file
+    limits, time_from, time_to are lists of 8 strings
+    the first 7 element are the time values corresponding to the 7 days of the week
+    the 8th element is the time value corresponding to the every day configuration
+    """
     limits = []
     time_from = []
     time_to = []
     status = dict()
-    default = True
     
     if conffile:
-    config = configparser.ConfigParser()
-    config.read(str(conffile))
-    if config.has_section(user):
-        default = False
+        config = configparser.ConfigParser()
+        config.read(str(conffile))
+    #If the user section is not found default value is loaded from a default-value file
+    if not config.has_section(user):
+        config = configparser.ConfigParser()
+        var = get_variables()
+        config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
+        user = 'default'
     
-    if default:
-    config = configparser.ConfigParser()
-    var = get_variables()
-    config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
-    user = 'default'
+    # Get json dumped array from the conf file and convert it to array
+    limits = json.loads(config.get(user,'limits').replace("'",'"'))
+    time_from = json.loads(config.get(user,'time_from').replace("'",'"'))
+    time_to = json.loads(config.get(user,'time_to').replace("'",'"'))
     
-    limits = json.loads(config.get(user,LABELS[0]).replace("'",'"'))
-    time_from = json.loads(config.get(user,LABELS[1]).replace("'",'"'))
-    time_to = json.loads(config.get(user,LABELS[2]).replace("'",'"'))   
-    #status['locked'] = config.getboolean(user,'locked')
+    #TODO: Get locked from the conffile
     status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
     status['limitedByDay'] = config.getboolean(user,'limitedByDay')
@@ -205,28 +150,32 @@ def read_user_settings(user = None, conffile = None):
         
     return limits, time_from, time_to, status
     
-    
 def parse_settings(settings):
+    # settings[0] is the limits vector
+    # settings[1] is the time_from vector
+    # settings[1] is the time_to vector
+    # settings[3] is the status vector
+    # limits can be 0 if the user is not limited or 
     if settings[3]['limited']:
-    if settings[3]['limitedByDay']:
-        limits = settings[0]
-        limits.pop()
+        if settings[3]['limitedByDay']:
+            limits = settings[0]
+            limits.pop()
+        else:
+            limits = [settings[0][7]]*7
     else:
-        limits = [settings[0][7]]*7
-    else:
-    limits = 0
+        limits = 0
     
     if settings[3]['bounded']:
-    if settings[3]['boundedByDay']:
-        time_from = settings[1]
-        time_to = settings[2]
-        time_from.pop()
-        time_to.pop()
+        if settings[3]['boundedByDay']:
+            time_from = settings[1]
+            time_to = settings[2]
+            time_from.pop()
+            time_to.pop()
+        else:
+            time_from = [settings[1][7]]*7 
+            time_to = [settings[2][7]]*7
     else:
-        time_from = [settings[1][7]]*7 
-        time_to = [settings[2][7]]*7
-    else:
-    time_from = 0
-    time_to = 0
+        time_from = 0
+        time_to = 0
     
     return limits, time_from, time_to
