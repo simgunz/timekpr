@@ -82,10 +82,10 @@ ActionReply Helper::managepermissions(const QVariantMap &args)
 	case Lock:
 	    code = lockUnlock(args["user"].toString(),args.value("operation").toInt());
 	    break;
-	case BypassTimeFrame:
+	case Bypass:
 	    code = (0);
 	    break;
-	case BypassAccessDuration:
+	case ClearBypass:
 	    code = (0);
 	    break;
 	case ResetTime:

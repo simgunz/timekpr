@@ -90,6 +90,12 @@ def is_fakerun():
     if isfile('/etc/timekpr/fakerun'):
         return 1
     return 0
+
+def is_file_ok(fname):
+    # File exists and is today's?
+    if isfile(fname) and from_today(fname):
+        return True
+    return False
     
 def get_cmd_output(cmd):
     # Execute a shell command and returns its output

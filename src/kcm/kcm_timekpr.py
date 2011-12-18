@@ -110,10 +110,8 @@ class Timekpr (KCModule):
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
         self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
         self.connect(self.ui.grant.btnUnlockAccount,SIGNAL('clicked()'),self.lockunlock)
-        self.connect(self.ui.grant.btnBoundBypass,SIGNAL('clicked()'),self.bypass_time_frame)
-        self.connect(self.ui.grant.btnClearBoundBypass,SIGNAL('clicked()'),self.bypass_time_frame)
-        self.connect(self.ui.grant.btnLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
-        self.connect(self.ui.grant.btnClearLimitBypass,SIGNAL('clicked()'),self.bypassAccessDuration)
+        self.connect(self.ui.grant.btnBypass,SIGNAL('clicked()'),self.bypass_restrictions)
+        self.connect(self.ui.grant.btnClearBypass,SIGNAL('clicked()'),self.clear_bypass)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.addTime)
         self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clear_all_restrictions)
@@ -239,13 +237,13 @@ class Timekpr (KCModule):
         self.spin[2].append(self.ui.limits.sbTo_6)
         self.spin[2].append(self.ui.limits.sbTo_7)
     
-    #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
         if self.status['limited'] != BOUND:
             self.ui.status.lbTimeLeftStatus.setText(i18n("Not limited"))     
         else:
             hours, minutes = self.get_time_left()
-            self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hr " + str(minutes) + " min")     
+            #TODO: No word puzzles
+            self.ui.status.lbTimeLeftStatus.setText(str(hours) + i18n(" hr ") + str(minutes) + i18n(" min"))     
             self.reset_button_state()
                 
     def get_time_left(self):
@@ -268,7 +266,7 @@ class Timekpr (KCModule):
                 limit = convert_limits(self.limits,7)
         return limit
         
-        
+       
     def get_used_time(self):
         timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
         used = 0
@@ -316,6 +314,11 @@ class Timekpr (KCModule):
         
         
     def buttonstates(self):
+        if ((self.status['locked'] == LOCK) or (self.status['bounded']) or (self.status['limited'])):
+            self.ui.grant.btnClearAllRestriction.setEnabled(True)
+        else:
+            self.ui.grant.btnClearAllRestriction.setEnabled(False)
+            
         if self.status['locked']:
             self.ui.grant.btnLockAccount.setEnabled(False)
             self.ui.grant.btnUnlockAccount.setEnabled(True)
@@ -323,32 +326,21 @@ class Timekpr (KCModule):
             self.ui.grant.btnLockAccount.setEnabled(True)
             self.ui.grant.btnUnlockAccount.setEnabled(False)
         
-    
-        if self.status['bounded']:
-            if self.status['bounded'] == BOUND:
-                index = int(strftime("%w"))
-                wfrom = self.time_from
-                wto = self.time_to
-                if wfrom[index] != '00:00' or wto[index] != '24:00':
-                    self.ui.grant.btnBoundBypass.setEnabled(True)
-                    self.ui.grant.btnClearBoundBypass.setEnabled(False)
-                else:
-                    self.ui.grant.btnBoundBypass.setEnabled(False)
-                    self.ui.grant.btnClearBoundBypass.setEnabled(True)
-            else:
-                self.ui.grant.btnBoundBypass.setEnabled(False)
-                self.ui.grant.btnClearBoundBypass.setEnabled(True)
-        else:
-            self.ui.grant.btnBoundBypass.setEnabled(False)
-            self.ui.grant.btnClearBoundBypass.setEnabled(False)
-        
+        #if (status['bypass'] == 1) and self.status['bounded']:
+                #index = int(strftime("%w"))
+                #wfrom = self.time_from
+                #wto = self.time_to
+                #if wfrom[index] == wto[index]:
+                    #status['bypass'] = 0
+
+                    
         if self.status['limited'] == LIMIT:
             timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
             #if isfile(timefile):
             self.reset_button_state()
             #Reward button should add time even if .time is not there?
-            self.ui.grant.btnLimitBypass.setEnabled(True)
-            self.ui.grant.btnClearLimitBypass.setEnabled(False)
+            #self.ui.grant.btnBypass.setEnabled(True)
+            #self.ui.grant.btnClearBypass.setEnabled(False)
             self.ui.grant.btnAddTime.setEnabled(True)
             self.ui.grant.sbAddTime.setEnabled(True)
             self.ui.grant.lbAddTime.setEnabled(True)
@@ -357,17 +349,24 @@ class Timekpr (KCModule):
             self.ui.grant.btnAddTime.setEnabled(False)
             self.ui.grant.sbAddTime.setEnabled(False)
             self.ui.grant.lbAddTime.setEnabled(False)
-            if self.status['limited'] == NOLIMIT:
-                self.ui.grant.btnLimitBypass.setEnabled(False)
-                self.ui.grant.btnClearLimitBypass.setEnabled(False)
-            else:
-                self.ui.grant.btnLimitBypass.setEnabled(False)
-                self.ui.grant.btnClearLimitBypass.setEnabled(True)
-            
-        if ((self.status['locked'] == LOCK) or (self.status['bounded']) or (self.status['limited'])):
-            self.ui.grant.btnClearAllRestriction.setEnabled(True)
+            #if self.status['limited'] == NOLIMIT:
+                #self.ui.grant.btnBypass.setEnabled(False)
+                #self.ui.grant.btnClearBypass.setEnabled(False)
+            #else:
+                #self.ui.grant.btnBypass.setEnabled(False)
+                #self.ui.grant.btnClearBypass.setEnabled(True)
+        
+        if self.status['bypass'] == 0:
+            self.ui.grant.btnBypass.setEnabled(False)
+            self.ui.grant.btnClearBypass.setEnabled(False)
+        elif self.status['bypass'] == 1:
+            self.ui.grant.btnBypass.setEnabled(True)
+            self.ui.grant.btnClearBypass.setEnabled(False)
         else:
-            self.ui.grant.btnClearAllRestriction.setEnabled(False)
+            self.ui.grant.btnBypass.setEnabled(False)
+            self.ui.grant.btnClearBypass.setEnabled(True)
+            
+        
     
     #TODO:def indexchanged(self):
     #KMessageBox.questionYesNo(this,i18n("<qt>You changed the default component of your choice, 
@@ -379,11 +378,21 @@ class Timekpr (KCModule):
         #self.status = {'locked':uislocked,'reset':NORESET}
         
         self.limits, self.time_from, self.time_to,self.status = read_user_settings(self.user,VAR['TIMEKPRDIR'] + '/timekprrc')
+        self.bypass_status()
         self.load_module_values()
         self.statusicons()
         self.buttonstates()
         self.emit(SIGNAL("changed(bool)"), False)
     
+    def bypass_status(self):
+        allowfile = VAR['TIMEKPRWORK'] + '/' + self.user + '.allow'
+        if is_file_ok(allowfile):
+            self.status['bypass'] = 2
+        elif self.status['limited'] or self.status['bounded']:
+            self.status['bypass'] = 1
+        else:
+            self.status['bypass'] = 0
+        
     def executePermissionsAction(self,args):
         action = KAuth.Action("org.kde.kcontrol.kcmtimekpr.managepermissions")
         action.setHelperID("org.kde.kcontrol.kcmtimekpr")
@@ -421,39 +430,27 @@ class Timekpr (KCModule):
             self.buttonstates()
             self.statusicons()
         
-    
-    def bypass_time_frame(self):
+    def bypass_restrictions(self):
         args = {'subaction':2}
-        if self.status['bounded'] == NOBOUND or self.status['bounded'] == NOBOUNDTODAY:
-            args['operation'] = BOUND
-        else:
-            args['operation'] = NOBOUNDTODAY
         reply = self.executePermissionsAction(args)
         if not reply.failed():
-            if (args['operation'] == NOBOUNDTODAY):
-                self.status['bounded'] = NOBOUNDTODAY
-            else:
-                self.status['bounded'] = BOUND
-                self.buttonstates()
-                self.statusicons()
-
-
-    def bypassAccessDuration(self):
+            self.status['bounded'] = NOBOUNDTODAY
+            self.status['limited'] = NOLIMITTODAY
+            self.status['bypass'] = 2
+            self.buttonstates()
+            self.statusicons()
+            
+    def clear_bypass(self):
         args = {'subaction':3}
-        if self.status['limited'] == NOLIMIT or self.status['limited'] == NOLIMITTODAY:
-            args['operation'] = LIMIT
-        else:
-            args['operation'] = NOLIMITTODAY
         reply = self.executePermissionsAction(args)
         if not reply.failed():
-            if (args['operation'] == NOLIMITTODAY):
-                self.status['limited'] = NOLIMITTODAY
-            else:
-                self.status['limited'] = LIMIT
-                self.buttonstates()
-                self.statusicons()
-        
-    
+            self.status['bounded'] = BOUND
+            self.status['limited'] = LIMIT        
+            self.status['bypass'] = 1
+            self.buttonstates()
+            self.statusicons()
+            
+            
     def resetTime(self):
         args = {'subaction':4}
         reply = self.executePermissionsAction(args)
@@ -522,6 +519,9 @@ class Timekpr (KCModule):
         action.setArguments(helperargs)    
         reply = action.execute()
         
+        if not (self.ui.limits.ckLimit.isChecked() and self.ui.limits.ckBound.isChecked()):
+            self.clear_bypass()
+        
         self.read_settings()
         self.update_time_left()
     
@@ -534,8 +534,9 @@ class Timekpr (KCModule):
         tempConfig = systemConfig.copyTo(tempConfigName)
         QFile.setPermissions(tempConfigName, tempConfigFile.permissions() | QFile.ReadOther);
         return tempConfig
-    
-    
+        
+            
+        
     def temp_config_save(self):
         userGroup = self.config.group(self.user)
         

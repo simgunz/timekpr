@@ -16,7 +16,6 @@ import dbus
 import dbus.service
 from dbus.mainloop.glib import DBusGMainLoop
 
-from timekprpam import *
 from timekprcommon import *
 
 
@@ -109,11 +108,6 @@ def check_lock_account():
             logkpr('check_lock_account: removing %s.lock file..' % u)
             remove(f)
 '''
-def is_file_ok(fname):
-    # File exists and is today's?
-    if isfile(fname) and from_today(fname):
-        return True
-    return False
 
 def get_users():
     u = get_cmd_output('users')
@@ -179,12 +173,12 @@ def log_it_out(username,logoutreason):
         graceperiod=0.5
         
         
-    if isfile(allowfile) and from_today(allowfile):
+    if is_file_ok(allowfile):
         logkpr('Extended login detected - %s.allow exists and is from today' % username)  
     else:
         # User has not been given extended login hours
         logkpr('Extended login not detected - %s.allow file not detected' % (username))
-        if isfile(logoutfile) and from_today(logoutfile):
+        if is_file_ok(logoutfile):
             logkpr('User %s has been kicked out today' % username)
             thread_it(0.5, logOut, username)
         else:

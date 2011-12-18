@@ -21,7 +21,7 @@ class Helper : public QObject {
     Q_OBJECT
     
 public:
-    enum { ClearAllRestriction, Lock, BypassTimeFrame, BypassAccessDuration, ResetTime, AddTime };
+    enum { ClearAllRestriction, Lock, Bypass, ClearBypass, ResetTime, AddTime };
 public slots:
     ActionReply save(const QVariantMap &map);
     ActionReply managepermissions(const QVariantMap &map);
