@@ -29,6 +29,7 @@ def logkpr(string,clear = 0):
     To log: logkpr("Something")
     To clear file and log: logkpr("Something",1)
     """
+    nowtime = strftime('%Y-%m-%d %H:%M:%S ')
     if FAKERUN:
         print nowtime + string
     else:
@@ -38,7 +39,6 @@ def logkpr(string,clear = 0):
             l = open(VAR['LOGFILE'], 'w')
         else:
             l = open(VAR['LOGFILE'], 'a')
-        nowtime = strftime('%Y-%m-%d %H:%M:%S ')
         l.write(nowtime + string +'\n')
     
     
@@ -169,14 +169,15 @@ def log_it_out(username,logoutreason):
     logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
     
     if logoutreason == 0:
-        logkpr('Current time greater than the time defined in timekprrc for user %s' % username)
-        graceperiod=float(VAR['GRACEPERIOD'])
-    elif logoutreason == 1:
-        logkpr('Current time less than the time defined in timekprrc for user %s' % username)
-        graceperiod=0.5
-    else:
         logkpr('Exceeded today\'s access login duration for user %s' % username)
         graceperiod=float(VAR['GRACEPERIOD'])
+    elif logoutreason == 1:
+        logkpr('Current time greater than the time defined in timekprrc for user %s' % username)
+        graceperiod=float(VAR['GRACEPERIOD'])
+    else:
+        logkpr('Current time less than the time defined in timekprrc for user %s' % username)
+        graceperiod=0.5
+        
         
     if isfile(allowfile) and from_today(allowfile):
         logkpr('Extended login detected - %s.allow exists and is from today' % username)  
@@ -213,7 +214,7 @@ if __name__ == '__main__':
     while (True):
         # Check if any accounts should be unlocked and re-activate them
         #TODO: Manage lock policy
-        check_lock_account()
+        #check_lock_account()
         
         # Get the usernames and PIDs of sessions
         usr = get_users()
@@ -252,7 +253,6 @@ if __name__ == '__main__':
                     if bfrom:
                         fromHM = bfrom[dayindex]
                         toHM = bto[dayindex]
-                        bound_lefttime = None
                         
                         # If fromHM == toHM the user can login all day long, so it is not actually limited
                         if fromHM != toHM:
@@ -271,8 +271,7 @@ if __name__ == '__main__':
                             bound_lefttime = max(0,(timeto - nowdatetime).total_seconds())
                             logoutreason = 1
                         
-                        # Check if bound_lefttime has been setted and determine the minimum time before logout between limit and bound left time
-                        if bound_lefttime is not None
+                            # Determine the minimum time before logout between limit and bound left time
                             if timebeforelogut is not None:
                                 timebeforelogut = min(bound_lefttime, timebeforelogut)
                                 if bound_lefttime > limit_lefttime:
@@ -280,12 +279,12 @@ if __name__ == '__main__':
                             else:
                                 timebeforelogut = bound_lefttime
                         
-                        # Check if current time is less than the from time
-                        # In case of timeto < timefrom an early login will be considered as a late login
-                        if timeto > timefrom:
-                            if nowdatetime < timefrom:
-                                timebeforelogut = 0
-                                logoutreason = 2
+                            # Check if current time is less than the from time
+                            # In case of timeto < timefrom an early login will be considered as a late login
+                            if timeto > timefrom:
+                                if nowdatetime < timefrom:
+                                    timebeforelogut = 0
+                                    logoutreason = 2
 
                     if timebeforelogut is not None:
                         timers[username] = thread_it(timebeforelogut,log_it_out,username,logoutreason)
