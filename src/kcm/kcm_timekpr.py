@@ -7,9 +7,8 @@
 # This file is licensed under the General Public License version 3 or later.
 # See the COPYRIGHT file for full details. You should have received the COPYRIGHT file along with the program
 
-from os import remove, mkdir, geteuid, getenv
-from os.path import isdir, isfile, realpath, dirname, dirname
-import sys
+from os import remove, getenv
+from os.path import isfile, dirname
 import json
 
 from PyQt4.QtGui import *
@@ -34,15 +33,8 @@ def sec_to_hr_mn(sec):
     return hr, mn
         
 def isnormal(username, userid):
-#Check if it is a regular user, with userid within UID_MIN and UID_MAX.    
-#TODO:Move to timekprcommon?
-#FIXME: Hide active user - bug #286529
-#SUDO_USER contains the username of the sudo user that launched timekpr
-#So this function return yes for all the non-system user and false for the system-user and for the user that launched timekp
-    if (getenv('SUDO_USER') and username == getenv('SUDO_USER')):
-        return False
-    
-    #Check if it is in the non-system users range
+    # Check if the user is in the non-system users range
+
     logindefs = open('/etc/login.defs')
     uidminmax = re.compile('^UID_(?:MIN|MAX)\s+(\d+)', re.M).findall(logindefs.read())
     if uidminmax[0] < uidminmax[1]:
@@ -57,32 +49,22 @@ def isnormal(username, userid):
     else:
         return False
 
-
-
-
-
+        
 class Timekpr (KCModule):
     def __init__(self, component_data, parent):
         KCModule.__init__(self,component_data, parent)
         
-        #Set AboutData
-        self.aboutdata = self.MakeAboutData()
+        self.aboutdata = self.make_about_data()
         self.setAboutData(self.aboutdata)
-        
-        
+            
         #Interface initialization
     
-        #print basename(sys.argv[0])
-        #Loading the UI module        print get_path()
+        #Loading the UI module
         self.ui = uic.loadUi(unicode(dirname(__file__) + "/ui/main.ui"))
         self.ui.status = uic.loadUi(unicode(dirname(__file__) + "/ui/status.ui"))
         self.ui.grant = uic.loadUi(unicode(dirname(__file__) + "/ui/grant.ui"))
         self.ui.limits = uic.loadUi(unicode(dirname(__file__) + "/ui/limits.ui"))
         
-        
-        
-        #Create the layout using group box 
-        #Since the UI is modular it's possible to change this layout for displaying the UI modules in tab, etc
         self.ui.lyStatus.addWidget(self.ui.status)
         self.ui.lyGrant = QVBoxLayout(self.ui.tbGrant)
         self.ui.lyGrant.addWidget(self.ui.grant)
@@ -157,7 +139,7 @@ class Timekpr (KCModule):
    
    
 #Function definition
-    def MakeAboutData(self):
+    def make_about_data(self):
         aboutdata = KAboutData("kcmtimekpr", "userconfig", ki18n("Timekpr control module"), "0.4",
         ki18n("User and Group Configuration Tool"),
         KAboutData.License_GPL,
@@ -166,80 +148,68 @@ class Timekpr (KCModule):
         aboutdata.addAuthor(ki18n("Even Nedberg"), ki18n("Developer"), "even@nedberg.net", "")
         aboutdata.addAuthor(ki18n("Savvas Radevic"), ki18n("Developer"), "vicedar@gmail.com", "")
         aboutdata.addAuthor(ki18n("Nicolas Laurance"), ki18n("Developer"), "nlaurance@zindep.com", "")
-        aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")
-        
+        aboutdata.addAuthor(ki18n("Charles Jackson"), ki18n("Lead tester"), "crjackson@carolina.rr.com", "")  
         return aboutdata
     
-    
     def set_locale(self):
+        # Move the Sunday position in the UI based on locale
         locale = KGlobal.locale()
-        startday = locale.weekStartDay()
-        
+        startday = locale.weekStartDay()    
         if startday != 7:
             sundayLimit = self.ui.limits.lyLimitWeek.takeAt(0)
             self.ui.limits.lyLimitWeek.addItem(sundayLimit)
             sundayBound = self.ui.limits.lyBoundWeek.takeAt(0)
             self.ui.limits.lyBoundWeek.addItem(sundayBound)
-            
             for i in range(3):
                 for j in range(8):
                     self.spin[i][j].setDisplayFormat("hh:mm")
-                    
-    
         self.toggle_daily_limit(self.ui.limits.ckLimitDay.isChecked())
         self.toggle_daily_bound(self.ui.limits.ckBoundDay.isChecked())
-    
-    
+        
     def loadUser(self):
+        # Fill the combobox with the users
         passwd = open('/etc/passwd','r').read()
         userinfodb = re.compile('^.+$', re.M).findall(passwd)        
-    
         for entry in userinfodb:
             userinfo = re.split(':',entry)
             if isnormal(userinfo[0],int(userinfo[2])):
                 self.ui.cbActiveUser.addItem(userinfo[0])               
                 self.ui.cbActiveUser.setCurrentIndex(0)
                 
-                
     def enable_limit(self,checked):
         if checked:
             self.ui.limits.wgLimitConf.setEnabled(True)
         else:
-            #self.ui.limits.ckLimitDay.setChecked(False)
             self.ui.limits.wgLimitConf.setEnabled(False)            
-            
-                        
+                       
     def enable_bound(self,checked):
         if checked:
             self.ui.limits.wgBoundConf.setEnabled(True)
         else:
-        #self.ui.limits.ckBoundDay.setChecked(False)
             self.ui.limits.wgBoundConf.setEnabled(False)
-            
             
     def toggle_daily_limit(self,checked):
         if checked:
-            self.ui.limits.wgLimitEveryDay.hide()
             self.ui.limits.wgLimitWeek.show()
             self.ui.limits.wgLimitSunday.show()
+            self.ui.limits.wgLimitEveryDay.hide()
         else:
             self.ui.limits.wgLimitWeek.hide()
             self.ui.limits.wgLimitSunday.hide()
             self.ui.limits.wgLimitEveryDay.show()
-
-                
+    
     def toggle_daily_bound(self,checked):
         if checked:
-            self.ui.limits.wgBoundEveryDay.hide()
             self.ui.limits.wgBoundWeek.show()
             self.ui.limits.wgBoundSunday.show()
+            self.ui.limits.wgBoundEveryDay.hide()
         else:
             self.ui.limits.wgBoundWeek.hide()
             self.ui.limits.wgBoundSunday.hide()
             self.ui.limits.wgBoundEveryDay.show()    
     
-    
     def get_spin(self):
+        # Put all the time spinboxes in a array to permit an easier access
         self.spin = [list(),list(),list()]
         
         self.spin[0].append(self.ui.limits.sbLimit_0)
@@ -269,17 +239,15 @@ class Timekpr (KCModule):
         self.spin[2].append(self.ui.limits.sbTo_6)
         self.spin[2].append(self.ui.limits.sbTo_7)
     
-    
     #TODO:Use plasmadataengine if possible to save file access
     def update_time_left(self):       
-        if self.status['limited'] != 1:
-            self.ui.status.lbTimeLeftStatus.setText("Not limited")     
+        if self.status['limited'] != BOUND:
+            self.ui.status.lbTimeLeftStatus.setText(i18n("Not limited"))     
         else:
             hours, minutes = self.get_time_left()
             self.ui.status.lbTimeLeftStatus.setText(str(hours) + " hr " + str(minutes) + " min")     
             self.reset_button_state()
                 
-    
     def get_time_left(self):
         limit = self.get_limit()
         used = self.get_used_time()
