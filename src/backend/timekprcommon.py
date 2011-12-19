@@ -22,6 +22,7 @@ UNLOCK, LOCK = range(2)
 NOBOUND, BOUND, NOBOUNDTODAY = range(3)
 NOLIMIT, LIMIT, NOLIMITTODAY = range(3)
 NORESET, RESET = range(2)
+DISABLED, OFF, ON = range(3)
 HR, MN = range(2)
 
 
@@ -91,6 +92,12 @@ def is_fakerun():
         return 1
     return 0
 
+def from_today(fname):
+    # Returns True if a file was last modified today
+    fdate = strftime("%Y%m%d", localtime(getmtime(fname)))
+    today = strftime("%Y%m%d")
+    return fdate == today
+    
 def is_file_ok(fname):
     # File exists and is today's?
     if isfile(fname) and from_today(fname):
@@ -101,12 +108,6 @@ def get_cmd_output(cmd):
     # Execute a shell command and returns its output
     out = popen(cmd)
     return out.read()
-
-def from_today(fname):
-    # Returns True if a file was last modified today
-    fdate = strftime("%Y%m%d", localtime(getmtime(fname)))
-    today = strftime("%Y%m%d")
-    return fdate == today
 
 def convert_limits(limits,index):
     # Return the duration limit expressed in minute
@@ -140,20 +141,17 @@ def read_user_settings(user=None, conffile=None):
         config = configparser.ConfigParser()
         var = get_variables()
         config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
-        user = 'default'
-    
+        user = 'default'   
     # Get json dumped array from the conf file and convert it to array
     limits = json.loads(config.get(user,'limits').replace("'",'"'))
     time_from = json.loads(config.get(user,'time_from').replace("'",'"'))
-    time_to = json.loads(config.get(user,'time_to').replace("'",'"'))
-    
+    time_to = json.loads(config.get(user,'time_to').replace("'",'"'))    
     #TODO: Get locked from the conffile
     status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
     status['limitedByDay'] = config.getboolean(user,'limitedByDay')
     status['bounded'] = config.getboolean(user,'bounded')
-    status['boundedByDay'] = config.getboolean(user,'boundedByDay')
-        
+    status['boundedByDay'] = config.getboolean(user,'boundedByDay')       
     return limits, time_from, time_to, status
     
 def parse_settings(settings):
