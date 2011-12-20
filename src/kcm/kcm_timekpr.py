@@ -36,48 +36,37 @@ class Timekpr (KCModule):
             
         #Interface initialization
     
-        #Loading the UI module
+        #Loading the UI module dynamically
         self.ui = uic.loadUi(unicode(dirname(__file__) + "/ui/main.ui"))
         self.ui.status = uic.loadUi(unicode(dirname(__file__) + "/ui/status.ui"))
         self.ui.grant = uic.loadUi(unicode(dirname(__file__) + "/ui/grant.ui"))
         self.ui.limits = uic.loadUi(unicode(dirname(__file__) + "/ui/limits.ui"))
-        
+        # Organizing the modules in a layout
         self.ui.lyStatus.addWidget(self.ui.status)
         self.ui.lyGrant = QVBoxLayout(self.ui.tbGrant)
         self.ui.lyGrant.addWidget(self.ui.grant)
         self.ui.lyLimitBound = QVBoxLayout(self.ui.tbLimitBound)
         self.ui.lyLimitBound.addWidget(self.ui.limits)            
-        #self.ui.lyLimitBound.insertStretch(-1)
         self.lyMainLayout = QVBoxLayout(self)
         self.lyMainLayout.addWidget(self.ui)
-        #self.lyMainLayout.insertStretch(-1)
-        
         #Disable the limits by default
         self.ui.limits.wgLimitConf.setEnabled(False)
         self.ui.limits.wgBoundConf.setEnabled(False)
-        #self.ui.limits.wgLabels.setEnabled(False)
-        
         #Copying the spinboxes to a list for faster access
         self.get_spin()
-    
         #Set the format of the week
         self.set_locale()
-        
         #Initializing the user combobox
         self.load_users() 
-
         #Initializing an empty list for time limits
         self.limits = []
         self.status = dict()
-
-        ##Timer initializing
+        #Timer initializing
         self.timer = QTimer()
         self.timer.setInterval(10000)
         self.timer.start()
-    
         #KConfig
         self.config = self.create_temp_config()
-    
         #Signal and slots definition 
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
         self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.enable_bound)        
@@ -89,29 +78,24 @@ class Timekpr (KCModule):
         self.connect(self.ui.grant.btnUnlockAccount,SIGNAL('clicked()'),self.lock_unlock)
         self.connect(self.ui.grant.btnBypass,SIGNAL('clicked()'),self.bypass_restrictions)
         self.connect(self.ui.grant.btnClearBypass,SIGNAL('clicked()'),self.clear_bypass)
-        self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
+        self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.reset_time)
         self.connect(self.ui.grant.btnAddTime,SIGNAL('clicked()'),self.add_time)
         self.connect(self.ui.grant.btnClearAllRestriction,SIGNAL('clicked()'),self.clear_all_restrictions)
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.changed)
         self.connect(self.ui.limits.ckBound, SIGNAL('toggled(bool)'), self.changed)        
         self.connect(self.ui.limits.ckLimitDay, SIGNAL('toggled(bool)'), self.changed)
         self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.changed)
-        
         for i in range(3):
             for j in range(8):
                 self.connect(self.spin[i][j],SIGNAL('timeChanged(QTime)'),self.changed)        
-        
-        
         #Ensure we have at least one available normal user otherwise we disable all the modules
-        if self.ui.cbActiveUser.count() == 0:
+        if not self.ui.cbActiveUser.count():
             self.ui.gbStatus.setEnabled(False)
             self.ui.gbGrant.setEnabled(False)
             self.ui.gbLimitBound.setEnabled(False)
-            
         #Needed for using KAuth authentication
         self.setNeedsAuthorization(True)
-   
-   
+      
    
 #Function definition
     def make_about_data(self):
@@ -231,6 +215,7 @@ class Timekpr (KCModule):
         self.spin[2].append(self.ui.limits.sbTo_7)
 
     def get_limit(self):
+        # Return the duration limit of the user for today in seconds
         limit = 86400
         dayIndex = 7
         if self.status['limited']:
@@ -240,6 +225,7 @@ class Timekpr (KCModule):
         return limit
 
     def get_used_time(self):
+        # Return the overall logon time of the user for today in seconds
         timefile = VAR['TIMEKPRWORK'] + '/' + self.user + '.time'
         used = 0
         if is_file_ok(timefile):
@@ -254,6 +240,7 @@ class Timekpr (KCModule):
         return str(hr) + ':' + str(mn).zfill(2)
         
     def get_time_left(self):
+        # Return the usage time left of the user for today or the time from now till midnight if lower
         #TODO:Use datetime to be more precise or a timer better
         limit = self.get_limit()
         used = self.get_used_time()
@@ -264,7 +251,8 @@ class Timekpr (KCModule):
         left = min(lefttoday,left)
         return self.sec_to_hhmm(left)
         
-    def update_time_left(self):       
+    def update_time_left(self):
+        # Update the time left label, it is called everytime the timer expire
         if self.status['limited'] != BOUND:
             self.ui.status.lbTimeLeftStatus.setText(i18n("Not limited"))     
         else:
@@ -352,6 +340,7 @@ class Timekpr (KCModule):
             self.spin[2][i].setTime(QTime.fromString(self.time_to[i],'hhmm'))
             
     def bypass_status(self):
+        # Bypass can be active, unactive or disabled if the user is not limited
         allowfile = VAR['TIMEKPRWORK'] + '/' + self.user + '.allow'
         if is_file_ok(allowfile):
             self.status['bypass'] = ON
@@ -361,6 +350,7 @@ class Timekpr (KCModule):
             self.status['bypass'] = DISABLED
             
     def read_settings(self):
+        # Get the user setting from timekprrc and update the UI
         self.user = str(self.ui.cbActiveUser.currentText())
         self.limits, self.time_from, self.time_to,self.status = read_user_settings(self.user,VAR['TIMEKPRDIR'] + '/timekprrc')
         self.load_module_values()
@@ -370,6 +360,7 @@ class Timekpr (KCModule):
         self.emit(SIGNAL("changed(bool)"), False)
     
     def executePermissionsAction(self,args):
+        # Add the common paramenter to all the actions and invoke the module root action
         action = self.authAction()
         args['action'] = 'permissions';
         args['var'] = VAR
@@ -377,7 +368,7 @@ class Timekpr (KCModule):
         action.setArguments(args)
         reply = action.execute()
         return reply
-            
+
     def clear_all_restrictions(self):
         answer = KMessageBox.warningContinueCancel(self,i18n("All restriction for user %1 will be cleared",self.user),i18n("Timekpr"))
         if answer != KMessageBox.Continue:
@@ -392,8 +383,7 @@ class Timekpr (KCModule):
             self.save()
             self.update_buttons_state()
             self.update_status_icons()
-            
-            
+
     def lock_unlock(self):
         args = {'subaction':1}
         if self.status['locked']:
@@ -405,7 +395,7 @@ class Timekpr (KCModule):
             self.status['locked'] = not self.status['locked']
             self.update_buttons_state()
             self.update_status_icons()
-        
+
     def bypass_restrictions(self):
         args = {'subaction':2}
         reply = self.executePermissionsAction(args)
@@ -426,7 +416,7 @@ class Timekpr (KCModule):
             self.update_buttons_state()
             self.update_status_icons()
             
-    def resetTime(self):
+    def reset_time(self):
         args = {'subaction':4}
         reply = self.executePermissionsAction(args)
         if not reply.failed():
@@ -443,6 +433,7 @@ class Timekpr (KCModule):
         time = used - rewardtime
         currenttime = int(strftime("%H")) * 3600 + int(strftime("%M")) * 60
         lefttoday = 86400 - currenttime     
+        # Limit the maximum amount of time to add or subtract from the usage time to stay into the day bound
         time = max(time,limit - lefttoday)
         time = min(time,limit)
         
@@ -454,10 +445,15 @@ class Timekpr (KCModule):
             self.update_status_icons()
         
     def changed(self):
-        #If a setting has changed, activate the Apply button
+        # If a setting has changed, activate the Apply button
         self.emit(SIGNAL("changed(bool)"), True)
-
+    
+    #TODO:def index_changed(self):
+    #KMessageBox.questionYesNo(this,i18n("<qt>You changed the default component of your choice, 
+    #do want to save that change now ?</qt>"),QString(),KStandardGuiItem::save(),KStandardGuiItem::discard())==KMessageBox::Yes)
+    
     def defaults(self):
+        # Called when the defaults button is pushed
         self.user = str(self.ui.cbActiveUser.currentText())
         self.limits, self.time_from, self.time_to,self.status = read_user_settings()
         self.load_module_values()
@@ -466,13 +462,11 @@ class Timekpr (KCModule):
         self.update_buttons_state()
     
     def load(self):
-        #This function is called from reset button and automatically during construction
-        self.read_settings()
-    #TODO:def indexchanged(self):
-    #KMessageBox.questionYesNo(this,i18n("<qt>You changed the default component of your choice, 
-    #do want to save that change now ?</qt>"),QString(),KStandardGuiItem::save(),KStandardGuiItem::discard())==KMessageBox::Yes)
+        # Called when the reset button is pushed and automatically during construction
+        self.read_settings()    
 
     def create_temp_config(self):
+        # Create a temporary KConfig file that can be modified without privilege
         tempconfigfile = KTemporaryFile()
         tempconfigfile.open()
         tempconfigname = tempconfigfile.fileName()
@@ -481,7 +475,7 @@ class Timekpr (KCModule):
         QFile.setPermissions(tempconfigname, tempconfigfile.permissions() | QFile.ReadOther);
         return tempconfig
     
-    def temp_config_save(self):
+    def save_temp_config(self):
         usergroup = self.config.group(self.user)
         #TODO:usergroup.writeEntry("locked",self.status['locked'])
         usergroup.writeEntry("limited",self.ui.limits.ckLimit.isChecked())
@@ -496,8 +490,9 @@ class Timekpr (KCModule):
                 usergroup.writeEntry(labels[i],json.dumps(vector))        
         self.config.sync()
         
-    def save(self):        
-        self.temp_config_save()
+    def save(self):
+        # Called whe the apply button is pushed. Move the temporary config file to the system wide config file
+        self.save_temp_config()
         settings = read_user_settings(self.user,self.config.name()) 
         lims, bFrom, bTo = parse_settings(settings)
         if bFrom:
@@ -516,4 +511,5 @@ class Timekpr (KCModule):
         
     
 def CreatePlugin(widget_parent, parent, component_data):
+    # Called from systemsettings or kcmshell4 to create the module
     return Timekpr(component_data, widget_parent)
