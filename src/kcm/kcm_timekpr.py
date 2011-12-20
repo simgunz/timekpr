@@ -76,7 +76,7 @@ class Timekpr (KCModule):
         self.timer.start()
     
         #KConfig
-        self.config = self.createTempConfig()
+        self.config = self.create_temp_config()
     
         #Signal and slots definition 
         self.connect(self.ui.limits.ckLimit, SIGNAL('toggled(bool)'), self.enable_limit)
@@ -85,8 +85,8 @@ class Timekpr (KCModule):
         self.connect(self.ui.limits.ckBoundDay, SIGNAL('toggled(bool)'), self.enable_daily_bound)
         self.connect(self.ui.cbActiveUser, SIGNAL('currentIndexChanged(int)'), self.read_settings)
         self.connect(self.timer, SIGNAL('timeout()'), self.update_time_left)
-        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lockunlock)
-        self.connect(self.ui.grant.btnUnlockAccount,SIGNAL('clicked()'),self.lockunlock)
+        self.connect(self.ui.grant.btnLockAccount,SIGNAL('clicked()'),self.lock_unlock)
+        self.connect(self.ui.grant.btnUnlockAccount,SIGNAL('clicked()'),self.lock_unlock)
         self.connect(self.ui.grant.btnBypass,SIGNAL('clicked()'),self.bypass_restrictions)
         self.connect(self.ui.grant.btnClearBypass,SIGNAL('clicked()'),self.clear_bypass)
         self.connect(self.ui.grant.btnResetTime,SIGNAL('clicked()'),self.resetTime)
@@ -307,7 +307,7 @@ class Timekpr (KCModule):
             self.ui.grant.btnResetTime.setEnabled(False)
                 
     def update_buttons_state(self):
-        if self.status['locked'] or self.status['bounded'] or (self.status['limited']:
+        if self.status['locked'] or self.status['bounded'] or self.status['limited']:
             self.ui.grant.btnClearAllRestriction.setEnabled(True)
         else:
             self.ui.grant.btnClearAllRestriction.setEnabled(False)
@@ -379,9 +379,8 @@ class Timekpr (KCModule):
         return reply
             
     def clear_all_restrictions(self):
-        #TODO:No puzzles
-        answer = KMessageBox.warningContinueCancel(self,i18n("All restriction for user " + self.user + " will be cleared"),i18n("Timekpr"))
-        if not answer == KMessageBox.Continue:
+        answer = KMessageBox.warningContinueCancel(self,i18n("All restriction for user %1 will be cleared",self.user),i18n("Timekpr"))
+        if answer != KMessageBox.Continue:
             return
         args = {'subaction':0}
         reply = self.executePermissionsAction(args)
@@ -394,9 +393,10 @@ class Timekpr (KCModule):
             self.update_buttons_state()
             self.update_status_icons()
             
-    def lockunlock(self):
+            
+    def lock_unlock(self):
         args = {'subaction':1}
-        if self.status['locked'] == LOCK:
+        if self.status['locked']:
             args['operation'] = UNLOCK
         else:
             args['operation'] = LOCK
@@ -412,7 +412,7 @@ class Timekpr (KCModule):
         if not reply.failed():
             self.status['bounded'] = NOBOUNDTODAY
             self.status['limited'] = NOLIMITTODAY
-            self.status['bypass'] = 2
+            self.status['bypass'] = ON
             self.update_buttons_state()
             self.update_status_icons()
             
@@ -422,10 +422,9 @@ class Timekpr (KCModule):
         if not reply.failed():
             self.status['bounded'] = BOUND
             self.status['limited'] = LIMIT        
-            self.status['bypass'] = 1
+            self.status['bypass'] = OFF
             self.update_buttons_state()
             self.update_status_icons()
-            
             
     def resetTime(self):
         args = {'subaction':4}
@@ -433,7 +432,6 @@ class Timekpr (KCModule):
         if not reply.failed():
             self.update_buttons_state()
             self.update_status_icons()
-
 
     def add_time(self):
         args = {'subaction':5}
@@ -443,16 +441,11 @@ class Timekpr (KCModule):
         limit = self.get_limit()
         used = self.get_used_time() 
         time = used - rewardtime
-        #time = max(time,limit - 86400)
         currenttime = int(strftime("%H")) * 3600 + int(strftime("%M")) * 60
         lefttoday = 86400 - currenttime     
         time = max(time,limit - lefttoday)
         time = min(time,limit)
-        #time = max(time,currenttime)
         
-        
-    
-    
         args['time'] = time
         reply = self.executePermissionsAction(args)
         if not reply.failed():
@@ -460,30 +453,50 @@ class Timekpr (KCModule):
             self.update_buttons_state()
             self.update_status_icons()
         
-        
     def changed(self):
-        #TODO:This function should be removed, it's just for testing
         #If a setting has changed, activate the Apply button
         self.emit(SIGNAL("changed(bool)"), True)
 
-
     def defaults(self):
-        #self.read_limit_status(True)
+        self.user = str(self.ui.cbActiveUser.currentText())
         self.limits, self.time_from, self.time_to,self.status = read_user_settings()
         self.load_module_values()
+        self.bypass_status()
+        self.update_status_icons()
+        self.update_buttons_state()
     
-
     def load(self):
         #This function is called from reset button and automatically during construction
         self.read_settings()
-        #FIXME:When the module is loaded from kcmshell the Apply button is enabled, should be disabled
-    
-#TODO:def indexchanged(self):
+    #TODO:def indexchanged(self):
     #KMessageBox.questionYesNo(this,i18n("<qt>You changed the default component of your choice, 
     #do want to save that change now ?</qt>"),QString(),KStandardGuiItem::save(),KStandardGuiItem::discard())==KMessageBox::Yes)
+
+    def create_temp_config(self):
+        tempconfigfile = KTemporaryFile()
+        tempconfigfile.open()
+        tempconfigname = tempconfigfile.fileName()
+        systemconfig = KConfig(VAR['TIMEKPRDIR'] + '/timekprrc', KConfig.SimpleConfig)
+        tempconfig = systemconfig.copyTo(tempconfigname)
+        QFile.setPermissions(tempconfigname, tempconfigfile.permissions() | QFile.ReadOther);
+        return tempconfig
     
-    def save(self):
+    def temp_config_save(self):
+        usergroup = self.config.group(self.user)
+        #TODO:usergroup.writeEntry("locked",self.status['locked'])
+        usergroup.writeEntry("limited",self.ui.limits.ckLimit.isChecked())
+        usergroup.writeEntry("limitedByday",self.ui.limits.ckLimitDay.isChecked())
+        usergroup.writeEntry("bounded",self.ui.limits.ckBound.isChecked())
+        usergroup.writeEntry("boundedByDay",self.ui.limits.ckBoundDay.isChecked())
+        labels = ['limits','time_from','time_to']
+        for i in range(3):
+            vector = list()
+            for j in range(8):
+                vector.append(str(self.spin[i][j].time().toString("hhmm")))
+                usergroup.writeEntry(labels[i],json.dumps(vector))        
+        self.config.sync()
         
+    def save(self):        
         self.temp_config_save()
         settings = read_user_settings(self.user,self.config.name()) 
         lims, bFrom, bTo = parse_settings(settings)
@@ -494,48 +507,12 @@ class Timekpr (KCModule):
         temprcfile = self.config.name()
         helperargs = {"action":"save","user":self.user,"bound":bound,"temprcfile":temprcfile,"var":VAR}
         action = self.authAction()
-
         action.setArguments(helperargs)    
         reply = action.execute()
-        
-        if not (self.ui.limits.ckLimit.isChecked() or self.ui.limits.ckBound.isChecked()):
-            self.clear_bypass()
-        
+        #TODO:Manage the case of errors
         self.read_settings()
-        self.update_time_left()
-    
- 
-    def createTempConfig(self):
-        tempConfigFile = KTemporaryFile()
-        tempConfigFile.open()
-        tempConfigName = tempConfigFile.fileName()
-        systemConfig = KConfig(VAR['TIMEKPRDIR'] + '/timekprrc', KConfig.SimpleConfig)
-        tempConfig = systemConfig.copyTo(tempConfigName)
-        QFile.setPermissions(tempConfigName, tempConfigFile.permissions() | QFile.ReadOther);
-        return tempConfig
-        
-            
-        
-    def temp_config_save(self):
-        userGroup = self.config.group(self.user)
-        
-        #userGroup.writeEntry("locked",self.status['locked'])
-        userGroup.writeEntry("limited",self.ui.limits.ckLimit.isChecked())
-        userGroup.writeEntry("limitedByday",self.ui.limits.ckLimitDay.isChecked())
-        userGroup.writeEntry("bounded",self.ui.limits.ckBound.isChecked())
-        userGroup.writeEntry("boundedByDay",self.ui.limits.ckBoundDay.isChecked())
-        labels = ['limits','time_from','time_to']
-        for i in range(3):
-            vector = list()
-            for j in range(8):
-                vector.append(str(self.spin[i][j].time().toString("hhmm")))
-                userGroup.writeEntry(labels[i],json.dumps(vector))
-
-        
-        self.config.sync()
-    
-    
-    
+        if not (self.status['limited'] or self.status['bounded']):
+            self.clear_bypass()        
         
     
 def CreatePlugin(widget_parent, parent, component_data):

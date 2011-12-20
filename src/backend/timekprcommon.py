@@ -137,7 +137,7 @@ def read_user_settings(user=None, conffile=None):
         config = configparser.ConfigParser()
         config.read(str(conffile))
     #If the user section is not found default value is loaded from a default-value file
-    if not config.has_section(user):
+    if not conffile or not config.has_section(user):
         config = configparser.ConfigParser()
         var = get_variables()
         config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
