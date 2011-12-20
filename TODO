@@ -1,0 +1,6 @@
+timekpr.py:
+Fix allow management in the case of allowed period over midnight
+
+Check what happen with overlapping allowed period
+Monday 22:00-02:00 Tuesday 03:00-04:00 ??
+Monday 22:00-02:00 Tuesday 01:00-04:00 ??
