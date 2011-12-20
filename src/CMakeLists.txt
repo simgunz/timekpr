@@ -11,4 +11,4 @@ add_subdirectory (kcm)
 add_subdirectory (plasma-applet)
 add_subdirectory (plasma-dataengine)
 add_subdirectory (icons)
-
+install(DIRECTORY etc/ DESTINATION ${SYSCONF_INSTALL_DIR})
