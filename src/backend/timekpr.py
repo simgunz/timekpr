@@ -14,7 +14,9 @@ from time import strftime, sleep, time as timenow
 from datetime import date, time, datetime, timedelta
 import dbus
 import dbus.service
+import gobject
 from dbus.mainloop.glib import DBusGMainLoop
+import signal
 
 from timekprcommon import *
 
@@ -22,6 +24,10 @@ from timekprcommon import *
 VAR = get_variables() # timekpr.conf variables (dictionary variable)
 THISDAY = strftime("%Y%m%d") # Keep track of todays date
 FAKERUN = is_fakerun()
+
+users = set()
+timers = dict()
+logouttime = dict()
 
 def logkpr(string,clear = 0):
     """Log events to the timekpr log file
@@ -40,8 +46,6 @@ def logkpr(string,clear = 0):
             l = open(VAR['LOGFILE'], 'a')
         l.write(nowtime + string +'\n')
     
-    
-
 def logOut(user, somefile = ''):
     """Log out the user from the system
     """
@@ -177,8 +181,133 @@ def log_it_out(username,logoutreason):
     else:
         logkpr('User %s has NOT been kicked out today' % username)
         thread_it(graceperiod, logOut, username, logoutfile)                   
-                   
-                   
+    
+def check_for_new_users(moduser=None):
+    # Check if any accounts should be unlocked and re-activate them
+    #TODO: Manage lock policy
+    #check_lock_account()
+    
+    global users
+    global timers
+    global logouttime
+
+    # Get the usernames and PIDs of sessions
+    if moduser is not None:
+        usr = set()
+    else:
+        usr = get_users()
+    
+    # Managing everything with Timers 99% of the times this block is skipped and no unuseful check is done
+    if users ^ usr: #someone has login or logout
+        if moduser is not None:
+            newusers = [moduser]
+            goneusers = [moduser]
+            stillusers = set()
+        else:
+            newusers = usr - users
+            goneusers = users - usr
+            stillusers = usr & users
+
+        # Parse gone users    
+        for username in goneusers:
+            try:
+                timers[username].cancel()
+                logouttime.pop(username)
+                logkpr('User: %s is gone from the system, logout action canceled' %username)
+            except KeyError:
+                logkpr('User: %s is gone from the system, but no logout action was running' %username)
+                
+        # Parse new users
+        for username in newusers:
+            logkpr('New user %s have logged in' %username)
+            allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
+            if is_file_ok(allowfile):
+                logkpr('Extended login detected - %s.allow exists and is from today. Nothing to do.' % username)
+            else:
+                logkpr('Extended login not detected - %s.allow file not detected. Proceed to run logout thread.' % (username))
+                # Read lists: from, to and limit
+                settings = read_user_settings(username, VAR['TIMEKPRDIR'] + '/timekprrc')
+                limits, bfrom, bto = parse_settings(settings)
+            
+                # If limits and bfrom are both null the user is not limited
+                if limits or bfrom:                   
+                    timebeforelogut = None
+                    # Get current day index and hour of day
+                    dayindex = int(strftime("%w"))
+                    logkpr('User: %s Day-Index: %s' % (username, dayindex))
+                    
+                    # If limits is not null, the time before logout is calculated parsing the time limit of the user
+                    if limits:
+                        timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
+                        time = int(get_time(timefile, username))
+                        lims = convert_limits(limits,dayindex)
+                        limit_lefttime = lims - time
+                        timebeforelogut = max(0,limit_lefttime)
+                        logoutreason = 0                    
+                    
+                    # If bfrom is not null, the time before logout is calculated parsing the time frame of the user
+                    if bfrom:
+                        fromHM = bfrom[dayindex]
+                        toHM = bto[dayindex]
+                        
+                        # If fromHM == toHM the user can login all day long, so it is not actually limited
+                        if fromHM != toHM:
+                            nowdatetime = datetime.now()
+                            todaydate = datetime.date(nowdatetime)
+                            timefrom = datetime.combine(todaydate,datetime.time(datetime.strptime(fromHM,'%H%M')))
+                            timeto = datetime.combine(todaydate,datetime.time(datetime.strptime(toHM,'%H%M')))
+                            
+                            # If timefrom less than timeto means that the allowed time frame straddles the midnight
+                            # If current time greater than timefrom means that timeto falls is in the next day
+                            if timeto < timefrom:
+                                if nowdatetime > timefrom:
+                                    tomorrow = datetime.date(nowdatetime + timedelta(days=1))
+                                    timeto = datetime.combine(tomorrow,datetime.time(datetime.strptime(toHM,'%H%M')))
+                            
+                            bound_lefttime = max(0,(timeto - nowdatetime).total_seconds())
+                            logoutreason = 1
+                        
+                            # Determine the minimum time before logout between limit and bound left time
+                            if timebeforelogut is not None:
+                                timebeforelogut = min(bound_lefttime, timebeforelogut)
+                                if bound_lefttime > limit_lefttime:
+                                    logoutreason = 0
+                            else:
+                                timebeforelogut = bound_lefttime
+                        
+                            # Check if current time is less than the from time
+                            # In case of timeto < timefrom an early login will be considered as a late login
+                            if timeto > timefrom:
+                                if nowdatetime < timefrom:
+                                    timebeforelogut = 0
+                                    logoutreason = 2
+
+                    if timebeforelogut is not None:
+                        timers[username] = thread_it(timebeforelogut,log_it_out,username,logoutreason)
+                        logouttime[username] = int(timenow()) + timebeforelogut
+    
+    # If users == usr none has login or logout
+    else:
+        stillusers = users
+    
+    if moduser is None:
+        users = usr
+    
+    for username in stillusers:
+        timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
+        #TODO:Add but not get
+        time = add_time(timefile, username)
+        logkpr('User: %s Seconds-passed: %s' % (username, time))
+            
+    # Done checking all users, sleeping
+    logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])        
+
+def timer_handler(signum,frame):
+    check_for_new_users()
+
+def conf_changed_handler(user):    
+    check_for_new_users(user)
+    
 if __name__ == '__main__':
     logkpr('Starting timekpr version %s' % get_version())
     logkpr('Variables: GRACEPERIOD: %s POLLTIME: %s DEBUGME: %s LOCKLASTS: %s' % (\
@@ -193,116 +322,14 @@ if __name__ == '__main__':
 
     if not isdir(VAR['TIMEKPRWORK']):
         mkdir(VAR['TIMEKPRWORK'])
-       
-    users = set()
-    timers = dict()
-    logouttime = dict()
-
-    while (True):
-        # Check if any accounts should be unlocked and re-activate them
-        #TODO: Manage lock policy
-        #check_lock_account()
         
-        # Get the usernames and PIDs of sessions
-        usr = get_users()
-        
-        # Managing everythin with Timers 99% of the times this block is skipped and no unuseful check is done
-        if users ^ usr: #someone has login or logout
-            newusers = usr - users
-            goneusers = users - usr
-            stillusers = usr & users
-        
-            # Parse new users
-            for username in newusers:
-                logkpr('New user %s have logged in' %username)
-                allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
-                if is_file_ok(allowfile):
-                    logkpr('Extended login detected - %s.allow exists and is from today. Nothing to do.' % username)
-                else:
-                    logkpr('Extended login not detected - %s.allow file not detected. Proceed to run logout thread.' % (username))
-                    # Read lists: from, to and limit
-                    settings = read_user_settings(username, VAR['TIMEKPRDIR'] + '/timekprrc')
-                    limits, bfrom, bto = parse_settings(settings)
-                
-                    # If limits and bfrom are both null the user is not limited
-                    if limits or bfrom:                   
-                        timebeforelogut = None
-                        # Get current day index and hour of day
-                        dayindex = int(strftime("%w"))
-                        logkpr('User: %s Day-Index: %s' % (username, dayindex))
-                        
-                        # If limits is not null, the time before logout is calculated parsing the time limit of the user
-                        if limits:
-                            timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
-                            time = int(get_time(timefile, username))
-                            lims = convert_limits(limits,dayindex)
-                            limit_lefttime = lims - time
-                            timebeforelogut = max(0,limit_lefttime)
-                            logoutreason = 0                    
-                        
-                        # If bfrom is not null, the time before logout is calculated parsing the time frame of the user
-                        if bfrom:
-                            fromHM = bfrom[dayindex]
-                            toHM = bto[dayindex]
-                            
-                            # If fromHM == toHM the user can login all day long, so it is not actually limited
-                            if fromHM != toHM:
-                                nowdatetime = datetime.now()
-                                todaydate = datetime.date(nowdatetime)
-                                timefrom = datetime.combine(todaydate,datetime.time(datetime.strptime(fromHM,'%H%M')))
-                                timeto = datetime.combine(todaydate,datetime.time(datetime.strptime(toHM,'%H%M')))
-                                
-                                # If timefrom less than timeto means that the allowed time frame straddles the midnight
-                                # If current time greater than timefrom means that timeto falls is in the next day
-                                if timeto < timefrom:
-                                    if nowdatetime > timefrom:
-                                        tomorrow = datetime.date(nowdatetime + timedelta(days=1))
-                                        timeto = datetime.combine(tomorrow,datetime.time(datetime.strptime(toHM,'%H%M')))
-                                
-                                bound_lefttime = max(0,(timeto - nowdatetime).total_seconds())
-                                logoutreason = 1
-                            
-                                # Determine the minimum time before logout between limit and bound left time
-                                if timebeforelogut is not None:
-                                    timebeforelogut = min(bound_lefttime, timebeforelogut)
-                                    if bound_lefttime > limit_lefttime:
-                                        logoutreason = 0
-                                else:
-                                    timebeforelogut = bound_lefttime
-                            
-                                # Check if current time is less than the from time
-                                # In case of timeto < timefrom an early login will be considered as a late login
-                                if timeto > timefrom:
-                                    if nowdatetime < timefrom:
-                                        timebeforelogut = 0
-                                        logoutreason = 2
-
-                        if timebeforelogut is not None:
-                            timers[username] = thread_it(timebeforelogut,log_it_out,username,logoutreason)
-                            logouttime[username] = int(timenow()) + timebeforelogut
-
-            # Parse gone users    
-            for username in goneusers:
-                try:
-                    timers[username].cancel()
-                    logouttime.pop(username)
-                    logkpr('User: %s is gone from the system, logout action canceled' %username)
-                except KeyError:
-                    logkpr('User: %s is gone from the system, but no logout action was running' %username)
-        
-        # If users == usr none has login or logout
-        else:
-            stillusers = users
-        
-        users = usr
-        
-        for username in stillusers:
-            timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
-            #TODO:Add but not get
-            time = add_time(timefile, username)
-            logkpr('User: %s Seconds-passed: %s' % (username, time))
-                
-        # Done checking all users, sleeping
-        logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])
-        sleep(VAR['POLLTIME'])
-
+    DBusGMainLoop(set_as_default=True)
+    loop = gobject.MainLoop()
+    gobject.threads_init()
+    bus = dbus.SystemBus()
+    bus.add_signal_receiver(conf_changed_handler,'UserConfChanged')
+    
+    signal.signal(signal.SIGALRM,timer_handler)
+    signal.setitimer(signal.ITIMER_REAL,1,VAR['POLLTIME'])
+    
+    loop.run()

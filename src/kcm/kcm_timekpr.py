@@ -20,12 +20,23 @@ from PyKDE4.kdeui import *
 from timekprpam import *
 from timekprcommon import *
 
+import dbus
+import dbus.service
+from dbus.mainloop.qt import DBusQtMainLoop
 
 #timekpr.conf variables (dictionary variable)
 global VAR
 VAR = get_variables()   
 VERSION = get_version()
-        
+
+
+class TimekprSignal(dbus.service.Object):
+    def __init__(self):
+        dbus.service.Object.__init__(self, dbus.SystemBus(),'/Timekpr')
+
+    @dbus.service.signal(dbus_interface='org.freedesktop.Timekpr', signature='s')
+    def UserConfChanged(self, user):
+        pass
         
 class Timekpr (KCModule):
     def __init__(self, component_data, parent):
@@ -33,7 +44,12 @@ class Timekpr (KCModule):
         
         self.aboutdata = self.make_about_data()
         self.setAboutData(self.aboutdata)
-            
+        
+        #DBus initialization
+        DBusQtMainLoop(set_as_default=True)
+        global kprsig
+        kprsig = TimekprSignal()
+        
         #Interface initialization
     
         #Loading the UI module dynamically
@@ -96,8 +112,7 @@ class Timekpr (KCModule):
         #Needed for using KAuth authentication
         self.setNeedsAuthorization(True)
       
-   
-#Function definition
+
     def make_about_data(self):
         aboutdata = KAboutData("kcmtimekpr", "userconfig", ki18n("Timekpr control module"), "0.4",
         ki18n("User and Group Configuration Tool"),
@@ -491,7 +506,7 @@ class Timekpr (KCModule):
         self.config.sync()
         
     def save(self):
-        # Called whe the apply button is pushed. Move the temporary config file to the system wide config file
+        # Called when the apply button is pushed. Move the temporary config file to the system wide config file
         self.save_temp_config()
         settings = read_user_settings(self.user,self.config.name()) 
         lims, bFrom, bTo = parse_settings(settings)
@@ -507,8 +522,9 @@ class Timekpr (KCModule):
         #TODO:Manage the case of errors
         self.read_settings()
         if not (self.status['limited'] or self.status['bounded']):
-            self.clear_bypass()        
-        
+            self.clear_bypass()   
+        global kprsig
+        kprsig.UserConfChanged(self.user)
     
 def CreatePlugin(widget_parent, parent, component_data):
     # Called from systemsettings or kcmshell4 to create the module
