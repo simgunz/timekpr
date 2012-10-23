@@ -6,7 +6,7 @@
 
 import sys
 import re
-from os import popen, mkdir, kill, remove
+from os import popen, mkdir, kill, remove, rename
 from os.path import split as splitpath, isfile, isdir, getmtime
 from glob import glob
 from threading import Timer
@@ -24,9 +24,11 @@ from timekprcommon import *
 VAR = get_variables() # timekpr.conf variables (dictionary variable)
 THISDAY = strftime("%Y%m%d") # Keep track of todays date
 FAKERUN = is_fakerun()
+UNSUDOTIME = 1800
 
 users = set()
 timers = dict()
+timersSudo = dict()
 logouttime = dict()
 
 def logkpr(string,clear = 0):
@@ -36,7 +38,7 @@ def logkpr(string,clear = 0):
     """
     nowtime = strftime('%Y-%m-%d %H:%M:%S ')
     if FAKERUN:
-        print nowtime + string
+        print nowtime + string + '\n'
     else:
         if VAR['DEBUGME'] != 'True':
             return
@@ -45,7 +47,7 @@ def logkpr(string,clear = 0):
         else:
             l = open(VAR['LOGFILE'], 'a')
         l.write(nowtime + string +'\n')
-    
+
 def logOut(user, somefile = ''):
     """Log out the user from the system
     """
@@ -63,10 +65,10 @@ def logOut(user, somefile = ''):
                 get_cmd_output('pkill -SIGKILL -u %s' % user)
     else:
         logkpr('LOGGED OUT')
-'''    
+'''
 def get_lock_lasts():
     # Returns the VAR['LOCKLASTS'] variable in seconds
-    
+
     t=re.compile('(\d+) (second|minute|hour|day|week|month|year)s?').match(VAR['LOCKLASTS'])
     if not t:
         exit('Error: locklasts value "%s" is badly formatted, should be something like "1 week" or "2 hours"' % VAR['LOCKLASTS'])
@@ -121,7 +123,7 @@ def get_users():
 def is_session_alive(user):
     """Check if session process still running
     Should it check against username and pid?
-    
+
     Returns:
       True if process is still there (user logged in),
       False if user has logged out
@@ -130,14 +132,14 @@ def is_session_alive(user):
         if u == user:
             return True
     return False
-    
+
 def add_time(tfile, username):
     # Adds time to the timefile
     time = get_time(tfile, username) + VAR['POLLTIME']
     f = open(tfile, 'w')
     f.write(str(time))
     return time
-    
+
 def get_time(tfile,username):
     # Return time from the timefile
     time = 0
@@ -146,7 +148,7 @@ def get_time(tfile,username):
         time = int(t.readline())
         t.close()
     return time
-    
+
 def time_left(username):
     # Return the time lef before logout for the user
     try:
@@ -154,17 +156,33 @@ def time_left(username):
     except KeyError:
         timeleft = -1
     return timeleft
-    
+
 def thread_it(sleeptime, command, *args):
     # Run a command after a given time
     t = Timer(sleeptime, command, args)
     t.start()
     return t
-    
-def log_it_out(username,logoutreason):        
+
+def add_sudo(username):
+    if not FAKERUN:
+        if isfile('/etc/sudoers.d/tkpr-%s~' % username):
+            rename(('/etc/sudoers.d/tkpr-%s~' % username),('/etc/sudoers.d/tkpr-%s' % username))
+            logkpr('Add user %s to sudoers file' % username)
+        else:
+            logkpr('User %s is not in sudoers file or it is already enabled. Nothing done' % username)
+
+def rm_sudo(username):
+    if not FAKERUN:
+        if isfile('/etc/sudoers.d/tkpr-%s' % username):
+            rename(('/etc/sudoers.d/tkpr-%s' % username),('/etc/sudoers.d/tkpr-%s~' % username))
+            logkpr('Remove user %s from sudoers file' % username)
+        else:
+            logkpr('User %s is not in sudoers file. Nothing done' % username)
+
+def log_it_out(username,logoutreason):
     # Check and eventually logout a user after a grace period time
     logoutfile = VAR['TIMEKPRWORK'] + '/' + username + '.logout'
-    
+
     if logoutreason == 0:
         logkpr('Exceeded today\'s access login duration for user %s' % username)
         graceperiod=float(VAR['GRACEPERIOD'])
@@ -174,21 +192,25 @@ def log_it_out(username,logoutreason):
     else:
         logkpr('Current time less than the time defined in timekprrc for user %s' % username)
         graceperiod=0.5
-        
+
     if is_file_ok(logoutfile):
         logkpr('User %s has been kicked out today' % username)
+        add_sudo(username)
         thread_it(0.5, logOut, username)
     else:
         logkpr('User %s has NOT been kicked out today' % username)
-        thread_it(graceperiod, logOut, username, logoutfile)                   
-    
+
+        thread_it(graceperiod, add_sudo, username)
+        thread_it(graceperiod, logOut, username, logoutfile)
+
 def check_for_new_users(moduser=None):
     # Check if any accounts should be unlocked and re-activate them
     #TODO: Manage lock policy
     #check_lock_account()
-    
+
     global users
     global timers
+    global timersSudo
     global logouttime
 
     # Get the usernames and PIDs of sessions
@@ -196,7 +218,7 @@ def check_for_new_users(moduser=None):
         usr = set()
     else:
         usr = get_users()
-    
+
     # Managing everything with Timers 99% of the times this block is skipped and no unuseful check is done
     if users ^ usr: #someone has login or logout
         if moduser is not None:
@@ -208,34 +230,35 @@ def check_for_new_users(moduser=None):
             goneusers = users - usr
             stillusers = usr & users
 
-        # Parse gone users    
+        # Parse gone users
         for username in goneusers:
             try:
                 timers[username].cancel()
+                timersSudo[username].cancel()
                 logouttime.pop(username)
                 logkpr('User: %s is gone from the system, logout action canceled' %username)
             except KeyError:
                 logkpr('User: %s is gone from the system, but no logout action was running' %username)
-                
+
         # Parse new users
         for username in newusers:
             logkpr('New user %s have logged in' %username)
             allowfile = VAR['TIMEKPRWORK'] + '/' + username + '.allow'
+            add_sudo(username)
             if is_file_ok(allowfile):
-                logkpr('Extended login detected - %s.allow exists and is from today. Nothing to do.' % username)
+                logkpr('Extended login detected - %s.allow exists and is from today. Nothing to do' % username)
             else:
-                logkpr('Extended login not detected - %s.allow file not detected. Proceed to run logout thread.' % (username))
                 # Read lists: from, to and limit
                 settings = read_user_settings(username, VAR['TIMEKPRDIR'] + '/timekprrc')
                 limits, bfrom, bto = parse_settings(settings)
-            
                 # If limits and bfrom are both null the user is not limited
-                if limits or bfrom:                   
+                if limits or bfrom:
+                    logkpr('Extended login not detected - %s.allow file not detected. Proceed to run logout thread.' % (username))
                     timebeforelogut = None
                     # Get current day index and hour of day
                     dayindex = int(strftime("%w"))
                     logkpr('User: %s Day-Index: %s' % (username, dayindex))
-                    
+
                     # If limits is not null, the time before logout is calculated parsing the time limit of the user
                     if limits:
                         timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
@@ -243,30 +266,30 @@ def check_for_new_users(moduser=None):
                         lims = convert_limits(limits,dayindex)
                         limit_lefttime = lims - time
                         timebeforelogut = max(0,limit_lefttime)
-                        logoutreason = 0                    
-                    
+                        logoutreason = 0
+
                     # If bfrom is not null, the time before logout is calculated parsing the time frame of the user
                     if bfrom:
                         fromHM = bfrom[dayindex]
                         toHM = bto[dayindex]
-                        
+
                         # If fromHM == toHM the user can login all day long, so it is not actually limited
                         if fromHM != toHM:
                             nowdatetime = datetime.now()
                             todaydate = datetime.date(nowdatetime)
                             timefrom = datetime.combine(todaydate,datetime.time(datetime.strptime(fromHM,'%H%M')))
                             timeto = datetime.combine(todaydate,datetime.time(datetime.strptime(toHM,'%H%M')))
-                            
+
                             # If timefrom less than timeto means that the allowed time frame straddles the midnight
                             # If current time greater than timefrom means that timeto falls is in the next day
                             if timeto < timefrom:
                                 if nowdatetime > timefrom:
                                     tomorrow = datetime.date(nowdatetime + timedelta(days=1))
                                     timeto = datetime.combine(tomorrow,datetime.time(datetime.strptime(toHM,'%H%M')))
-                            
+
                             bound_lefttime = max(0,(timeto - nowdatetime).total_seconds())
                             logoutreason = 1
-                        
+
                             # Determine the minimum time before logout between limit and bound left time
                             if timebeforelogut is not None:
                                 timebeforelogut = min(bound_lefttime, timebeforelogut)
@@ -274,7 +297,7 @@ def check_for_new_users(moduser=None):
                                     logoutreason = 0
                             else:
                                 timebeforelogut = bound_lefttime
-                        
+
                             # Check if current time is less than the from time
                             # In case of timeto < timefrom an early login will be considered as a late login
                             if timeto > timefrom:
@@ -284,52 +307,55 @@ def check_for_new_users(moduser=None):
 
                     if timebeforelogut is not None:
                         timers[username] = thread_it(timebeforelogut,log_it_out,username,logoutreason)
+                        timersSudo[username] = thread_it(timebeforelogut-UNSUDOTIME,rm_sudo,username)
                         logouttime[username] = int(timenow()) + timebeforelogut
-    
+                else:
+                    logkpr('User %s is not limited. Nothing to do' % username)
     # If users == usr none has login or logout
     else:
         stillusers = users
-    
+
     if moduser is None:
         users = usr
-    
+
     for username in stillusers:
         timefile = VAR['TIMEKPRWORK'] + '/' + username + '.time'
         #TODO:Add but not get
         time = add_time(timefile, username)
         logkpr('User: %s Seconds-passed: %s' % (username, time))
-            
+
     # Done checking all users, sleeping
-    logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])        
+    logkpr('Finished checking all users, sleeping for %s seconds' % VAR['POLLTIME'])
 
 def timer_handler(signum,frame):
     check_for_new_users()
 
-def conf_changed_handler(user):    
+def conf_changed_handler(user):
+    add_sudo(user)
     check_for_new_users(user)
-    
+
 if __name__ == '__main__':
-    logkpr('Starting timekpr version %s' % get_version())
+    logkpr('Starting timekpr version %s\n' % get_version())
     logkpr('Variables: GRACEPERIOD: %s POLLTIME: %s DEBUGME: %s LOCKLASTS: %s' % (\
             VAR['GRACEPERIOD'],
             VAR['POLLTIME'],
             VAR['DEBUGME'],
             VAR['LOCKLASTS']))
-    logkpr('Directories: LOGFILE: %s TIMEKPRDIR: %s TIMEKPRWORK: %s' % (\
+    logkpr('Directories: LOGFILE: %s TIMEKPRDIR: %s TIMEKPRWORK: %s\n' % (\
             VAR['LOGFILE'],
             VAR['TIMEKPRDIR'],
             VAR['TIMEKPRWORK']))
 
     if not isdir(VAR['TIMEKPRWORK']):
         mkdir(VAR['TIMEKPRWORK'])
-        
+
     DBusGMainLoop(set_as_default=True)
     loop = gobject.MainLoop()
     gobject.threads_init()
     bus = dbus.SystemBus()
     bus.add_signal_receiver(conf_changed_handler,'UserConfChanged')
-    
+
     signal.signal(signal.SIGALRM,timer_handler)
     signal.setitimer(signal.ITIMER_REAL,1,VAR['POLLTIME'])
-    
+
     loop.run()

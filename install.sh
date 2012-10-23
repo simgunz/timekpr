@@ -1,9 +1,9 @@
-#!/bin/sh 
+#!/bin/sh
 
 buildDir="./build"
 
-if [ ! -d ${buildDir} ]
-then mkdir build || exit
+if [ ! -d ${buildDir} ]; then
+  mkdir build || exit
 fi
 
 

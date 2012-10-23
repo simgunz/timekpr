@@ -5,5 +5,5 @@ Icon=timekpr_kde
 [org.kde.kcontrol.kcmtimekpr.save]
 Name=Save the timekpr settings
 Description=Administrator authorization is required to change the timekpr settings
-Policy=yes
+Policy=auth_admin
 Persistence=session
