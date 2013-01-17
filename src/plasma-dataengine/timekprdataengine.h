@@ -1,4 +1,4 @@
- 
+
 #ifndef TIMEKPRDATAENGINE_H
 #define TIMEKPRDATAENGINE_H
 
@@ -17,18 +17,18 @@ class TimekprDataEngine : public Plasma::DataEngine
 
     public:
         TimekprDataEngine(QObject* parent, const QVariantList& args);
-	QStringList sources() const;
+    QStringList sources() const;
     protected Q_SLOTS:
-	bool updateSourceEvent(const QString& source);
+    bool updateSourceEvent(const QString& source);
     protected:
         bool sourceRequestEvent(const QString& name);
     private:
-	void init();
-	QStringList parseVector(QString vector);
-	QStringList m_users;
-	QStringList m_keys;
-	KSharedConfigPtr m_config;
-	QFileSystemWatcher m_watcher;
+    void init();
+    QStringList parseVector(QString vector);
+    QStringList m_users;
+    QStringList m_keys;
+    KSharedConfigPtr m_config;
+    QFileSystemWatcher m_watcher;
 };
 
 #endif //TIMEKPRDATAENGINE_H

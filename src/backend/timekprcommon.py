@@ -13,7 +13,7 @@ try:
 except ImportError:
     # python2.x
     import ConfigParser as configparser
-    
+
 from timekprpam import *
 
 
@@ -97,13 +97,13 @@ def from_today(fname):
     fdate = strftime("%Y%m%d", localtime(getmtime(fname)))
     today = strftime("%Y%m%d")
     return fdate == today
-    
+
 def is_file_ok(fname):
     # File exists and is today's?
     if isfile(fname) and from_today(fname):
         return True
     return False
-    
+
 def get_cmd_output(cmd):
     # Execute a shell command and returns its output
     out = popen(cmd)
@@ -115,14 +115,14 @@ def convert_limits(limits,index):
     mn = int(limits[index][2:4])
     lims = hr * 3600 + mn * 60
     return lims
-    
+
 def convert_bounds(bounds,index):
     # Return the bound time string as integer
     hr = int(bounds[index][0:2])
     mn = int(bounds[index][2:4])
-    return hr,mn 
-    
-def read_user_settings(user=None, conffile=None):  
+    return hr,mn
+
+def read_user_settings(user=None, conffile=None):
     """Read user settings from timekprrc file
     limits, time_from, time_to are lists of 8 strings
     the first 7 element are the time values corresponding to the 7 days of the week
@@ -132,7 +132,7 @@ def read_user_settings(user=None, conffile=None):
     time_from = []
     time_to = []
     status = dict()
-    
+
     if conffile:
         config = configparser.ConfigParser()
         config.read(str(conffile))
@@ -141,25 +141,25 @@ def read_user_settings(user=None, conffile=None):
         config = configparser.ConfigParser()
         var = get_variables()
         config.read(str(var['TIMEKPRDIR'] + '/timekprdefault'))
-        user = 'default'   
+        user = 'default'
     # Get json dumped array from the conf file and convert it to array
     limits = json.loads(config.get(user,'limits').replace("'",'"'))
     time_from = json.loads(config.get(user,'time_from').replace("'",'"'))
-    time_to = json.loads(config.get(user,'time_to').replace("'",'"'))    
+    time_to = json.loads(config.get(user,'time_to').replace("'",'"'))
     #TODO: Get locked from the conffile
     status['locked'] = isuserlocked(user)
     status['limited'] = config.getboolean(user,'limited')
     status['limitedByDay'] = config.getboolean(user,'limitedByDay')
     status['bounded'] = config.getboolean(user,'bounded')
-    status['boundedByDay'] = config.getboolean(user,'boundedByDay')       
+    status['boundedByDay'] = config.getboolean(user,'boundedByDay')
     return limits, time_from, time_to, status
-    
+
 def parse_settings(settings):
     # settings[0] is the limits vector
     # settings[1] is the time_from vector
     # settings[1] is the time_to vector
     # settings[3] is the status vector
-    # limits can be 0 if the user is not limited or 
+    # limits can be 0 if the user is not limited or
     if settings[3]['limited']:
         if settings[3]['limitedByDay']:
             limits = settings[0]
@@ -168,7 +168,7 @@ def parse_settings(settings):
             limits = [settings[0][7]]*7
     else:
         limits = 0
-    
+
     if settings[3]['bounded']:
         if settings[3]['boundedByDay']:
             time_from = settings[1]
@@ -176,10 +176,10 @@ def parse_settings(settings):
             time_from.pop()
             time_to.pop()
         else:
-            time_from = [settings[1][7]]*7 
+            time_from = [settings[1][7]]*7
             time_to = [settings[2][7]]*7
     else:
         time_from = 0
         time_to = 0
-    
+
     return limits, time_from, time_to

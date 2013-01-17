@@ -22,7 +22,7 @@ class Helper : public QObject {
 
 public slots:
     ActionReply save(const QVariantMap &map);
-    
+
 private:
     bool savelimits(const QVariantMap &args);
     bool managepermissions(const QVariantMap &args);

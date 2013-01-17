@@ -18,26 +18,26 @@ except ImportError:
 def get_conf_section(conffile):
     """Returns the content of the timekpr section in a file (access.conf or time.conf).
     Also used to check if the timekpr section is set correctly.
-    
+
     Arguments:
       conffile (string)
     """
-    
+
     s = open(conffile).read()
-    check = re.compile('## TIMEKPR START|## TIMEKPR END').findall(s)    
+    check = re.compile('## TIMEKPR START|## TIMEKPR END').findall(s)
     # If the timekpr section lines '## TIMEKPR START' or '## TIMEKPR END' are not
     # found, exit with an error.
     if not len(check):
         exit("Error: Could not find timekpr section in '%s'" % conffile)
     elif len(check) != 2:
-        exit("Error: Incorrect format of timekpr section in '%s'" % conffile)        
+        exit("Error: Incorrect format of timekpr section in '%s'" % conffile)
     # Otherwise, get and return the content between the section lines.
     m = re.compile('## TIMEKPR START\n(.*)## TIMEKPR END', re.S).findall(s)
     return m[0]
 
 def parse_access_conf(accessfile='/etc/security/access.conf'):
     """Parses the timekpr section in access.conf
-    
+
     Returns:
       A list with the (locked) usernames.
       Example: ['niania','wawa']
@@ -53,15 +53,15 @@ def isuserlocked(username):
     except ValueError:
         return False
     return True
-    
+
 def convert_time_line(hfrom, hto):
     """Converts a list of hours (from and to limits) into a time.conf line
     Does NOT support all of the features of time.conf, e.g. negation!
-    
+
     Arguments:
       hfrom, hto: lists of 7 strings with the following format: hhmm
         Example: ['0000','0000','0000','1000','1130','1135','2359']
-    
+
     Returns:
       The time part of the time.conf compatible formatted string
       Example: Al0700-2230
@@ -75,7 +75,7 @@ def convert_time_line(hfrom, hto):
     # Return Al0700-2400
     if mfrom and mto:
         return 'Al' + mfrom.group(1) + '-' + mto.group(1)
-    
+
     #or if all days separate
     su = 'Su' + hfrom[0] + '-' + hto[0]
     mo = 'Mo' + hfrom[1] + '-' + hto[1]

@@ -1,4 +1,4 @@
-set(SRCFILES timekprpam.py timekprcommon.py)
+set(SRCFILES timekprlogout.py timekprpam.py timekprcommon.py)
 
 PYKDE4_INSTALL_PYTHON_FILES(${SRCFILES})
 

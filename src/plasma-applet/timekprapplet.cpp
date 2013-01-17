@@ -56,7 +56,7 @@ TimekprApplet::TimekprApplet(QObject *parent, const QVariantList &args)
     // this will get us the standard applet background, for free!
     setBackgroundHints(StandardBackground);
     setAspectRatioMode(Plasma::ConstrainedSquare );
-    setHasConfigurationInterface(true);  
+    setHasConfigurationInterface(true);
     setPopupIcon(m_icon);
     //resize(200, 200);
     //resize(graphicsWidget()->minimumSize());
@@ -87,21 +87,21 @@ void TimekprApplet::init()
 
     if (!extender()->hasItem("InfoProvider"))
     {
-	Plasma::ExtenderItem *eItem = new Plasma::ExtenderItem(extender());
-	eItem->setName("InfoProvider");
-	eItem->setTitle("InfoProvider");
-	initExtenderItem(eItem);
+    Plasma::ExtenderItem *eItem = new Plasma::ExtenderItem(extender());
+    eItem->setName("InfoProvider");
+    eItem->setTitle("InfoProvider");
+    initExtenderItem(eItem);
     }
 
     m_tooltip.setMainText("Time left for user " + m_user);
     m_tooltip.setImage(KIcon("timekpr"));
     m_tooltip.setAutohide(true);
     Plasma::ToolTipManager::self()->setContent(this,m_tooltip);
-    
-    
+
+
     m_tooltiptimer.setInterval(1000);
     connect(&m_tooltiptimer, SIGNAL(timeout()), this, SLOT(updateTooltip()));
-    
+
     //Plasma::DataEngine::Data data = m_dataengine->query(m_user);
     m_dataengine->connectSource(m_user,this);
 }
@@ -126,7 +126,7 @@ void TimekprApplet::createConfigurationInterface(KConfigDialog *parent)
 void TimekprApplet::toolTipAboutToShow()
 {
     //KNotification::event(KNotification::Notification, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
-    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));    
+    //KNotification::event(KNotification::Catastrophe, "Titolo","Tempo scaduto", KIcon("timekpr_kde").pixmap(QSize(32,32)));
     updateTooltip();
     m_tooltiptimer.start();
 }
