@@ -6,12 +6,14 @@
 
 import sys
 import re
-from os import popen, mkdir, kill, remove, rename
+import pwd
+from os import popen, mkdir, kill, remove, rename, setuid, setgid, environ
 from os.path import split as splitpath, isfile, isdir, getmtime
 from glob import glob
 from threading import Timer
 from time import strftime, sleep, time as timenow
 from datetime import date, time, datetime, timedelta
+from multiprocessing import Process
 import dbus
 import dbus.service
 import gobject
@@ -48,6 +50,32 @@ def logkpr(string,clear = 0):
             l = open(VAR['LOGFILE'], 'a')
         l.write(nowtime + string +'\n')
 
+def logout(user, confirm):
+    #Must never be called directly or the daemon will lose root privilage
+    setgid(pwd.getpwnam(user)[3])
+    setuid(pwd.getpwnam(user)[2])
+
+    #TODO:Should I close the file?
+    machineid = open('/var/lib/dbus/machine-id').readline().rstrip('\n')
+    busfilname = pwd.getpwnam(user)[5] + '/.dbus/session-bus/' + machineid + '-0'
+    busfile = open(busfilname)
+    busaddress = re.compile('^DBUS_SESSION_BUS_ADDRESS=(.*)', re.M).findall(busfile.read())[0]
+
+    environ['DBUS_SESSION_BUS_ADDRESS'] = busaddress
+    #TODO:Need to get the correct one
+    environ['DISPLAY'] = ':0'
+
+    try:
+        ksmserver = dbus.SessionBus().get_object('org.kde.ksmserver','/KSMServer')
+
+        #http://api.kde.org/4.4-api/kdebase-workspace-apidocs/libs/kworkspace/html/namespaceKWorkSpace.html#ebd506f19067a1ae1c00ae4b8f2d7c03
+        #(No)Confirm, Logout, Default(session kill way)
+        #1=Confirm 0=NoConfirm
+        ksmserver.logout(confirm,3,-1)
+        #exit(0)
+    except:
+        exit(1)
+
 def logOut(user, somefile = ''):
     """Log out the user from the system
     """
@@ -56,9 +84,20 @@ def logOut(user, somefile = ''):
         f = open(somefile, 'w').close()
     if not FAKERUN:
         if is_session_alive(user):
-            logkpr('logOut: Attempting killing %s (SIGTERM)...' % user)
-            #this is a pretty bad way of killing a users processes, but we warned 'em
-            get_cmd_output('pkill -SIGTERM -u %s' % user)
+            logkpr('logOut: Attempting logout %s (KDE Way with Gracetime)...' % user)
+            p = Process(target=logout, args=(user,1))
+            p.start()
+            logkpr('Exit %s' % p.exitcode)
+            sleep(60)
+            if is_session_alive(user):
+                logkpr('logOut: Attempting logout %s (KDE Way without Gracetime)...' % user)
+                p = Process(target=logout, args=(user,0))
+                p.start()
+            sleep(30)
+            if is_session_alive(user):
+                logkpr('logOut: Attempting killing %s (SIGTERM)...' % user)
+                #this is a pretty bad way of killing a users processes, but we warned 'em
+                get_cmd_output('pkill -SIGTERM -u %s' % user)
             sleep(5)
             if is_session_alive(user):
                 logkpr('logOut: Process still there, attempting force-killing %s (SIGKILL)...' % user)
@@ -195,12 +234,9 @@ def log_it_out(username,logoutreason):
 
     if is_file_ok(logoutfile):
         logkpr('User %s has been kicked out today' % username)
-        add_sudo(username)
         thread_it(0.5, logOut, username)
     else:
         logkpr('User %s has NOT been kicked out today' % username)
-
-        thread_it(graceperiod, add_sudo, username)
         thread_it(graceperiod, logOut, username, logoutfile)
 
 def check_for_new_users(moduser=None):
@@ -331,7 +367,6 @@ def timer_handler(signum,frame):
     check_for_new_users()
 
 def conf_changed_handler(user):
-    add_sudo(user)
     check_for_new_users(user)
 
 if __name__ == '__main__':
