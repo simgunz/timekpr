@@ -2,22 +2,52 @@
 
 A KDE System Settings module for configuring timekpr, a parental control utility that limits user access and usage time on Linux systems.
 
-## Repository Structure
+## Features
 
-- **_timekpr/** - Main development repo (GitHub: simgunz/timekpr, branch: dev)
-  - KDE configuration interface for timekpr
-  - Components: backend daemon, KCM module, plasma applet, dataengine
-  - Note: Contains nested git repo at `src/applet/package/.git` (should be cleaned up)
+- KDE Control Module (KCM) for system settings integration
+- Backend daemon for time tracking and enforcement
+- Plasma applet for desktop integration
+- Data engine for real-time status updates
 
-- **garbage/_timekprREM/** - Experimental sleep detection branch
-  - Branch: sleepdetect
-  - Work-in-progress features
+## Installation
+
+### Dependencies
+
+- gcc
+- make
+- cmake
+- automoc4
+
+### Install
+
+```bash
+sudo ./install.sh
+```
+
+After installation, you may need to restart Plasma:
+
+```bash
+kquitapp plasma-desktop
+plasma-desktop
+```
+
+Or simply reboot your system.
+
+### Uninstall
+
+```bash
+sudo ./uninstall.sh
+```
+
+To completely purge configuration:
+
+```bash
+sudo ./uninstall.sh purge
+```
 
 ## Status
 
 Historical project (2011-2015). No longer actively developed.
-
-Main branch (dev) is clean and pushed to GitHub.
 
 ## Links
 
